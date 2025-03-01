@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
-    "build": "rimraf dist && tsc -p tsconfig.build.json",
-    "start": "node dist/index.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "build": "NODE_ENV=production rimraf dist && tsc -p tsconfig.build.json",
+    "start": "NODE_ENV=production node dist/index.js",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage"
   },
   "repository": {
     "type": "git",
