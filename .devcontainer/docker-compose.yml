@@ -8,7 +8,6 @@ services:
       - node_modules:/workspaces/entix-api/node_modules
     network_mode: service:db
     command: sleep infinity
-    user: node
 
   db:
     image: postgres:13
@@ -23,3 +22,4 @@ services:
 volumes:
   postgres-data:
   node_modules:
+    driver: local
