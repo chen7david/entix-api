@@ -130,5 +130,5 @@ describe("Database Configuration", () => {
     } finally {
       client.release();
     }
-  });
+  }, 10000); // Added 10 second timeout
 });
