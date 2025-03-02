@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
-    "build": "NODE_ENV=production rimraf dist && tsc -p tsconfig.build.json",
+    "build": "NODE_ENV=production rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
