@@ -4,20 +4,20 @@ const getDbConfig = (): PoolConfig => {
   const env = process.env.NODE_ENV || "development";
 
   const baseConfig = {
-    host: process.env.POSTGRES_HOST || "db", 
+    host: process.env.POSTGRES_HOST || "db",
     port: parseInt(process.env.POSTGRES_PORT || "5432"),
     user: process.env.POSTGRES_USER || "postgres",
     password: process.env.POSTGRES_PASSWORD || "postgres",
-    database: process.env.POSTGRES_DB || "postgres", 
+    database: process.env.POSTGRES_DB || "postgres",
     connectionTimeoutMillis: 5000,
-    max: 20, 
+    max: 20,
     idleTimeoutMillis: 30000,
   };
 
   if (env === "test") {
     return {
       ...baseConfig,
-      max: 1, 
+      max: 2,
     };
   }
 
