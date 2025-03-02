@@ -8,17 +8,36 @@
   "workspaceFolder": "/workspaces/entix-api",
 
   // Features to add to the dev container. More info: https://containers.dev/features.
-  // "features": {},
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [5432],
+  "forwardPorts": [3000, 5432],
 
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "christian-kohler.npm-intellisense"
+      ],
       "settings": {
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "eslint.validate": [
+          "javascript",
+          "typescript"
+        ],
+        "files.eol": "\n"
       }
     }
   },
@@ -26,5 +45,8 @@
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   "remoteUser": "node",
 
-  "postCreateCommand": "npm install"
+  "postCreateCommand": "npm install && npm install -D eslint prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-config-prettier",
+
+  // Use initializeCommand to ensure .env file exists
+  "initializeCommand": "test -f .env || cp .env.example .env"
 }
