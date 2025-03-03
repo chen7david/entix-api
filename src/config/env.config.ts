@@ -8,7 +8,12 @@ import { loadConfig } from "../utils/config.util";
 const envSchema = z.object({
   NODE_ENV: z.nativeEnum(Environment).default(Environment.Development),
   PORT: z.coerce.number().default(3000),
-  DATABASE_URL: z.string().min(1),
+  // Database config
+  DB_HOST: z.string().min(1),
+  DB_PORT: z.coerce.number().default(5432),
+  DB_NAME: z.string().min(1),
+  DB_USER: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
