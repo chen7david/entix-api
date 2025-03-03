@@ -1,0 +1,21 @@
+import { z } from "zod";
+import { Environment } from "@src/types/app.types";
+import { loadConfig } from "../utils/config.util";
+
+/**
+ * Environment schema validation using zod
+ */
+const envSchema = z.object({
+  NODE_ENV: z.nativeEnum(Environment).default(Environment.Development),
+  PORT: z.coerce.number().default(3000),
+  // Database config
+  DB_HOST: z.string().min(1),
+  DB_PORT: z.coerce.number().default(5432),
+  DB_NAME: z.string().min(1),
+  DB_USER: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
+});
+
+type EnvConfig = z.infer<typeof envSchema>;
+
+export const env = loadConfig({ schema: envSchema });

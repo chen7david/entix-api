@@ -1,20 +1,20 @@
 import { Pool, PoolConfig } from "pg";
+import { env } from "@src/config/env.config";
+import { Environment } from "@src/types/app.types";
 
 const getDbConfig = (): PoolConfig => {
-  const env = process.env.NODE_ENV || "development";
-
   const baseConfig = {
-    host: process.env.POSTGRES_HOST || "db",
-    port: parseInt(process.env.POSTGRES_PORT || "5432"),
-    user: process.env.POSTGRES_USER || "postgres",
-    password: process.env.POSTGRES_PASSWORD || "postgres",
-    database: process.env.POSTGRES_DB || "postgres",
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: env.DB_NAME,
     connectionTimeoutMillis: 5000,
     max: 20,
     idleTimeoutMillis: 30000,
   };
 
-  if (env === "test") {
+  if (env.NODE_ENV === Environment.Test) {
     return {
       ...baseConfig,
       max: 2,
