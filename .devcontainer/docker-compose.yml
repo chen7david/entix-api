@@ -21,12 +21,19 @@ services:
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - ../.env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-entix-app-dev}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    command: >
+      bash -c "echo 'Environment variables:' &&
+               echo POSTGRES_DB=$${POSTGRES_DB} &&
+               echo POSTGRES_USER=$${POSTGRES_USER} &&
+               docker-entrypoint.sh postgres"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
