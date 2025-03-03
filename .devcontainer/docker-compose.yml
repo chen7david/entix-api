@@ -24,14 +24,10 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-entix-app-dev}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    command: >
-      bash -c "echo 'Environment variables:' &&
-               echo POSTGRES_DB=$${POSTGRES_DB} &&
-               echo POSTGRES_USER=$${POSTGRES_USER} &&
-               docker-entrypoint.sh postgres"
+      POSTGRES_DB: ${DB_NAME:entix-api}
+      POSTGRES_USER: ${DB_USER:-dbUser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbPassword}
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s

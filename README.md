@@ -1,5 +1,28 @@
 # entix-api
 
+## Getting Started
+
+### Prerequisites
+
+Before opening the project in Dev Containers, make sure you have:
+1. Docker installed and running
+2. VS Code with Dev Containers extension
+3. A `.env` file in the root directory with the following database configuration:
+```env
+DB_NAME=entix-api    # Your preferred database name
+DB_USER=dbUser       # Your preferred database user
+DB_PASSWORD=dbPassword # Your preferred database password
+```
+
+These values will be used to create the PostgreSQL database and user when the container starts. If you don't set these values before opening in Dev Containers, the default values shown above will be used.
+
+### Important Note
+If you accidentally opened the container without setting the proper values in `.env`:
+1. Close the Dev Container
+2. Delete the Docker volume to remove the database
+3. Create/update your `.env` file with your preferred values
+4. Reopen in Dev Containers
+
 ## Environment Variables Management
 
 This project uses environment variables for configuration across different environments:
