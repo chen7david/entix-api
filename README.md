@@ -6,6 +6,7 @@ This project uses environment variables for configuration across different envir
 - Development: `.env` file
 - CI: GitHub Actions secrets
 - Production: Jenkins secrets
+- Docker: Uses `.env` with fallback to defaults in docker-compose.yml
 
 ### Adding or Updating Environment Variables
 
@@ -26,6 +27,9 @@ When adding or modifying environment variables, follow these steps:
    - Add the variable to `.env` with a development-appropriate value
    - Add the variable to `.env.example` with a placeholder value
    - Update `.env.test` if needed for test environment
+   - If the variable is needed in Docker containers:
+     - Add to `.devcontainer/docker-compose.yml` with a default value
+     - Use the syntax: `${VAR_NAME:-default_value}`
 
 3. **CI/CD Pipeline**
    - Add the secret in GitHub Actions
@@ -48,6 +52,7 @@ When adding or modifying environment variables, follow these steps:
 2. **Clean Up Sources**
    - Remove from `.env` and `.env.example`
    - Remove from `.env.test` if present
+   - Remove from `.devcontainer/docker-compose.yml` if present
    - Delete the secret from GitHub Actions
    - Remove from Jenkins configuration
 
@@ -59,3 +64,4 @@ When adding or modifying environment variables, follow these steps:
 - Group related variables with common prefixes
 - Add comments in `.env.example` to explain variable purpose
 - Consider adding validation rules for critical variables
+- For Docker, always provide sensible defaults in docker-compose.yml
