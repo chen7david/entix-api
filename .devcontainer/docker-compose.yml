@@ -24,7 +24,7 @@ services:
     env_file:
       - ../.env
     environment:
-      POSTGRES_DB: ${DB_NAME:entix-api}
+      POSTGRES_DB: ${DB_NAME:-entix-api}
       POSTGRES_USER: ${DB_USER:-dbUser}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-dbPassword}
 
