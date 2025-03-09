@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Check if .env.test already exists
+if [ -f .env.test ]; then
+  echo ".env.test file already exists. Skipping creation."
+  exit 0
+fi
+
 # Check if .env file exists
 if [ ! -f .env ]; then
   echo ".env file not found!"
