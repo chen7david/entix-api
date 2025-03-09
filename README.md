@@ -85,6 +85,34 @@ The project includes automated setup for the test environment:
    npm run test:coverage  # Run tests with coverage report
    ```
 
+## Test Environment Setup
+
+The project includes automated setup for the test environment:
+
+1. **Initialize Test Environment**
+
+   ```bash
+   npm run test:init
+   ```
+
+   This command:
+
+   - Creates a `.env.test` file based on your `.env` file
+   - Appends `-test` to the database name in `.env.test`
+   - Creates or recreates the test database
+
+2. **Safety Features**
+
+   - The test database initialization will only work if the database name contains `-test`
+   - This prevents accidental deletion of non-test databases
+   - If the test database already exists, it will be dropped and recreated
+
+3. **Running Tests**
+   ```bash
+   npm test
+   ```
+   Tests automatically use the test database configuration from `.env.test`
+
 ## Environment Variables Management
 
 This project uses environment variables for configuration across different environments:
