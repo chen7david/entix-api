@@ -85,7 +85,19 @@ The project includes automated setup for the test environment:
    npm run test:coverage  # Run tests with coverage report
    ```
 
-## Test Environment Setup
+If you prefer not to use Dev Containers, you'll need to set up the environment manually:
+
+1. Install Node.js (version specified in package.json)
+2. Install PostgreSQL 13 or later
+3. Copy `.env.example` to `.env` and update the values
+4. Run the following commands:
+   ```bash
+   npm install
+   npm run test:init  # Sets up test environment
+   ```
+5. Configure your PostgreSQL database according to your `.env` settings
+
+## Test Environment
 
 The project includes automated setup for the test environment:
 
@@ -97,7 +109,7 @@ The project includes automated setup for the test environment:
 
    This command:
 
-   - Creates a `.env.test` file based on your `.env` file
+   - Creates a `.env.test` file based on your `.env` file (if it doesn't exist)
    - Appends `-test` to the database name in `.env.test`
    - Creates or recreates the test database
 
@@ -109,9 +121,10 @@ The project includes automated setup for the test environment:
 
 3. **Running Tests**
    ```bash
-   npm test
+   npm test               # Run all tests
+   npm run test:watch     # Run tests in watch mode
+   npm run test:coverage  # Run tests with coverage report
    ```
-   Tests automatically use the test database configuration from `.env.test`
 
 ## Environment Variables Management
 
