@@ -1,6 +1,6 @@
 import { Pool, PoolConfig } from "pg";
 import { env } from "@src/config/env.config";
-import { DbName, Environment } from "@src/types/app.types";
+import { Environment } from "@src/types/app.types";
 
 export const getDbConfig = (): PoolConfig => {
   const baseConfig = {
@@ -25,10 +25,6 @@ export const getDbConfig = (): PoolConfig => {
 };
 
 export const pool = new Pool(getDbConfig());
-export const migrationPool = new Pool({
-  ...getDbConfig(),
-  database: DbName.Postgres,
-});
 
 pool.on("error", (err, client) => {
   console.error("Unexpected error on idle client", err);

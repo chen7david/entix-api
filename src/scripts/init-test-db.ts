@@ -1,8 +1,15 @@
-import { migrationPool } from "@/db/connection.db";
+import { getDbConfig } from "@/db/connection.db";
 import { env } from "@/config/env.config";
+import { Pool } from "pg";
+
+const defaultDb = "postgres";
+const pool = new Pool({
+  ...getDbConfig(),
+  database: defaultDb,
+});
 
 async function initTestDatabase() {
-  const client = await migrationPool.connect();
+  const client = await pool.connect();
 
   try {
     const dbName = env.POSTGRES_DB;
