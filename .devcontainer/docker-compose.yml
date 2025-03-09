@@ -8,34 +8,18 @@ services:
       - node_modules:/workspaces/entix-api/node_modules
     network_mode: service:db
     command: sleep infinity
-    environment:
-      - NODE_ENV=development
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   db:
     image: postgres:13
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    env_file:
-      - ../.env
     environment:
-      POSTGRES_DB: ${DB_NAME:-entix-api}
-      POSTGRES_USER: ${DB_USER:-dbUser}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-dbPassword}
-
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
 volumes:
   postgres-data:
-    name: "${COMPOSE_PROJECT_NAME:-entix}-postgres-data"
   node_modules:
     driver: local
