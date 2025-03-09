@@ -2,13 +2,13 @@ import { Pool, PoolConfig } from "pg";
 import { env } from "@src/config/env.config";
 import { Environment } from "@src/types/app.types";
 
-const getDbConfig = (): PoolConfig => {
+export const getDbConfig = (): PoolConfig => {
   const baseConfig = {
-    host: env.DB_HOST,
-    port: env.DB_PORT,
-    user: env.DB_USER,
-    password: env.DB_PASSWORD,
-    database: env.DB_NAME,
+    host: env.POSTGRES_HOST,
+    port: env.POSTGRES_PORT,
+    user: env.POSTGRES_USER,
+    password: env.POSTGRES_PASSWORD,
+    database: env.POSTGRES_DB,
     connectionTimeoutMillis: 5000,
     max: 20,
     idleTimeoutMillis: 30000,

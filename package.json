@@ -7,6 +7,8 @@
     "dev": "NODE_ENV=development nodemon",
     "build": "NODE_ENV=production rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "NODE_ENV=production node dist/index.js",
+    "test:init": "NODE_ENV=test bash src/scripts/init-test.sh && npm run test:init-db",
+    "test:init-db": "NODE_ENV=test ts-node -r tsconfig-paths/register ./src/scripts/init-test-db.ts",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
     "test:coverage": "NODE_ENV=test jest --coverage"
