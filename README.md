@@ -1,33 +1,62 @@
 # entix-api
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+  - [Development Environment Setup](#development-environment-setup)
+  - [Manual Setup (Without Dev Containers)](#manual-setup-without-dev-containers)
+- [Test Environment](#test-environment)
+- [Environment Variables Management](#environment-variables-management)
+- [Development Workflow](#development-workflow)
+- [Cleanup and Troubleshooting](#cleanup-and-troubleshooting)
+
 ## Getting Started
 
-### Prerequisites
+### Development Environment Setup
 
-Before opening the project in Dev Containers, make sure you have:
+#### Using Dev Containers (Recommended)
+
+This project is configured to use VS Code Dev Containers, which provides a consistent development environment with all dependencies pre-configured.
+
+**Prerequisites:**
 
 1. Docker installed and running
 2. VS Code with Dev Containers extension
-3. A `.env` file in the root directory with the following database configuration:
+3. A `.env` file in the root directory (see below)
 
-```env
-DB_NAME=entix-api    # Your preferred database name
-DB_USER=dbUser       # Your preferred database user
-DB_PASSWORD=dbPassword # Your preferred database password
-```
+**Setup Steps:**
 
-These values will be used to create the PostgreSQL database and user when the container starts. If you don't set these values before opening in Dev Containers, the default values shown above will be used.
+1. Copy `.env.example` to `.env` (will be done automatically if not present)
+2. Open the project in VS Code
+3. When prompted, click "Reopen in Container"
+4. The container will automatically:
+   - Install all npm dependencies
+   - Set up the PostgreSQL database
+   - Create a test environment configuration
 
-### Important Note
+**Dev Container Features:**
 
-If you accidentally opened the container without setting the proper values in `.env`:
+- Node.js environment with all dependencies
+- PostgreSQL database
+- Git and GitHub CLI
+- ESLint and Prettier configured
+- Port forwarding for the API (3000) and PostgreSQL (5432)
 
-1. Close the Dev Container
-2. Delete the Docker volume to remove the database
-3. Create/update your `.env` file with your preferred values
-4. Reopen in Dev Containers
+### Manual Setup (Without Dev Containers)
 
-## Test Environment Setup
+If you prefer not to use Dev Containers, you'll need to set up the environment manually:
+
+1. Install Node.js (version specified in package.json)
+2. Install PostgreSQL 13 or later
+3. Copy `.env.example` to `.env` and update the values
+4. Run the following commands:
+   ```bash
+   npm install
+   npm run test:init  # Sets up test environment
+   ```
+5. Configure your PostgreSQL database according to your `.env` settings
+
+## Test Environment
 
 The project includes automated setup for the test environment:
 
@@ -39,7 +68,7 @@ The project includes automated setup for the test environment:
 
    This command:
 
-   - Creates a `.env.test` file based on your `.env` file
+   - Creates a `.env.test` file based on your `.env` file (if it doesn't exist)
    - Appends `-test` to the database name in `.env.test`
    - Creates or recreates the test database
 
@@ -51,9 +80,10 @@ The project includes automated setup for the test environment:
 
 3. **Running Tests**
    ```bash
-   npm test
+   npm test               # Run all tests
+   npm run test:watch     # Run tests in watch mode
+   npm run test:coverage  # Run tests with coverage report
    ```
-   Tests automatically use the test database configuration from `.env.test`
 
 ## Environment Variables Management
 
@@ -127,3 +157,57 @@ When adding or modifying environment variables, follow these steps:
 - Add comments in `.env.example` to explain variable purpose
 - Add validation rules for critical variables
 - For Docker, always provide sensible defaults in docker-compose.yml
+
+## Development Workflow
+
+### Available Scripts
+
+- `npm run dev` - Start the development server with hot reloading
+- `npm run build` - Build the production version
+- `npm start` - Run the production build
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Generate test coverage report
+- `npm run test:init` - Initialize the test environment
+
+### Database Management
+
+The project uses PostgreSQL for data storage. When running in Dev Containers:
+
+- The database is automatically created based on your `.env` configuration
+- The test database is created with `-test` appended to the database name
+- Database data is persisted in a Docker volume
+
+## Cleanup and Troubleshooting
+
+### Complete Dev Environment Cleanup
+
+If you need to completely reset your development environment, use the following command to remove all containers and volumes:
+
+```bash
+docker stop entix-api-devcontainer entix-api-db-devcontainer \
+&& docker rm entix-api-devcontainer entix-api-db-devcontainer \
+&& docker volume rm entix-api-node_modules \
+&& docker volume rm entix-api-postgres \
+&& docker volume rm vscode
+```
+
+**Warning:** This will delete all database data and node_modules. Use only when you want to completely reset your environment.
+
+### Common Issues
+
+1. **Database Connection Issues**
+
+   - Check that PostgreSQL is running
+   - Verify your `.env` database configuration
+   - For Dev Containers, try rebuilding the container
+
+2. **Missing Environment Variables**
+
+   - Ensure your `.env` file is properly configured
+   - Check that all required variables are defined in the schema
+
+3. **Dev Container Not Starting**
+   - Check Docker is running
+   - Look for errors in the VS Code Dev Containers output
+   - Try the cleanup command above and restart
