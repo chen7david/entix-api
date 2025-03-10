@@ -1,5 +1,5 @@
-import { createApp } from "./app";
-import { logger } from "@/services/logger.service";
+import { createApp } from './app';
+import { logger } from '@/services/logger.service';
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,10 +15,10 @@ export function startServer() {
   });
 
   // Handle graceful shutdown
-  process.on("SIGTERM", () => {
-    logger.info("SIGTERM signal received: closing HTTP server");
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
     server.close(() => {
-      logger.info("HTTP server closed");
+      logger.info('HTTP server closed');
     });
   });
 

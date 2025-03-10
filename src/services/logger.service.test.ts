@@ -45,7 +45,7 @@ describe('Logger Service', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPinoInstance = (pino() as unknown) as MockPinoLogger;
+    mockPinoInstance = pino() as unknown as MockPinoLogger;
   });
 
   describe('Default Logger Instance', () => {
@@ -61,7 +61,10 @@ describe('Logger Service', () => {
       expect(mockPinoInstance.fatal).toHaveBeenCalledWith(testMeta, testMessage);
 
       logger.error(testMessage, undefined, testMeta);
-      expect(mockPinoInstance.error).toHaveBeenCalledWith({ ...testMeta, error: undefined }, testMessage);
+      expect(mockPinoInstance.error).toHaveBeenCalledWith(
+        { ...testMeta, error: undefined },
+        testMessage,
+      );
 
       logger.warn(testMessage, testMeta);
       expect(mockPinoInstance.warn).toHaveBeenCalledWith(testMeta, testMessage);
@@ -99,14 +102,17 @@ describe('Logger Service', () => {
 
       logger.error('Error occurred', testError, testMeta);
 
-      expect(mockPinoInstance.error).toHaveBeenCalledWith({
-        ...testMeta,
-        error: {
-          message: testError.message,
-          stack: testError.stack,
-          name: testError.name,
+      expect(mockPinoInstance.error).toHaveBeenCalledWith(
+        {
+          ...testMeta,
+          error: {
+            message: testError.message,
+            stack: testError.stack,
+            name: testError.name,
+          },
         },
-      }, 'Error occurred');
+        'Error occurred',
+      );
     });
 
     it('should handle undefined errors', () => {
@@ -114,10 +120,13 @@ describe('Logger Service', () => {
 
       logger.error('Error occurred', undefined, testMeta);
 
-      expect(mockPinoInstance.error).toHaveBeenCalledWith({
-        ...testMeta,
-        error: undefined,
-      }, 'Error occurred');
+      expect(mockPinoInstance.error).toHaveBeenCalledWith(
+        {
+          ...testMeta,
+          error: undefined,
+        },
+        'Error occurred',
+      );
     });
   });
 
@@ -133,14 +142,17 @@ describe('Logger Service', () => {
 
       logger.error('Error occurred', testError, testMeta);
 
-      expect(mockPinoInstance.error).toHaveBeenCalledWith({
-        userId: '123',
-        error: {
-          message: testError.message,
-          stack: testError.stack,
-          name: testError.name,
+      expect(mockPinoInstance.error).toHaveBeenCalledWith(
+        {
+          userId: '123',
+          error: {
+            message: testError.message,
+            stack: testError.stack,
+            name: testError.name,
+          },
         },
-      }, 'Error occurred');
+        'Error occurred',
+      );
     });
   });
-}); 
+});

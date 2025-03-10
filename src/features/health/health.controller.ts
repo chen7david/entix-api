@@ -1,13 +1,13 @@
-import { Controller, Get } from "routing-controllers";
-import { logger } from "@/services/logger.service";
+import { Controller, Get } from 'routing-controllers';
+import { logger } from '@/services/logger.service';
 
-@Controller("/health")
+@Controller('/health')
 export class HealthController {
   @Get()
   check() {
-    logger.debug("Health check endpoint called");
+    logger.debug('Health check endpoint called');
     return {
-      status: "ok",
+      status: 'ok',
       timestamp: new Date().toISOString(),
     };
   }

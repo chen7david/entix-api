@@ -1,6 +1,6 @@
-import { Pool, PoolConfig } from "pg";
-import { env } from "@src/config/env.config";
-import { Environment } from "@src/types/app.types";
+import { Pool, PoolConfig } from 'pg';
+import { env } from '@src/config/env.config';
+import { Environment } from '@src/types/app.types';
 import { logger } from '@/services/logger.service';
 
 const dbLogger = logger.setContext('Database');
@@ -29,21 +29,21 @@ export const getDbConfig = (): PoolConfig => {
 
 export const pool = new Pool(getDbConfig());
 
-pool.on("error", (err, client) => {
+pool.on('error', (err, client) => {
   dbLogger.error('Database connection error', err);
 });
 
-pool.on("connect", () => {
-  dbLogger.info("New client connected to database");
+pool.on('connect', () => {
+  dbLogger.info('New client connected to database');
 });
 
 pool.on('remove', () => {
   dbLogger.debug('Database connection removed from pool');
 });
 
-process.on("SIGTERM", () => {
+process.on('SIGTERM', () => {
   pool.end().then(() => {
-    console.log("Database pool has ended");
+    console.log('Database pool has ended');
     process.exit(0);
   });
 });

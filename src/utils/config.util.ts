@@ -1,7 +1,7 @@
-import { z } from "zod";
-import * as dotenv from "dotenv";
-import path from "path";
-import { EnvFile, Environment } from "@src/types/app.types";
+import { z } from 'zod';
+import * as dotenv from 'dotenv';
+import path from 'path';
+import { EnvFile, Environment } from '@src/types/app.types';
 
 const envErrorTemplate = (keys: string[]) => `
 ╭──────────────────────────────╮
@@ -9,7 +9,7 @@ const envErrorTemplate = (keys: string[]) => `
 ╰──────────────────────────────╯
 
 Missing or invalid variables:
-${keys.join("\n")}
+${keys.join('\n')}
 
 Please check your environment variables and try again.
 `;
@@ -39,8 +39,7 @@ export const loadConfig = <T extends z.ZodType>({
   envPath,
 }: LoadConfigOptions<T>): z.infer<T> => {
   const nodeEnv = process.env.NODE_ENV || Environment.Development;
-  const fileName =
-    nodeEnv === Environment.Test ? EnvFile.TestEnv : EnvFile.DevelopmentEnv;
+  const fileName = nodeEnv === Environment.Test ? EnvFile.TestEnv : EnvFile.DevelopmentEnv;
 
   // Step 1: Load environment variables from file into process.env
   dotenv.config({
@@ -52,9 +51,7 @@ export const loadConfig = <T extends z.ZodType>({
     return schema.parse(process.env) as z.infer<T>;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map(
-        (err) => `  • ${err.path.join(".")}`
-      );
+      const missingVars = error.errors.map(err => `  • ${err.path.join('.')}`);
 
       throw new Error(envErrorTemplate(missingVars));
     }

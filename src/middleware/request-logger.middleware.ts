@@ -1,8 +1,8 @@
-import { ExpressMiddlewareInterface, Middleware } from "routing-controllers";
-import { Request, Response, NextFunction } from "express";
-import { logger } from "@/services/logger.service";
+import { ExpressMiddlewareInterface, Middleware } from 'routing-controllers';
+import { Request, Response, NextFunction } from 'express';
+import { logger } from '@/services/logger.service';
 
-@Middleware({ type: "before" })
+@Middleware({ type: 'before' })
 export class RequestLoggerMiddleware implements ExpressMiddlewareInterface {
   use(request: Request, response: Response, next: NextFunction): void {
     const startTime = Date.now();
@@ -14,7 +14,7 @@ export class RequestLoggerMiddleware implements ExpressMiddlewareInterface {
     });
 
     // Add listener for when response finishes
-    response.on("finish", () => {
+    response.on('finish', () => {
       const duration = Date.now() - startTime;
 
       logger.debug(`Request completed`, {
