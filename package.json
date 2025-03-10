@@ -1,12 +1,12 @@
 {
   "name": "entix-api",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.0",
+  "description": "entix core api",
+  "main": "server.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
     "build": "NODE_ENV=production rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "start": "NODE_ENV=production node dist/index.js",
+    "start": "NODE_ENV=production node dist/server.js",
     "test:init": "NODE_ENV=test bash src/scripts/init-test.sh && npm run test:init-db",
     "test:init-db": "NODE_ENV=test ts-node -r tsconfig-paths/register ./src/scripts/init-test-db.ts",
     "test": "NODE_ENV=test jest",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/chen7david/entix-api#readme",
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.8",
     "@types/pg": "^8.11.11",
@@ -45,9 +46,12 @@
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "pg": "^8.13.3",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
+    "reflect-metadata": "^0.2.2",
+    "routing-controllers": "^0.11.2",
     "zod": "^3.24.2"
   }
 }
