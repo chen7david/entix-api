@@ -69,7 +69,6 @@ async function initTestDatabase() {
 // Run the initialization
 initTestDatabase()
   .then(() => {
-    testLogger.info("Test database initialization complete");
     process.exit(0);
   })
   .catch((error) => {

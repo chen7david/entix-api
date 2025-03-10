@@ -7,8 +7,8 @@ type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
 // Configure base logger options
 const baseLogger = pino({
-  level: env.NODE_ENV === Environment.Development ? 'debug' : 'info',
-  transport: env.NODE_ENV === Environment.Development 
+  level: env.NODE_ENV !== Environment.Production ? 'debug' : 'info',
+  transport: env.NODE_ENV !== Environment.Production 
     ? {
         target: 'pino-pretty',
         options: {
