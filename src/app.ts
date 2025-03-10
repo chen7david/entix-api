@@ -8,7 +8,7 @@ import { ErrorMiddleware } from './middleware/error.middleware';
 import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
 import { Environment } from './types/app.types';
 import { env } from './config/env.config';
-
+import { corsOptions } from './config/cors.config';
 /**
  * Creates and configures the Express application
  * @returns Configured Express application
@@ -30,7 +30,7 @@ export function createApp(): express.Application {
       NotFoundMiddleware, // This must be registered last
     ],
     defaultErrorHandler: false,
-    cors: true,
+    cors: corsOptions,
     routePrefix: '/api',
     development: env.NODE_ENV !== Environment.Production,
   });
