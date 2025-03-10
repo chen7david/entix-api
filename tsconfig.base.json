@@ -13,6 +13,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "removeComments": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   }
 }
