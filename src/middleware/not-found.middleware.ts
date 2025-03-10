@@ -1,4 +1,5 @@
 import { ExpressMiddlewareInterface, Middleware } from 'routing-controllers';
+import { Service } from 'typedi';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '@/services/logger.service';
 
@@ -7,6 +8,7 @@ import { logger } from '@/services/logger.service';
  * This middleware should be registered last in the middleware chain
  */
 @Middleware({ type: 'after' })
+@Service()
 export class NotFoundMiddleware implements ExpressMiddlewareInterface {
   use(request: Request, response: Response, next: NextFunction): void {
     // If no route has matched and no response has been sent yet

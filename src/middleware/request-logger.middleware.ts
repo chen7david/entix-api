@@ -1,8 +1,10 @@
 import { ExpressMiddlewareInterface, Middleware } from 'routing-controllers';
+import { Service } from 'typedi';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '@/services/logger.service';
 
 @Middleware({ type: 'before' })
+@Service()
 export class RequestLoggerMiddleware implements ExpressMiddlewareInterface {
   use(request: Request, response: Response, next: NextFunction): void {
     const startTime = Date.now();

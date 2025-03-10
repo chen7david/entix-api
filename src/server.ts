@@ -1,5 +1,6 @@
 import { createApp } from './app';
 import { logger } from '@/services/logger.service';
+import { initializeContainer } from '@src/config/di.config';
 
 const PORT = process.env.PORT || 3000;
 
@@ -8,6 +9,9 @@ const PORT = process.env.PORT || 3000;
  * @returns The HTTP server instance
  */
 export function startServer() {
+  // Initialize the DI container before creating the app
+  initializeContainer();
+
   const app = createApp();
 
   const server = app.listen(PORT, () => {
