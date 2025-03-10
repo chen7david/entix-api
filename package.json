@@ -11,7 +11,8 @@
     "test:init-db": "NODE_ENV=test ts-node -r tsconfig-paths/register ./src/scripts/init-test-db.ts",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
-    "test:coverage": "NODE_ENV=test jest --coverage"
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
