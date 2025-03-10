@@ -3,6 +3,9 @@ import express from 'express';
 import path from 'path';
 import { useExpressServer } from 'routing-controllers';
 import { logger } from '@/services/logger.service';
+import { NotFoundMiddleware } from './middleware/not-found.middleware';
+import { ErrorMiddleware } from './middleware/error.middleware';
+import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
 import { Environment } from './types/app.types';
 import { env } from './config/env.config';
 
@@ -21,8 +24,13 @@ export function createApp(): express.Application {
   // Configure routing-controllers
   useExpressServer(app, {
     controllers: [path.join(__dirname, '/features/**/*.controller.{ts,js}')],
-    middlewares: [path.join(__dirname, '/middleware/**/*.middleware.{ts,js}')],
+    middlewares: [
+      RequestLoggerMiddleware,
+      ErrorMiddleware,
+      NotFoundMiddleware, // This must be registered last
+    ],
     defaultErrorHandler: false,
+    cors: true,
     routePrefix: '/api',
     development: env.NODE_ENV !== Environment.Production,
   });

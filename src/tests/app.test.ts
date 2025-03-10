@@ -15,10 +15,15 @@ describe('API Server', () => {
   });
 
   describe('Non-existent route', () => {
-    it('should return 404 for non-existent routes', async () => {
+    it('should return 404 with JSON response for non-existent routes', async () => {
       const response = await request(app).get('/api/non-existent-route');
 
       expect(response.status).toBe(404);
+      expect(response.type).toBe('application/json');
+      expect(response.body).toHaveProperty('status', 404);
+      expect(response.body).toHaveProperty('message', 'Resource not found');
+      expect(response.body).toHaveProperty('path', '/api/non-existent-route');
+      expect(response.body).toHaveProperty('timestamp');
     });
   });
 });
