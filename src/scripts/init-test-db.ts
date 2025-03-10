@@ -1,6 +1,7 @@
 import { getDbConfig } from "@/db/connection.db";
 import { env } from "@/config/env.config";
 import { Pool } from "pg";
+import { logger } from '@/services/logger.service';
 
 const defaultDb = "postgres";
 const pool = new Pool({
@@ -8,20 +9,23 @@ const pool = new Pool({
   database: defaultDb,
 });
 
+const testLogger = logger.setContext('TestSetup');
+
 async function initTestDatabase() {
   const client = await pool.connect();
 
   try {
     const dbName = env.POSTGRES_DB;
+    testLogger.info('Initializing test database', { dbName });
 
     // Check if this is a test database
     const isTestDB = dbName.includes("-test");
     if (!isTestDB) {
+      testLogger.error('Invalid database name for tests', undefined, { dbName });
       throw new Error(
         'Safety check failed: Can only initialize databases with "-test" in the name'
       );
     }
-    console.log("before db check");
     // Check if database exists
     const { rows } = await client.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
@@ -31,6 +35,7 @@ async function initTestDatabase() {
 
     // If database exists, disconnect users and drop it
     if (isDBExist) {
+      testLogger.info('Dropping existing test database', { dbName });
       // Disconnect all users from the database
       await client.query(
         `
@@ -48,10 +53,13 @@ async function initTestDatabase() {
     }
 
     // Create a fresh database
+    testLogger.info('Creating fresh test database', { dbName });
     await client.query(`CREATE DATABASE "${dbName}";`);
     console.log(`Test database "${dbName}" created successfully.`);
+    
+    testLogger.info('Test database initialization complete', { dbName });
   } catch (error) {
-    console.error("Error initializing test database:", error);
+    testLogger.error('Test database initialization failed', error as Error);
     throw error;
   } finally {
     client.release();
@@ -61,10 +69,10 @@ async function initTestDatabase() {
 // Run the initialization
 initTestDatabase()
   .then(() => {
-    console.log("Test database initialization complete");
+    testLogger.info("Test database initialization complete");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("Test database initialization failed:", error);
+    testLogger.info("Test database initialization failed:", error);
     process.exit(1);
   });

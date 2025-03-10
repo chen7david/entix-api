@@ -1,6 +1,9 @@
 import { Pool, PoolConfig } from "pg";
 import { env } from "@src/config/env.config";
 import { Environment } from "@src/types/app.types";
+import { logger } from '@/services/logger.service';
+
+const dbLogger = logger.setContext('Database');
 
 export const getDbConfig = (): PoolConfig => {
   const baseConfig = {
@@ -26,17 +29,17 @@ export const getDbConfig = (): PoolConfig => {
 
 export const pool = new Pool(getDbConfig());
 
-pool.on("error", (err, client) => {
-  console.error("Unexpected error on idle client", err);
+pool.on('error', (err) => {
+  dbLogger.error('Database connection error', err);
 });
 
-pool.on("connect", () => {
-  console.log("New client connected to database");
+pool.on('remove', () => {
+  dbLogger.debug('Database connection removed from pool');
 });
 
 process.on("SIGTERM", () => {
   pool.end().then(() => {
-    console.log("Database pool has ended");
+    dbLogger.debug("Database pool has ended");
     process.exit(0);
   });
 });
