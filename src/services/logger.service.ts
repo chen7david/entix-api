@@ -8,16 +8,17 @@ type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 // Configure base logger options
 const baseLogger = pino({
   level: env.NODE_ENV !== Environment.Production ? 'debug' : 'info',
-  transport: env.NODE_ENV !== Environment.Production 
-    ? {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          ignore: 'pid,hostname',
-          translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l',
-        },
-      }
-    : undefined,
+  transport:
+    env.NODE_ENV !== Environment.Production
+      ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            ignore: 'pid,hostname',
+            translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l',
+          },
+        }
+      : undefined,
   formatters: {
     level: (label: string) => {
       return { level: label };
@@ -37,9 +38,7 @@ export class Logger {
 
   constructor(context?: string) {
     this.context = context;
-    this.logger = context 
-      ? baseLogger.child({ context })
-      : baseLogger;
+    this.logger = context ? baseLogger.child({ context }) : baseLogger;
   }
 
   /**
@@ -69,11 +68,13 @@ export class Logger {
   public error(message: string, error?: Error, meta?: Record<string, unknown>): void {
     this.log('error', message, {
       ...meta,
-      error: error ? {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      } : undefined,
+      error: error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : undefined,
     });
   }
 

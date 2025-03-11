@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { Environment } from "@src/types/app.types";
-import { loadConfig } from "../utils/config.util";
+import { z } from 'zod';
+import { Environment } from '@src/types/app.types';
+import { loadConfig } from '../utils/config.util';
 
 /**
  * Environment schema validation using zod
