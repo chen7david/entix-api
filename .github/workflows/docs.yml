@@ -41,5 +41,6 @@ jobs:
         with:
           target_branch: gh-pages
           build_dir: docs/.vuepress/dist
+          fqdn: api-docs.entix.org
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

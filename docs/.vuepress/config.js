@@ -36,7 +36,7 @@ export default defineUserConfig({
       '/': [
         {
           text: 'Setup',
-          // collapsible: true,
+          collapsible: true,
           children: ['/setup/', '/setup/development', '/setup/database', '/setup/environment'],
         },
         // {
@@ -51,12 +51,12 @@ export default defineUserConfig({
         // },
         {
           text: 'API',
-          // collapsible: true,
+          collapsible: true,
           children: ['/api/', '/api/authentication', '/api/error-handling', '/api/response-format'],
         },
         {
           text: 'Contributing',
-          // collapsible: true,
+          collapsible: true,
           children: [
             '/contributing/',
             // '/contributing/workflow',
@@ -79,11 +79,14 @@ export default defineUserConfig({
     searchPlugin({
       // Search options
       locales: {
-        // '/': {},
+        '/': {
+          placeholder: 'Search',
+        },
       },
+      // These options help fix the search bar display issue
+      isSearchable: page => page.path !== '/',
+      getExtraFields: page => page.frontmatter.tags || [],
       maxSuggestions: 10,
-      hotKeys: ['s', '/'],
-      getExtraFields: page => page.frontmatter.tags ?? [],
     }),
   ],
 });

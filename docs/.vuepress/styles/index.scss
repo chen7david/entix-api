@@ -1,0 +1,32 @@
+// Fix search bar styling
+.search-box {
+  input {
+    background-color: var(--c-bg);
+    color: var(--c-text);
+    border: 1px solid var(--c-border);
+    padding: 0 0.5rem 0 2rem !important;
+    width: 12rem !important;
+    transition: all 0.3s ease;
+
+    &:focus {
+      width: 15rem !important;
+      border-color: var(--c-brand);
+    }
+  }
+}
+
+// Ensure search icon is visible
+.DocSearch-Button {
+  background-color: var(--c-bg) !important;
+  border: 1px solid var(--c-border);
+
+  &:hover {
+    border-color: var(--c-brand);
+  }
+}
+
+// Fix search results styling
+.DocSearch-Modal {
+  background-color: var(--c-bg);
+  color: var(--c-text);
+}
