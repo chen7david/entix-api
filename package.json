@@ -12,7 +12,9 @@
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
     "test:coverage": "NODE_ENV=test jest --coverage",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,7 @@
     "pino-pretty": "^13.0.0",
     "prettier": "^3.5.3",
     "rimraf": "^4.4.1",
+    "sass-embedded": "^1.85.1",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
