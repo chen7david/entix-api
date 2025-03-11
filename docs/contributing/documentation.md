@@ -1,19 +1,24 @@
-# Updating Documentation
+# Documentation Guide
 
-## Quick Start
+This guide explains how to create and maintain documentation for the Entix API project.
 
-1. Install MkDocs locally:
+## Getting Started
 
-   ```bash
-   pip install -r docs/requirements.txt
-   ```
+### Local Development
 
-2. Preview changes:
+1. **Install dependencies**:
 
    ```bash
-   mkdocs serve
+   npm install
    ```
 
-3. View at `http://localhost:8000`
+2. **Start the development server**:
 
-## File Structure
+   ```bash
+   npm run docs:dev
+   ```
+
+3. **View the documentation**:
+   Open your browser and navigate to `http://localhost:8080`
+
+### File Structure
