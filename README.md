@@ -15,6 +15,8 @@ npm run dev
 
 ## Documentation
 
+The full documentation for the Entix API can be viewed at [https://api-docs.entix.org](https://api-docs.entix.org).
+
 - [Setup Guide](docs/setup/README.md)
 
   - [Development Environment](docs/setup/development.md)
