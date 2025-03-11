@@ -1,4 +1,4 @@
-import { pool } from '@src/db/connection.db';
+import { pool } from '@src/config/postgres.config';
 
 describe('Database Connection', () => {
   beforeAll(async () => {

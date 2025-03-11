@@ -1,7 +1,7 @@
-import { getDbConfig } from '@/db/connection.db';
 import { env } from '@/config/env.config';
 import { Pool } from 'pg';
 import { logger } from '@/services/logger.service';
+import { getDbConfig } from '@src/config/postgres.config';
 
 const defaultDb = 'postgres';
 const pool = new Pool({

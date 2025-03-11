@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { loadConfig } from './config.util';
 import { Environment } from '@src/types/app.types';
+import { loadConfig } from '../config.util';
 
 describe('Config Utility', () => {
   const originalEnv = process.env;

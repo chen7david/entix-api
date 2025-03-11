@@ -1,6 +1,6 @@
 import { Container } from 'typedi';
-import { initializeContainer } from '../config/di.config';
-import { UserService } from '../services/user.service';
+import { initializeContainer } from '../di.config';
+import { UserService } from '@src/features/users/user.service';
 
 describe('Dependency Injection', () => {
   beforeAll(() => {

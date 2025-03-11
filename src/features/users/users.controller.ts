@@ -1,6 +1,6 @@
 import { JsonController, Get, Param, NotFoundError } from 'routing-controllers';
 import { Service } from 'typedi';
-import { UserService } from '@/services/user.service';
+import { UserService } from '@src/features/users/user.service';
 import { logger } from '@/services/logger.service';
 
 @JsonController('/users')
