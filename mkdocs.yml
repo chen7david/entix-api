@@ -1,7 +1,7 @@
 site_name: Entix API Documentation
 site_description: Documentation for the Entix API
 repo_url: https://github.com/chen7david/entix-api
-repo_name: chen7david/entix-api
+site_url: https://api-docs.entix.org
 
 theme:
   name: material
