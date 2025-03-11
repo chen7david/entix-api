@@ -74,15 +74,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-          cache: pip
-          cache-dependency-path: docs/requirements.txt
-
       - name: Install markdownlint
         run: npm install -g markdownlint-cli
 
+      - name: Create markdownlint config
+        run: |
+          echo '{
+            "default": true,
+            "MD013": false,
+            "MD024": false,
+            "MD033": false,
+            "MD041": false,
+            "MD046": false,
+            "MD031": false,
+            "MD040": false,
+            "MD047": false
+          }' > .markdownlint.json
+
       - name: Lint Markdown Files
-        run: markdownlint 'docs/**/*.md' --config .markdownlint.json
+        run: |
+          markdownlint \
+            --config .markdownlint.json \
+            'docs/**/*.md' \
+            'README.md'
