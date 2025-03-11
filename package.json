@@ -45,7 +45,8 @@
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.11",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vuepress": "^2.0.0-rc.20"
   },
   "dependencies": {
     "cors": "^2.8.5",
