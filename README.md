@@ -17,6 +17,25 @@ npm run dev
 
 The full documentation for the Entix API can be viewed at [https://api-docs.entix.org](https://api-docs.entix.org).
 
+### Local Documentation Development
+
+To work on the documentation locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Start documentation development server
+npm run docs:dev
+
+# Build documentation
+npm run docs:build
+```
+
+Visit `http://localhost:8080` to preview the documentation.
+
+## Documentation Structure
+
 - [Setup Guide](docs/setup/README.md)
 
   - [Development Environment](docs/setup/development.md)
@@ -38,6 +57,7 @@ The full documentation for the Entix API can be viewed at [https://api-docs.enti
 - [Contributing](docs/contributing/README.md)
 
   - [Development Workflow](docs/contributing/workflow.md)
+  - [Documentation](docs/contributing/documentation.md)
   - [Code Style](docs/contributing/code-style.md)
   - [Testing](docs/contributing/testing.md)
 
