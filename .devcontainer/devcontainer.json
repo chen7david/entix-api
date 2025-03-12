@@ -13,6 +13,9 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
+  // Add updateGitConfig to handle repository permissions
+  "updateContentCommand": "git config --global --add safe.directory /workspaces/entix-api && git config --global core.filemode false",
+
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [3000, 5432],
 
@@ -40,6 +43,7 @@
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   "remoteUser": "node",
 
+  // Update postCreateCommand to run after git config is set
   "postCreateCommand": "npm install && npm run test:init",
   // Use initializeCommand to ensure .env file exists
   "initializeCommand": "test -f .env || cp .env.example .env"
