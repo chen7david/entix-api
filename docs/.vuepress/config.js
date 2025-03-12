@@ -65,6 +65,11 @@ export default defineUserConfig({
           ],
         },
         {
+          text: 'AI',
+          collapsible: true,
+          children: ['/ai/'],
+        },
+        {
           text: 'FAQ',
           collapsible: true,
           children: ['/faq/common-issues'],
