@@ -5,7 +5,18 @@ import { logger } from '@/services/logger.service';
 
 const dbLogger = logger.setContext('Database');
 
-export const getDbConfig = (): PoolConfig => {
+export type GetDbConfigOptions = {
+  host?: string;
+  port?: number;
+  user?: string;
+  password?: string;
+  database?: string;
+  max?: number;
+  connectionTimeoutMillis?: number;
+  idleTimeoutMillis?: number;
+};
+
+export const getDbConfig = (config?: GetDbConfigOptions): PoolConfig => {
   const baseConfig = {
     host: env.POSTGRES_HOST,
     port: env.POSTGRES_PORT,
@@ -15,6 +26,7 @@ export const getDbConfig = (): PoolConfig => {
     connectionTimeoutMillis: 5000,
     max: 20,
     idleTimeoutMillis: 30000,
+    ...config,
   };
 
   if (env.NODE_ENV === Environment.Test) {
