@@ -1,7 +1,11 @@
 import { pool } from '@src/config/postgres.config';
+import { logger } from '@/services/logger.service';
+
+const testLogger = logger.setContext('PostgresConfigTest');
 
 describe('Database Connection', () => {
   beforeAll(async () => {
+    testLogger.info('Setting up test table for postgres config tests');
     // Create test table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS test_users (
@@ -14,9 +18,9 @@ describe('Database Connection', () => {
   });
 
   afterAll(async () => {
-    // Drop test table and close connection
+    testLogger.info('Cleaning up test table for postgres config tests');
+    // Drop test table but don't close connection - let global.setup.ts handle it
     await pool.query('DROP TABLE IF EXISTS test_users');
-    await pool.end();
   });
 
   beforeEach(async () => {
