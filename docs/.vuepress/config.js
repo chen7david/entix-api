@@ -23,20 +23,12 @@ export default defineUserConfig({
     docsDir: 'docs',
     editLink: true,
 
-    themeConfig: {
-      search: true, // enabled by default
-      searchMaxSuggestions: 10, // adjust the number of suggestions
-    },
-
-    // Navigation bar
-    navbar: [],
-
     // Sidebar configuration
     sidebar: {
       '/': [
         {
           text: 'Setup',
-          collapsible: true,
+          // collapsible: true,
           children: ['/setup/', '/setup/development', '/setup/database', '/setup/environment'],
         },
         // {
@@ -51,12 +43,12 @@ export default defineUserConfig({
         // },
         {
           text: 'API',
-          collapsible: true,
+          // collapsible: true,
           children: ['/api/', '/api/authentication', '/api/error-handling', '/api/response-format'],
         },
         {
           text: 'Contributing',
-          collapsible: true,
+          // collapsible: true,
           children: [
             '/contributing/',
             // '/contributing/workflow',
