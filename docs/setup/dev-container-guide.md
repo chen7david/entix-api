@@ -167,3 +167,20 @@ docker stop entix-api-devcontainer entix-api-db-devcontainer \
 && docker volume rm entix-api-postgres \
 && docker volume rm vscode
 ```
+
+# Dev Container Setup
+
+## Setting Up Git
+
+After starting your dev container, you may want to configure Git to make commits. You can do this by running the following commands in the terminal inside the container:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "youremail@example.com"
+```
+
+Replace `"Your Name"` with your actual name and `youremail@example.com` with your email address.
+
+### Additional Configuration
+
+If you want to ensure that your workspace is recognized as a safe directory and to disable file mode checking, you can also run:
