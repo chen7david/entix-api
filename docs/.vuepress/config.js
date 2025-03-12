@@ -28,8 +28,15 @@ export default defineUserConfig({
       '/': [
         {
           text: 'Setup',
-          // collapsible: true,
-          children: ['/setup/', '/setup/development', '/setup/database', '/setup/environment'],
+          collapsible: true,
+          children: [
+            '/setup/',
+            '/setup/getting-started',
+            '/setup/dev-container-guide',
+            '/setup/development',
+            '/setup/database',
+            '/setup/environment',
+          ],
         },
         // {
         //   text: 'Usage',
@@ -43,12 +50,12 @@ export default defineUserConfig({
         // },
         {
           text: 'API',
-          // collapsible: true,
+          collapsible: true,
           children: ['/api/', '/api/authentication', '/api/error-handling', '/api/response-format'],
         },
         {
           text: 'Contributing',
-          // collapsible: true,
+          collapsible: true,
           children: [
             '/contributing/',
             // '/contributing/workflow',
