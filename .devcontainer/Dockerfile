@@ -19,6 +19,7 @@ USER node
 RUN npm install -g nodemon typescript ts-node \
     eslint prettier \
     @typescript-eslint/parser @typescript-eslint/eslint-plugin \
-    eslint-config-prettier
+    eslint-config-prettier \
+    tree-cli
 
 WORKDIR /workspaces/entix-api
