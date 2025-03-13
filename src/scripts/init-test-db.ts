@@ -9,7 +9,7 @@ const pool = new Pool({
   database: defaultDb,
 });
 
-const testLogger = logger.setContext('TestSetup');
+const testLogger = logger.setContext('test-setup');
 
 async function initTestDatabase() {
   const client = await pool.connect();

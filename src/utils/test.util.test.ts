@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { createDb, createTestDb, dropDb, getRandomTestDbName } from '../test.util';
+import { createDb, createTestDb, dropDb, getRandomTestDbName } from './test.util';
 import { pool } from '@src/config/postgres.config';
 
 describe('Database Test Utilities', () => {

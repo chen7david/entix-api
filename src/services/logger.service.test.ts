@@ -1,5 +1,5 @@
 import pino from 'pino';
-import { Logger, logger } from '../logger.service';
+import { Logger, logger } from './logger.service';
 
 // Define mock types
 interface MockPinoLogger {
