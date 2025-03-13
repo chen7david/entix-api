@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { getDbConfig, GetDbConfigOptions } from '@src/config/postgres.config';
+import { getDbConfig, GetDbConfigOptions } from '@src/config/db.config';
 
 export const getRandomTestDbName = () =>
   `test_db_${Date.now()}_${Math.floor(Math.random() * 1000)}`;

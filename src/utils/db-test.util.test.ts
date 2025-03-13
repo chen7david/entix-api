@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
-import { createDb, createTestDb, dropDb, getRandomTestDbName } from './test.util';
-import { pool } from '@src/config/postgres.config';
+import { createDb, createTestDb, dropDb, getRandomTestDbName } from './db-test.util';
+import { pool } from '@src/config/db.config';
 
 describe('Database Test Utilities', () => {
   const mainClient = pool;

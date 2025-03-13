@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { createApp } from '../../app';
 
-describe('API Server', () => {
+describe('/api/health', () => {
   const app = createApp();
 
   describe('Health Check', () => {

@@ -1,7 +1,7 @@
 import { env } from '@/config/env.config';
 import { Pool } from 'pg';
 import { logger } from '@/services/logger.service';
-import { getDbConfig } from '@src/config/postgres.config';
+import { getDbConfig } from '@src/config/db.config';
 
 const defaultDb = 'postgres';
 const pool = new Pool({
@@ -9,7 +9,7 @@ const pool = new Pool({
   database: defaultDb,
 });
 
-const testLogger = logger.setContext('test-setup');
+const testLogger = logger.setContext('DbTestSetup');
 
 async function initTestDatabase() {
   const client = await pool.connect();
