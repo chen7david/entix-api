@@ -1,5 +1,5 @@
 import { Container } from 'typedi';
-import { initializeContainer } from '../di.config';
+import { initializeContainer } from './di.config';
 import { UserService } from '@src/features/users/user.service';
 
 describe('Dependency Injection', () => {

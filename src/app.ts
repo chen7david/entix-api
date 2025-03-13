@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import path from 'path';
 import { useExpressServer } from 'routing-controllers';
-import { logger } from '@/services/logger.service';
+import { logger } from '@src/services/logger.service';
 import { NotFoundMiddleware } from './middleware/not-found.middleware';
 import { ErrorMiddleware } from './middleware/error.middleware';
 import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
