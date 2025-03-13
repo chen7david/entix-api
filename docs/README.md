@@ -5,7 +5,7 @@ heroText: Entix API Documentation
 tagline: A modern Express.js API with TypeScript, routing-controllers, and dependency injection
 actions:
   - text: Get Started →
-    link: /setup/
+    link: /getting-started/
     type: primary
 features:
   - title: TypeScript-based
