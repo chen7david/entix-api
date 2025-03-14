@@ -203,7 +203,7 @@ describe('Database Configuration', () => {
       expect(config.password).toBe(env.POSTGRES_PASSWORD);
       expect(config.database).toBe(env.POSTGRES_DB);
       expect(config.connectionTimeoutMillis).toBe(env.CONNECTION_TIMEOUT_MILLIS);
-      expect(config.max).toBe(env.MAX);
+      expect(config.max).toBe(env.MAX_POOL_SIZE);
       expect(config.idleTimeoutMillis).toBe(env.IDLE_TIMEOUT_MILLIS);
     });
 
