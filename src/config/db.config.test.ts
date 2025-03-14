@@ -1,6 +1,7 @@
 import { pool, getDbConfig } from '@src/config/db.config';
 import { Pool } from 'pg';
 import { env } from '@src/config/env.config';
+import { createTestDb, getRandomTestDbName, cleanUpTestDb } from '@src/utils/db-test.util';
 
 /**
  * Test database constants and queries
@@ -59,34 +60,50 @@ describe('Database Configuration', () => {
    */
   describe('Default Pool', () => {
     let adminPool: Pool;
+    let testPool: Pool;
+    let testDbName: string;
 
     beforeAll(async () => {
       // Use the default pool
       adminPool = pool;
 
+      // create a test pool
+      const testDbConfig = {
+        database: getRandomTestDbName(),
+      };
+
+      const result = await createTestDb(adminPool, testDbConfig);
+      testPool = result.client;
+      testDbName = result.dbName;
+
       // Create test table
-      await adminPool.query(CREATE_TEST_TABLE_QUERY);
+      await testPool.query(CREATE_TEST_TABLE_QUERY);
     });
 
     afterAll(async () => {
       // Drop test table and close connection
-      await adminPool.query(DROP_TEST_TABLE_QUERY);
-      // Don't end the pool as it's the singleton instance
+      await testPool.query(DROP_TEST_TABLE_QUERY);
+      await cleanUpTestDb(adminPool, testPool);
+    });
+
+    afterEach(async () => {
+      // Clean up data after each test
+      await testPool.query(TRUNCATE_TEST_TABLE_QUERY);
     });
 
     beforeEach(async () => {
       // Clean up data before each test
-      await adminPool.query(TRUNCATE_TEST_TABLE_QUERY);
+      await testPool.query(TRUNCATE_TEST_TABLE_QUERY);
     });
 
     it('should connect to the database successfully', async () => {
-      const result = await adminPool.query(SELECT_CURRENT_TIME_QUERY);
+      const result = await testPool.query(SELECT_CURRENT_TIME_QUERY);
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0].now).toBeDefined();
     });
 
     it('should create and insert data successfully', async () => {
-      const result = await adminPool.query(INSERT_USER_QUERY, [TEST_USER.name, TEST_USER.email]);
+      const result = await testPool.query(INSERT_USER_QUERY, [TEST_USER.name, TEST_USER.email]);
 
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0].name).toBe(TEST_USER.name);
@@ -97,9 +114,9 @@ describe('Database Configuration', () => {
 
     it('should read data successfully', async () => {
       // Insert test data
-      await adminPool.query(INSERT_USER_QUERY, [TEST_USER_JANE.name, TEST_USER_JANE.email]);
+      await testPool.query(INSERT_USER_QUERY, [TEST_USER_JANE.name, TEST_USER_JANE.email]);
 
-      const result = await adminPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_JANE.email]);
+      const result = await testPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_JANE.email]);
 
       expect(result.rows).toHaveLength(1);
       expect(result.rows[0].name).toBe(TEST_USER_JANE.name);
@@ -108,7 +125,7 @@ describe('Database Configuration', () => {
 
     it('should update data successfully', async () => {
       // Insert test data
-      const insertResult = await adminPool.query(INSERT_USER_RETURNING_ID_QUERY, [
+      const insertResult = await testPool.query(INSERT_USER_RETURNING_ID_QUERY, [
         TEST_USER_BOB.name,
         TEST_USER_BOB.email,
       ]);
@@ -116,32 +133,32 @@ describe('Database Configuration', () => {
       const updatedName = 'Robert Wilson';
 
       // Update the record
-      await adminPool.query(UPDATE_USER_NAME_QUERY, [updatedName, userId]);
+      await testPool.query(UPDATE_USER_NAME_QUERY, [updatedName, userId]);
 
       // Verify the update
-      const result = await adminPool.query(SELECT_USER_BY_ID_QUERY, [userId]);
+      const result = await testPool.query(SELECT_USER_BY_ID_QUERY, [userId]);
       expect(result.rows[0].name).toBe(updatedName);
       expect(result.rows[0].email).toBe(TEST_USER_BOB.email);
     });
 
     it('should delete data successfully', async () => {
       // Insert test data
-      await adminPool.query(INSERT_USER_QUERY, [TEST_USER_ALICE.name, TEST_USER_ALICE.email]);
+      await testPool.query(INSERT_USER_QUERY, [TEST_USER_ALICE.name, TEST_USER_ALICE.email]);
 
       // Verify data exists
-      let result = await adminPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
+      let result = await testPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
       expect(result.rows).toHaveLength(1);
 
       // Delete the record
-      await adminPool.query(DELETE_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
+      await testPool.query(DELETE_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
 
       // Verify deletion
-      result = await adminPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
+      result = await testPool.query(SELECT_USER_BY_EMAIL_QUERY, [TEST_USER_ALICE.email]);
       expect(result.rows).toHaveLength(0);
     });
 
     it('should handle concurrent transactions correctly', async () => {
-      const client = await adminPool.connect();
+      const client = await testPool.connect();
 
       try {
         await client.query('BEGIN');
@@ -160,7 +177,7 @@ describe('Database Configuration', () => {
         await client.query('COMMIT');
 
         // Verify data is visible after commit
-        const finalResult = await adminPool.query(SELECT_USER_BY_EMAIL_QUERY, [
+        const finalResult = await testPool.query(SELECT_USER_BY_EMAIL_QUERY, [
           TEST_USER_TRANSACTION.email,
         ]);
         expect(finalResult.rows).toHaveLength(1);

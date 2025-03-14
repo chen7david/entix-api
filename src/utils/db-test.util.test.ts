@@ -72,9 +72,8 @@ describe('Database Test Utilities', () => {
       );
       expect(checkExistQuery.rows.length).toBe(1);
 
-      // Drop the database
-      await testClient.end();
-      await dropDb(adminPool, testDbName);
+      // Clean up the test database
+      await cleanUpTestDb(adminPool, testClient);
 
       // Verify the database no longer exists by querying pg_database
       const checkDeletedQuery = await adminPool.query(
@@ -124,6 +123,9 @@ describe('Database Test Utilities', () => {
       // Check internal properties
       expect(testClient.options.connectionTimeoutMillis).toBe(connectionTimeout);
       expect(testClient.options.idleTimeoutMillis).toBe(idleTimeout);
+
+      // close the test client
+      await testClient.end();
     });
 
     it('should respect custom database name in pool configuration', async () => {
