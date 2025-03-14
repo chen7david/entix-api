@@ -28,7 +28,7 @@ export const getDbConfig = (config?: GetDbConfigOptions): PoolConfig => ({
   password: env.POSTGRES_PASSWORD,
   database: env.POSTGRES_DB,
   connectionTimeoutMillis: env.CONNECTION_TIMEOUT_MILLIS,
-  max: env.MAX,
+  max: env.MAX_POOL_SIZE,
   idleTimeoutMillis: env.IDLE_TIMEOUT_MILLIS,
   ...config,
 });

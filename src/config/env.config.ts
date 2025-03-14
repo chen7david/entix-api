@@ -16,7 +16,7 @@ const envSchema = z.object({
   POSTGRES_PASSWORD: z.string().min(1),
   CONNECTION_TIMEOUT_MILLIS: z.coerce.number(),
   IDLE_TIMEOUT_MILLIS: z.coerce.number(),
-  MAX: z.coerce.number(),
+  MAX_POOL_SIZE: z.coerce.number(),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
