@@ -15,6 +15,12 @@ export type GetDbConfigOptions = {
   idleTimeoutMillis?: number;
 };
 
+/**
+ * Gets database configuration with optional overrides
+ *
+ * @param config - Optional configuration overrides
+ * @returns Pool configuration object
+ */
 export const getDbConfig = (config?: GetDbConfigOptions): PoolConfig => ({
   host: env.POSTGRES_HOST,
   port: env.POSTGRES_PORT,
@@ -27,6 +33,9 @@ export const getDbConfig = (config?: GetDbConfigOptions): PoolConfig => ({
   ...config,
 });
 
+/**
+ * Singleton database connection pool
+ */
 export const pool = new Pool(getDbConfig());
 
 pool.on('error', (err, client) => {
