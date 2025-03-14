@@ -45,4 +45,7 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          CONNECTION_TIMEOUT_MILLIS: ${{ secrets.CONNECTION_TIMEOUT_MILLIS }}
+          IDLE_TIMEOUT_MILLIS: ${{ secrets.IDLE_TIMEOUT_MILLIS }}
+          MAX_POOL_SIZE: ${{ secrets.MAX_POOL_SIZE }}
         run: npm test
