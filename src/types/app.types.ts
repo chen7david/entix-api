@@ -1,26 +1,26 @@
 export enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
+  DEVELOPMENT = 'development',
+  PRODUCTION = 'production',
+  TEST = 'test',
 }
 
-export enum EnvFile {
-  DevelopmentEnv = '.env',
-  TestEnv = '.env.test',
+export enum EnvFilename {
+  DEVELOPMENT = '.env',
+  TEST = '.env.test',
 }
 
 export enum HTTPMethod {
-  Get = 'GET',
-  Post = 'POST',
-  Put = 'PUT',
-  Delete = 'DELETE',
-  Patch = 'PATCH',
-  Options = 'OPTIONS',
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  DELETE = 'DELETE',
+  PATCH = 'PATCH',
+  OPTIONS = 'OPTIONS',
 }
 
 export enum HTTPHeaders {
-  ContentType = 'Content-Type',
-  Authorization = 'Authorization',
-  Accept = 'Accept',
-  XRequestedWith = 'X-Requested-With',
+  CONTENT_TYPE = 'Content-Type',
+  AUTHORIZATION = 'Authorization',
+  ACCEPT = 'Accept',
+  X_REQUESTED_WITH = 'X-Requested-With',
 }

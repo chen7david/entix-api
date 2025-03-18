@@ -7,7 +7,7 @@ import path from 'path';
  * Environment schema validation using zod
  */
 const envSchema = z.object({
-  NODE_ENV: z.nativeEnum(Environment).default(Environment.Development),
+  NODE_ENV: z.nativeEnum(Environment).default(Environment.DEVELOPMENT),
   PORT: z.coerce.number().default(3000),
   // Database config
   DB_HOST: z.string().min(1),

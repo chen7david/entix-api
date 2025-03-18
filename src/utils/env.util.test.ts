@@ -5,7 +5,7 @@ jest.mock('dotenv', () => ({
 }));
 
 import { getEnvFilename, loadConfig } from '@src/utils/env.util';
-import { Environment, EnvFile } from '@src/types/app.types';
+import { Environment, EnvFilename } from '@src/types/app.types';
 import { z } from 'zod';
 
 /**
@@ -14,28 +14,28 @@ import { z } from 'zod';
 describe('Environment Utilities', () => {
   describe('getEnvFilename', () => {
     it('returns the development environment file when nodeEnv is "development"', () => {
-      const result = getEnvFilename(Environment.Development);
-      expect(result).toBe(EnvFile.DevelopmentEnv);
+      const result = getEnvFilename(Environment.DEVELOPMENT);
+      expect(result).toBe(EnvFilename.DEVELOPMENT);
     });
 
     it('returns the test environment file when nodeEnv is "test"', () => {
-      const result = getEnvFilename(Environment.Test);
-      expect(result).toBe(EnvFile.TestEnv);
+      const result = getEnvFilename(Environment.TEST);
+      expect(result).toBe(EnvFilename.TEST);
     });
 
     it('returns the development environment file by default when nodeEnv is undefined', () => {
       const result = getEnvFilename(undefined);
-      expect(result).toBe(EnvFile.DevelopmentEnv);
+      expect(result).toBe(EnvFilename.DEVELOPMENT);
     });
 
     it('returns the development environment file for an unrecognized environment', () => {
       const result = getEnvFilename('unknown' as Environment);
-      expect(result).toBe(EnvFile.DevelopmentEnv);
+      expect(result).toBe(EnvFilename.DEVELOPMENT);
     });
 
     it('handles production environment correctly', () => {
-      const result = getEnvFilename(Environment.Production);
-      expect(result).toBe(EnvFile.DevelopmentEnv);
+      const result = getEnvFilename(Environment.PRODUCTION);
+      expect(result).toBe(EnvFilename.DEVELOPMENT);
     });
   });
 
@@ -144,8 +144,8 @@ describe('Environment Utilities', () => {
       const schemaWithDefaults = z.object({
         PORT: z.coerce.number().int().positive().default(3000),
         NODE_ENV: z
-          .enum([Environment.Development, Environment.Test])
-          .default(Environment.Development),
+          .enum([Environment.DEVELOPMENT, Environment.TEST])
+          .default(Environment.DEVELOPMENT),
       });
 
       // Execute with no environment variables set
@@ -154,7 +154,7 @@ describe('Environment Utilities', () => {
       // Verify defaults are applied
       expect(config).toEqual({
         PORT: 3000,
-        NODE_ENV: Environment.Development,
+        NODE_ENV: Environment.DEVELOPMENT,
       });
     });
 

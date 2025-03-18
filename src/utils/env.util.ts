@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
-import { EnvFile, Environment } from '@src/types/app.types';
+import { EnvFilename, Environment } from '@src/types/app.types';
 
 /**
  * Template for environment configuration error messages
@@ -35,12 +35,12 @@ type LoadConfigOptions<T extends z.ZodType> = {
  */
 export const getEnvFilename = (nodeEnv: string | undefined): string => {
   switch (nodeEnv) {
-    case Environment.Development:
-      return EnvFile.DevelopmentEnv;
-    case Environment.Test:
-      return EnvFile.TestEnv;
+    case Environment.DEVELOPMENT:
+      return EnvFilename.DEVELOPMENT;
+    case Environment.TEST:
+      return EnvFilename.TEST;
     default:
-      return EnvFile.DevelopmentEnv;
+      return EnvFilename.DEVELOPMENT;
   }
 };
 
