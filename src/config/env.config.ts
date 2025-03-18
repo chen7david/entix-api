@@ -1,6 +1,7 @@
-import { z } from 'zod';
 import { Environment } from '@src/types/app.types';
-import { loadConfig } from '@src/utils/config.util';
+import { loadConfig, getEnvFilename } from '@src/utils/env.util';
+import { z } from 'zod';
+import path from 'path';
 
 /**
  * Environment schema validation using zod
@@ -19,6 +20,11 @@ const envSchema = z.object({
   MAX_POOL_SIZE: z.coerce.number(),
 });
 
-type EnvConfig = z.infer<typeof envSchema>;
+export type EnvConfig = z.infer<typeof envSchema>;
 
-export const env = loadConfig({ schema: envSchema });
+const envFilename = getEnvFilename(process.env.NODE_ENV);
+
+export const env = loadConfig({
+  schema: envSchema,
+  envPath: path.resolve(process.cwd(), envFilename),
+});
