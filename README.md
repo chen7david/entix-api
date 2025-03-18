@@ -12,3 +12,11 @@ dev-setup:
 
 - `tsconfig-paths`: maps path aliases to relative paths during runtime
 - `tsc-alias`: maps path aliases to relative paths during build time
+
+#### Getting Started - Dev Containers
+
+Dev containers provide us with a simple setup dev enviroment to get started. This workspace includes a postgres db with the following default credentials:
+
+- user: postgres
+- password: postgres
+- database: postgres
