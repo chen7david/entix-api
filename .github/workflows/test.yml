@@ -40,11 +40,11 @@ jobs:
       - name: Run tests
         env:
           NODE_ENV: test
-          POSTGRES_HOST: ${{ secrets.DB_HOST }}
-          POSTGRES_PORT: ${{ secrets.DB_PORT }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
           CONNECTION_TIMEOUT_MILLIS: ${{ secrets.CONNECTION_TIMEOUT_MILLIS }}
           IDLE_TIMEOUT_MILLIS: ${{ secrets.IDLE_TIMEOUT_MILLIS }}
           MAX_POOL_SIZE: ${{ secrets.MAX_POOL_SIZE }}
