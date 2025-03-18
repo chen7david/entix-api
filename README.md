@@ -15,8 +15,14 @@ dev-setup:
 
 #### Getting Started - Dev Containers
 
+Prerequisites:
+
+- Docker
+
 Dev containers provide us with a simple setup dev enviroment to get started. This workspace includes a postgres db with the following default credentials:
 
 - user: postgres
 - password: postgres
 - database: postgres
+
+To start the dev-container you on a mac you need to holdown `shift` + `command` + `p`, then choose Dev Containers: `Rebuild Container`
