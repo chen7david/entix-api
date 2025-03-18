@@ -160,12 +160,11 @@ describe('Environment Utilities', () => {
 
     it('uses variables from the specified .env file', () => {
       // Setup test environment variables
-      const testEnvVars = {
+      Object.assign(process.env, {
         DATABASE_URL: 'https://test-db.example.com',
         PORT: '4000',
         JWT_SECRET: 'test-secret-key',
-      };
-      Object.assign(process.env, testEnvVars);
+      });
 
       // Execute with custom env path
       const config = loadConfig({ schema: testSchema, envPath: '.env.test' });
