@@ -1,3 +1,3 @@
-import { helloWold } from "@src/utils/example.util";
+import { helloWold } from '@src/utils/example.util';
 
 helloWold();
