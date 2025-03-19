@@ -1,5 +1,6 @@
-import { Environment } from '@src/types/app.types';
+import { Environment } from '@src/constants/app.constant';
 import { loadConfig, getEnvFilename } from '@src/utils/env.util';
+import { LogLevel } from '@src/constants/logger.constant';
 import { z } from 'zod';
 import path from 'path';
 
@@ -7,8 +8,16 @@ import path from 'path';
  * Environment schema validation using zod
  */
 const envSchema = z.object({
-  NODE_ENV: z.nativeEnum(Environment).default(Environment.Development),
+  // Logger config
+  LOG_LEVEL: z.nativeEnum(LogLevel).default(LogLevel.INFO),
+  APP_NAME: z.string().min(1),
+  // Environment config
+  NODE_ENV: z.nativeEnum(Environment).default(Environment.DEVELOPMENT),
   PORT: z.coerce.number().default(3000),
+  // New Relic config
+  NEW_RELIC_ENABLED: z.coerce.boolean().default(false),
+  NEW_RELIC_LICENSE_KEY: z.string().optional(),
+  NEW_RELIC_APP_NAME: z.string().optional(),
   // Database config
   DB_HOST: z.string().min(1),
   DB_PORT: z.coerce.number().default(5432),
