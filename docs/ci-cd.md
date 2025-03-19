@@ -135,3 +135,11 @@ If the image doesn't update as expected:
 1. Check if the workflow ran successfully
 2. Verify that the image was pushed to GHCR
 3. Ensure your deployment is pulling the correct tag
+
+### Jenkins
+
+The webhook for Jenkin jobs should go to:
+
+```bash
+https://jenkins.entix.org/jenkins/github-webhook/
+```
