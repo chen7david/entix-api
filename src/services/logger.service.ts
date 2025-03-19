@@ -3,7 +3,6 @@ import { randomUUID } from 'crypto';
 import { Environment } from '@src/constants/app.constant';
 import { env } from '@src/config/env.config';
 import { LogLevel } from '@src/constants/logger.constant';
-import nrPino from '@newrelic/pino-enricher';
 
 /**
  * Configuration options for the logger
@@ -25,6 +24,8 @@ export type LoggerConfig = {
   timestamp?: boolean;
   /** Additional base fields to include in every log */
   baseFields?: Record<string, unknown>;
+  /** Enable New Relic enricher */
+  enableNewRelic?: boolean;
 };
 
 /**
@@ -55,7 +56,7 @@ export class LoggerService {
    * @param config - Logger configuration options
    */
   constructor(config: LoggerConfig = {}) {
-    const options: LoggerOptions = {
+    let options: LoggerOptions = {
       level: config.level || LogLevel.INFO,
       base: {
         app: config.appName || env.APP_NAME,
@@ -64,7 +65,7 @@ export class LoggerService {
       },
       timestamp: config.timestamp !== false,
       // For development, use more readable logs
-      ...(config.prettyPrint && env.NODE_ENV !== 'production'
+      ...(config.prettyPrint && env.NODE_ENV !== Environment.PRODUCTION
         ? {
             transport: {
               target: 'pino-pretty',
@@ -77,6 +78,17 @@ export class LoggerService {
           }
         : {}),
     };
+
+    // Apply New Relic enricher if enabled
+    const useNewRelic = config.enableNewRelic ?? env.NEW_RELIC_ENABLED;
+    if (env.NODE_ENV === Environment.PRODUCTION && useNewRelic) {
+      try {
+        const nrPino = require('@newrelic/pino-enricher');
+        options = nrPino(options);
+      } catch (error) {
+        console.error('Failed to initialize New Relic enricher:', error);
+      }
+    }
 
     // Initialize the logger
     this.logger = config.destination ? pino(options, config.destination) : pino(options);
@@ -224,6 +236,7 @@ export const createLogger = (config: LoggerConfig = {}): LoggerService => {
     appName: env.APP_NAME || 'app',
     env: env.NODE_ENV,
     prettyPrint: env.NODE_ENV !== Environment.PRODUCTION,
+    enableNewRelic: env.NEW_RELIC_ENABLED,
     ...config,
   });
 };

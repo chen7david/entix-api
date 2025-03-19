@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
+    "start": "NODE_ENV=production node -r newrelic dist/index.js",
     "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format": "prettier --write .",
     "test": "NODE_ENV=test jest",
@@ -39,7 +40,6 @@
   },
   "dependencies": {
     "@newrelic/pino-enricher": "^1.1.1",
-    "@types/newrelic": "^9.14.8",
     "dotenv": "^16.4.7",
     "newrelic": "^12.16.0",
     "pino": "^9.6.0",

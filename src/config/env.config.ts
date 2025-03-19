@@ -14,6 +14,10 @@ const envSchema = z.object({
   // Environment config
   NODE_ENV: z.nativeEnum(Environment).default(Environment.DEVELOPMENT),
   PORT: z.coerce.number().default(3000),
+  // New Relic config
+  NEW_RELIC_ENABLED: z.coerce.boolean().default(false),
+  NEW_RELIC_LICENSE_KEY: z.string().optional(),
+  NEW_RELIC_APP_NAME: z.string().optional(),
   // Database config
   DB_HOST: z.string().min(1),
   DB_PORT: z.coerce.number().default(5432),
