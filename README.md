@@ -11,6 +11,8 @@ The **Entix API** is a Node.js application designed for monitoring and logging u
 - **New Relic**: A monitoring tool for performance management and observability.
 - **Pino**: A fast logger for Node.js applications.
 - **PostgreSQL**: A relational database used for data storage.
+- **Docker**: Containerization platform for packaging applications.
+- **GitHub Actions**: CI/CD platform for automated builds and deployments.
 
 ## Scripts
 
@@ -61,6 +63,24 @@ enum ExampleEnum {
 
 We prefer using types instead of interfaces where possible. Types offer more flexibility, and we generally do not encourage declaration merging for readability and maintainability reasons.
 
+## Deployment
+
+The application is containerized using Docker and automatically built and published to GitHub Container Registry (GHCR) when code is merged into the `main` branch. For more details on the CI/CD pipeline, see the [CI/CD documentation](docs/ci-cd.md).
+
+### Docker Image
+
+You can pull the latest Docker image using:
+
+```bash
+docker pull ghcr.io/chen7david/entix-api:latest
+```
+
+To run the Docker image:
+
+```bash
+docker run -p 3000:3000 --env-file .env.production ghcr.io/chen7david/entix-api:latest
+```
+
 ## New Relic Integration
 
 For detailed information on how to integrate and configure New Relic, please refer to the [New Relic Integration Documentation](docs/newrelic.md).
@@ -68,7 +88,9 @@ For detailed information on how to integrate and configure New Relic, please ref
 ## Additional Documentation
 
 - [New Relic Integration](docs/newrelic.md)
-- [Logging with Pino](docs/logging.md)
+- [CI/CD Pipeline](docs/ci-cd.md)
+- [Logging with Pino](docs/logging.md) (if applicable)
+- [API Endpoints](docs/api.md) (if applicable)
 
 ## Troubleshooting
 
