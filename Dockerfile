@@ -31,7 +31,7 @@ RUN npm ci --omit=dev
 
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/newrelic.js ./newrelic.js
+# COPY --from=builder /app/newrelic.js ./newrelic.js
 
 # Create a non-root user and set permissions
 RUN chown -R node:node /app
