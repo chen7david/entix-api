@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@newrelic/pino-enricher": "^1.1.1",
+    "@types/newrelic": "^9.14.8",
     "dotenv": "^16.4.7",
     "newrelic": "^12.16.0",
     "pino": "^9.6.0",
