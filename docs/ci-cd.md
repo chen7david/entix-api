@@ -135,3 +135,70 @@ If the image doesn't update as expected:
 1. Check if the workflow ran successfully
 2. Verify that the image was pushed to GHCR
 3. Ensure your deployment is pulling the correct tag
+
+## Jenkins Webhook Setup
+
+To set up a webhook for Jenkins jobs, follow these steps:
+
+### GitHub Webhook
+
+1. **Navigate to Your GitHub Repository**:
+
+   - Go to your repository on GitHub.
+
+2. **Access Settings**:
+
+   - Click on the "Settings" tab.
+
+3. **Webhooks**:
+
+   - In the left sidebar, click on "Webhooks".
+
+4. **Add Webhook**:
+
+   - Click on the "Add webhook" button.
+
+5. **Configure Webhook**:
+
+   - **Payload URL**: Enter the following URL:
+     ```
+     https://jenkins.entix.org/jenkins/github-webhook/
+     ```
+   - **Content type**: Select `application/json`.
+   - **Secret**: (Optional) You can add a secret for security, but make sure to configure Jenkins to use this secret if you do.
+   - **Which events would you like to trigger this webhook?**: Select "Let me select individual events." and check the following:
+     - **Pull requests**
+     - **Pushes**
+   - **Active**: Ensure the webhook is active.
+
+6. **Save**:
+   - Click the "Add webhook" button to save your changes.
+
+### Non-GitHub Webhook
+
+1. **Open Jenkins**:
+
+   - Navigate to your Jenkins instance.
+
+2. **Create a New Job**:
+
+   - Click on "New Item" in the Jenkins dashboard.
+   - Enter a name for your job (e.g., "Deploy on Build Success") and select "Freestyle project" or "Pipeline" based on your needs.
+   - Click "OK".
+
+3. **Configure Job**:
+
+   - In the job configuration, scroll down to the "Build Triggers" section.
+   - Check the box for **"Trigger builds remotely (e.g., from scripts)"**.
+   - Enter an authentication token (e.g., `my-token`). You will use this token in your webhook URL.
+
+4. **Set Up Build Steps**:
+
+   - Configure the build steps as needed for your deployment process (e.g., running scripts, deploying to servers, etc.).
+
+5. **Save the Job**:
+   - Click "Save" to save your job configuration.
+
+### Triggering the Jenkins Job via Webhook
+
+To trigger the Jenkins job using a webhook, you will need to use the following URL format:
