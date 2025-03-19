@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import * as dotenv from 'dotenv';
-import { EnvFilename, Environment } from '@src/types/app.types';
+import { EnvFilename, Environment } from '@src/constants/app.constant';
 
 /**
  * Template for environment configuration error messages

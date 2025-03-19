@@ -1,8 +1,8 @@
 import pino, { Logger, LoggerOptions, DestinationStream } from 'pino';
 import { randomUUID } from 'crypto';
-import { Environment } from '@src/types/app.types';
+import { Environment } from '@src/constants/app.constant';
 import { env } from '@src/config/env.config';
-import { LogLevel } from '@src/types/logger.types';
+import { LogLevel } from '@src/constants/logger.constant';
 
 /**
  * Configuration options for the logger

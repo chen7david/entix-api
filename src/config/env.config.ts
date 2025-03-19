@@ -1,6 +1,6 @@
-import { Environment } from '@src/types/app.types';
+import { Environment } from '@src/constants/app.constant';
 import { loadConfig, getEnvFilename } from '@src/utils/env.util';
-import { LogLevel } from '@src/types/logger.types';
+import { LogLevel } from '@src/constants/logger.constant';
 import { z } from 'zod';
 import path from 'path';
 
