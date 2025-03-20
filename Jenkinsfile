@@ -23,6 +23,7 @@ pipeline {
                 npm ci
                 npm run build
                 echo "NEW_RELIC_LICENSE_KEY: $NEW_RELIC_LICENSE_KEY"
+                echo "the end!"
                 '''
             }
         }
