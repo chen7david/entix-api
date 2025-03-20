@@ -53,11 +53,9 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Trigger Jenkins Job Webhook
-        uses: appleboy/jenkins-action@master
+        uses: appleboy/jenkins-action@v1.1.1
         with:
           url: ${{ env.JENKINS_URL }}
-          job: Deploy
-          token: ${{ secrets.JENKINS_TOKEN }} # Use a secret for security
-          parameters: |
-            param1=value1
-            param2=value2
+          user: ${{ env.JENKINS_USER }}
+          token: ${{ secrets.JENKINS_TOKEN }}
+          job: ${{ env.JENKINS_JOB_NAME }}
