@@ -51,3 +51,13 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Trigger Jenkins Job Webhook
+        uses: appleboy/jenkins-action@master
+        with:
+          url: ${{ env.JENKINS_URL }}
+          job: Deploy
+          token: ${{ secrets.JENKINS_TOKEN }} # Use a secret for security
+          parameters: |
+            param1=value1
+            param2=value2
