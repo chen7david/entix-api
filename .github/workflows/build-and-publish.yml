@@ -55,7 +55,7 @@ jobs:
       - name: Trigger Jenkins Job Webhook
         uses: appleboy/jenkins-action@v1.1.1
         with:
-          url: http://24.150.238.56:8080
-          user: chen7david
+          url: ${{ vars.JENKINS_URL }}
+          user: ${{ vars.JENKINS_USER }}
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: prod-entix-api
+          job: ${{ vars.JENKINS_JOB_NAME }}
