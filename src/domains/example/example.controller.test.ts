@@ -67,9 +67,10 @@ describe('Example Controller', () => {
 
   describe('404 Handling', () => {
     it('should return 404 for non-existent routes', async () => {
-      const response = await request(app).get('/non-existent-route');
+      const response = await request(app).get('/api/non-existent-route');
 
       expect(response.status).toBe(404);
+      expect(response.body.message).toEqual('Not found');
     });
   });
 });
