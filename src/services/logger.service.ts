@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { Environment } from '@src/constants/app.constant';
 import { env } from '@src/config/env.config';
 import { LogLevel } from '@src/constants/logger.constant';
+import { Injectable } from '@src/utils/typedi.util';
+import pinoHttp from 'pino-http';
 
 /**
  * Configuration options for the logger
@@ -47,6 +49,7 @@ export type LogContext = Record<string, unknown> & {
 /**
  * Logger service for application-wide logging
  */
+@Injectable()
 export class LoggerService {
   private logger: Logger;
   private defaultContext: LogContext = {};
@@ -245,3 +248,9 @@ export const createLogger = (config: LoggerConfig = {}): LoggerService => {
  * Default logger instance for application-wide use
  */
 export const logger = createLogger();
+
+/**
+ * Creates a Pino HTTP logger instance
+ * @returns A Pino HTTP logger instance
+ */
+export const httpLogger = pinoHttp({ logger: logger.getRawLogger() });

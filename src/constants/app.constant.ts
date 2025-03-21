@@ -24,3 +24,15 @@ export enum HTTPHeaders {
   ACCEPT = 'Accept',
   X_REQUESTED_WITH = 'X-Requested-With',
 }
+
+export enum HTTPStatus {
+  OK = 200,
+  CREATED = 201,
+  NO_CONTENT = 204,
+}
+
+export enum CorsOrigin {
+  LOCALHOST = 'http://localhost:3000',
+  PRODUCTION = 'https://example.com',
+  ALL = '*',
+}
