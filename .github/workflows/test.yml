@@ -40,6 +40,9 @@ jobs:
       - name: Run tests
         env:
           NODE_ENV: test
+          PORT: ${{ vars.PORT }}
+          APP_NAME: ${{ vars.APP_NAME }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_USER: ${{ secrets.DB_USER }}
