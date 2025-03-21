@@ -2,10 +2,10 @@
   "name": "entix-api",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
-    "start": "NODE_ENV=production node -r newrelic dist/index.js",
+    "start": "NODE_ENV=production node -r newrelic dist/server.js",
     "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format": "prettier --write .",
     "test": "NODE_ENV=test jest",
