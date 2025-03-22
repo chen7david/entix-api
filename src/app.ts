@@ -1,16 +1,15 @@
 import 'reflect-metadata';
 import { useExpressServer, getMetadataArgsStorage, useContainer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { NotFoundMiddleware } from '@src/middleware/not-foud.middleware';
 import { Environment } from '@src/constants/app.constant';
 import { httpLogger, logger } from '@src/services/logger.service';
 import { AppConfig } from '@src/types/app.type';
 import { env } from '@src/config/env.config';
 import { Container } from 'typedi';
-import cors from 'cors';
+import { corsMiddleware } from './middleware/cors.middleware';
+import { notFoundMiddleware } from './middleware/not-found.middleware';
 import express from 'express';
 import path from 'path';
-import { corsConfig } from './config/cors.config';
 
 // Configure TypeDI container
 useContainer(Container);
@@ -30,6 +29,9 @@ export class App {
     this.app = express();
     this.setupMiddleware(config);
     this.setupControllers();
+
+    // Register the not found middleware last to catch all unhandled routes
+    this.app.use(notFoundMiddleware);
   }
 
   /**
@@ -39,7 +41,7 @@ export class App {
   private setupMiddleware(config: AppConfig): void {
     // Enable CORS if configured
     if (config.cors) {
-      this.app.use(cors(corsConfig));
+      this.app.use(corsMiddleware);
       logger.debug('CORS middleware enabled');
     }
 
@@ -65,7 +67,6 @@ export class App {
     // Register controllers with routing-controllers
     useExpressServer(this.app, {
       controllers: [path.join(__dirname, 'domains', '**', '*.controller.{ts,js}')],
-      middlewares: [NotFoundMiddleware],
       defaultErrorHandler: false,
       routePrefix: '/api',
       development: env.NODE_ENV !== Environment.PRODUCTION,
@@ -93,6 +94,6 @@ export class App {
  * @returns The configured Express application
  */
 export const createApp = (config?: AppConfig): express.Application => {
-  const app = new App(config);
-  return app.app;
+  const appInstance = new App(config);
+  return appInstance.app;
 };

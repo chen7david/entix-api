@@ -1,18 +1,22 @@
 import { corsConfig } from '@src/config/cors.config';
-import { NextFunction } from 'express';
-import { ExpressMiddlewareInterface, Middleware } from 'routing-controllers';
+import { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { Injectable } from '@src/utils/typedi.util';
 
 /**
- * The CORS middleware
+ * CORS Middleware
+ *
+ * This middleware is intentionally implemented as a traditional Express middleware
+ * rather than using routing-controllers. This approach ensures that CORS headers are
+ * applied to all requests, including those that are handled before routing-controllers
+ * processes them.
+ *
+ * Important:
+ * - routing-controllers middlewares only apply to routes managed by the framework
+ * - For middlewares that need to run early in the request lifecycle (like CORS),
+ *   it's recommended to use traditional Express middleware for broader coverage
+ * - This middleware should be loaded before routing-controllers is initialized
+ *
+ * This middleware will apply the CORS configuration defined in corsConfig
+ * to allow cross-origin requests according to the configured rules.
  */
-@Middleware({ type: 'before' })
-@Injectable()
-class CorsMiddleware implements ExpressMiddlewareInterface {
-  use(req: Request, res: Response, next: NextFunction): void {
-    cors(corsConfig);
-  }
-}
-
-export const corsMiddleware = new CorsMiddleware();
+export const corsMiddleware = cors(corsConfig);
