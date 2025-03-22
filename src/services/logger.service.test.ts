@@ -15,6 +15,13 @@ const mockPino = jest.fn().mockReturnValue(mockPinoInstance);
 // Mock the entire pino module
 jest.mock('pino', () => mockPino);
 
+// Mock the entire pino-http module
+jest.mock('pino-http', () => {
+  return jest.fn().mockReturnValue({
+    logger: mockPinoInstance,
+  });
+});
+
 // Mock environment configuration
 jest.mock('@src/config/env.config', () => ({
   env: {

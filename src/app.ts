@@ -1,28 +1,18 @@
 import 'reflect-metadata';
-import express from 'express';
-import cors from 'cors';
-import {
-  useExpressServer,
-  getMetadataArgsStorage,
-  JsonController,
-  Get,
-  Param,
-  QueryParam,
-} from 'routing-controllers';
+import { useExpressServer, getMetadataArgsStorage, useContainer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { logger } from '@src/services/logger.service';
+import { Environment } from '@src/constants/app.constant';
+import { httpLogger, logger } from '@src/services/logger.service';
+import { AppConfig } from '@src/types/app.type';
 import { env } from '@src/config/env.config';
-import { Environment, HTTPMethod } from '@src/constants/app.constant';
+import { Container } from 'typedi';
+import { corsMiddleware } from './middleware/cors.middleware';
+import { notFoundMiddleware } from './middleware/not-found.middleware';
+import express from 'express';
+import path from 'path';
 
-/**
- * Configuration for creating the Express application with routing-controllers
- */
-type AppConfig = {
-  /** Whether to enable CORS for the application */
-  cors?: boolean;
-  /** Whether to enable detailed logging for requests */
-  detailedLogging?: boolean;
-};
+// Configure TypeDI container
+useContainer(Container);
 
 /**
  * Represents the Express application with routing-controllers configuration
@@ -39,6 +29,9 @@ export class App {
     this.app = express();
     this.setupMiddleware(config);
     this.setupControllers();
+
+    // Register the not found middleware last to catch all unhandled routes
+    this.app.use(notFoundMiddleware);
   }
 
   /**
@@ -48,13 +41,7 @@ export class App {
   private setupMiddleware(config: AppConfig): void {
     // Enable CORS if configured
     if (config.cors) {
-      this.app.use(
-        cors({
-          origin: '*',
-          methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-          allowedHeaders: ['Content-Type', 'Authorization'],
-        }),
-      );
+      this.app.use(corsMiddleware);
       logger.debug('CORS middleware enabled');
     }
 
@@ -64,30 +51,7 @@ export class App {
 
     // Add request logging middleware
     if (config.detailedLogging && env.NODE_ENV !== Environment.PRODUCTION) {
-      this.app.use((req, res, next) => {
-        const startTime = Date.now();
-
-        // Log request
-        logger.info(`${req.method} ${req.url}`, {
-          method: req.method,
-          url: req.url,
-          ip: req.ip,
-          userAgent: req.get('User-Agent'),
-        });
-
-        // Log response time when request is complete
-        res.on('finish', () => {
-          const duration = Date.now() - startTime;
-          logger.debug(`Request processed in ${duration}ms`, {
-            method: req.method,
-            url: req.url,
-            statusCode: res.statusCode,
-            duration,
-          });
-        });
-
-        next();
-      });
+      this.app.use(httpLogger);
     }
 
     // Health check endpoint
@@ -102,15 +66,13 @@ export class App {
   private setupControllers(): void {
     // Register controllers with routing-controllers
     useExpressServer(this.app, {
-      controllers: [TestController],
+      controllers: [path.join(__dirname, 'domains', '**', '*.controller.{ts,js}')],
       defaultErrorHandler: false,
       routePrefix: '/api',
       development: env.NODE_ENV !== Environment.PRODUCTION,
-      validation: {
-        whitelist: true,
-        forbidNonWhitelisted: true,
-      },
-      classTransformer: true,
+      // Use Zod instead of class-validator and class-transformer
+      validation: false,
+      classTransformer: false,
       cors: true,
     });
 
@@ -132,48 +94,6 @@ export class App {
  * @returns The configured Express application
  */
 export const createApp = (config?: AppConfig): express.Application => {
-  const app = new App(config);
-  return app.app;
+  const appInstance = new App(config);
+  return appInstance.app;
 };
-
-/**
- * Test controller for demonstration purposes
- */
-@JsonController('/test')
-class TestController {
-  /**
-   * Simple health check endpoint
-   * @returns Object with status message
-   */
-  @Get('/')
-  getAll(): { message: string } {
-    logger.info('TestController.getAll called');
-    return { message: 'Test controller is working!' };
-  }
-
-  /**
-   * Endpoint with a query parameter
-   * @param name - Optional name query parameter
-   * @returns Greeting message
-   */
-  @Get('/hello')
-  getGreeting(@QueryParam('name') name?: string): { greeting: string } {
-    const greeting = name ? `Hello, ${name}!` : 'Hello, World!';
-    logger.info(`TestController.getGreeting called with name: ${name || 'undefined'}`);
-    return { greeting };
-  }
-
-  /**
-   * Endpoint with a path parameter
-   * @param id - The ID parameter from the URL
-   * @returns Object with the provided ID
-   */
-  @Get('/:id')
-  getOne(@Param('id') id: string): { id: string; timestamp: string } {
-    logger.info(`TestController.getOne called with id ${id}`);
-    return {
-      id,
-      timestamp: new Date().toISOString(),
-    };
-  }
-}
