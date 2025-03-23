@@ -16,7 +16,7 @@ pipeline {
         // Database Configuration
         DB_HOST = 'postgres'
         DB_PORT = '5432'
-        DB_NAME = 'postgres'
+        DB_NAME = 'prod-entix-api'
         DB_USER = 'postgres'
         DB_PASSWORD = 'postgres'
         CONNECTION_TIMEOUT_MILLIS = '5000'
