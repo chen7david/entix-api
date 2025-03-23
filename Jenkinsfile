@@ -4,27 +4,37 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
         DOCKER_IMAGE = 'chen7david/entix-api'
+        
+        // Application Settings
         NODE_ENV = 'production'
-        PORT = '3000'  // From .env.example
-        APP_NAME = 'EntixAPI'  // From .env.example
-        LOG_LEVEL = 'info'  // From .env.example
+        PORT = '3000'
+        
+        // Logger Configuration
+        APP_NAME = 'EntixAPI'
+        LOG_LEVEL = 'info'
 
         // Database Configuration
-        DB_HOST = credentials('DB_HOST')  // Add this in Jenkins credentials
-        DB_PORT = credentials('DB_PORT')  // Add this in Jenkins credentials
-        DB_NAME = credentials('DB_NAME')  // Add this in Jenkins credentials
-        DB_USER = credentials('DB_USER')  // Add this in Jenkins credentials
-        DB_PASSWORD = credentials('DB_PASSWORD')  // Add this in Jenkins credentials
+        DB_HOST = 'postgres'
+        DB_PORT = '5432'
+        DB_NAME = 'postgres'
+        DB_USER = 'postgres'
+        DB_PASSWORD = 'postgres'
+        CONNECTION_TIMEOUT_MILLIS = '5000'
+        IDLE_TIMEOUT_MILLIS = '30000'
+        MAX_POOL_SIZE = '20'
 
         // New Relic Configuration
-        NEW_RELIC_ENABLED = 'true'  // Set to true to enable New Relic
-        NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')  // Add this in Jenkins credentials
-        NEW_RELIC_APP_NAME = 'entix-api-test'  // From .env.example
-
-        // Timeout and Pool Size
-        CONNECTION_TIMEOUT_MILLIS = '5000'  // From .env.example
-        IDLE_TIMEOUT_MILLIS = '30000'  // From .env.example
-        MAX_POOL_SIZE = '20'  // From .env.example
+        NEW_RELIC_ENABLED = 'true'
+        NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')
+        NEW_RELIC_APP_NAME = 'prod-entix-api'
+        
+        // Cognito Configuration
+        COGNITO_USER_POOL_ID = 'us-east-1_123456789'
+        COGNITO_CLIENT_ID = '1234567890abcdef'
+        COGNITO_REGION = 'us-east-1'
+        
+        // Container details
+        CONTAINER_NAME = 'entix-api'
     }
 
     stages {
@@ -36,28 +46,21 @@ pipeline {
             }
         }
 
-        stage('Stop and Remove Old Container') {
+        stage('Deploy Container') {
             steps {
                 sh '''
-                docker ps -q --filter "name=entix-api" | grep -q . && docker stop entix-api || true
-                docker ps -aq --filter "name=entix-api" | grep -q . && docker rm entix-api || true
-                '''
-            }
-        }
-
-        stage('Deploy New Container') {
-            steps {
-                sh '''
+                # Stop and remove existing container if it exists
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+                
+                # Start new container
                 docker run -d \
-                    --name entix-api \
+                    --name $CONTAINER_NAME \
                     -p $PORT:$PORT \
                     -e NODE_ENV=$NODE_ENV \
                     -e PORT=$PORT \
                     -e APP_NAME=$APP_NAME \
                     -e LOG_LEVEL=$LOG_LEVEL \
-                    -e NEW_RELIC_ENABLED=$NEW_RELIC_ENABLED \
-                    -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
-                    -e NEW_RELIC_APP_NAME=$NEW_RELIC_APP_NAME \
                     -e DB_HOST=$DB_HOST \
                     -e DB_PORT=$DB_PORT \
                     -e DB_NAME=$DB_NAME \
@@ -66,6 +69,12 @@ pipeline {
                     -e CONNECTION_TIMEOUT_MILLIS=$CONNECTION_TIMEOUT_MILLIS \
                     -e IDLE_TIMEOUT_MILLIS=$IDLE_TIMEOUT_MILLIS \
                     -e MAX_POOL_SIZE=$MAX_POOL_SIZE \
+                    -e NEW_RELIC_ENABLED=$NEW_RELIC_ENABLED \
+                    -e NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY \
+                    -e NEW_RELIC_APP_NAME=$NEW_RELIC_APP_NAME \
+                    -e COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID \
+                    -e COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID \
+                    -e COGNITO_REGION=$COGNITO_REGION \
                     --restart unless-stopped \
                     $DOCKER_REGISTRY/$DOCKER_IMAGE:latest
                 '''
@@ -75,6 +84,10 @@ pipeline {
         stage('Cleanup') {
             steps {
                 sh '''
+                # Clean up unused images
+                docker image prune -a -f --filter "until=24h"
+                
+                # Clean up system
                 docker system prune -f
                 '''
             }
@@ -82,8 +95,11 @@ pipeline {
     }
 
     post {
-        always {
-            sh 'docker logout $DOCKER_REGISTRY' // This can be removed since no login is performed
+        success {
+            echo 'Deployment completed successfully'
+        }
+        failure {
+            echo 'Deployment failed'
         }
     }
 }
