@@ -4,11 +4,8 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'ghcr.io'
         DOCKER_IMAGE = 'chen7david/entix-api'
-        
-        // Application Settings
         NODE_ENV = 'production'
-        PORT = '3000'
-        
+
         // Logger Configuration
         APP_NAME = 'EntixAPI'
         LOG_LEVEL = 'info'
@@ -16,28 +13,33 @@ pipeline {
         // Database Configuration
         DB_HOST = 'postgres'
         DB_PORT = '5432'
-        DB_NAME = 'postgres'
         DB_USER = 'postgres'
         DB_PASSWORD = 'postgres'
         CONNECTION_TIMEOUT_MILLIS = '5000'
         IDLE_TIMEOUT_MILLIS = '30000'
         MAX_POOL_SIZE = '20'
 
-        // New Relic Configuration
-        NEW_RELIC_ENABLED = 'true'
-        NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')
-        NEW_RELIC_APP_NAME = 'prod-entix-api'
-        
         // Cognito Configuration
         COGNITO_USER_POOL_ID = 'us-east-1_123456789'
         COGNITO_CLIENT_ID = '1234567890abcdef'
         COGNITO_REGION = 'us-east-1'
-        
-        // Container details
-        CONTAINER_NAME = 'entix-api'
     }
 
     stages {
+        stage('Set Environment Variables') {
+            steps {
+                script {
+                    def isProd = env.JOB_NAME.contains('prod')
+                    env.PORT = isProd ? '3000' : '4000'
+                    env.DB_NAME = isProd ? 'prod-entix-api' : 'staging-entix-api'
+                    env.CONTAINER_NAME = isProd ? 'prod-entix-api' : 'staging-entix-api'
+                    env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
+                    env.NEW_RELIC_LICENSE_KEY = isProd ? credentials('NEW_RELIC_LICENSE_KEY') : ''
+                    env.NEW_RELIC_APP_NAME = 'prod-entix-api'
+                }
+            }
+        }
+
         stage('Pull Latest Image') {
             steps {
                 sh '''
