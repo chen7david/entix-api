@@ -29,7 +29,11 @@ pipeline {
         stage('Set Environment Variables') {
             steps {
                 script {
+                    echo "JOB_NAME: ${env.JOB_NAME}"
                     def isProd = env.JOB_NAME.contains('prod')
+                    echo "isProd: ${isProd}"
+                    def NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')
+                    echo "NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}"
                     env.PORT = isProd ? '3000' : '4000'
                     env.DB_NAME = isProd ? 'prod-entix-api' : 'staging-entix-api'
                     env.CONTAINER_NAME = isProd ? 'prod-entix-api' : 'staging-entix-api'
