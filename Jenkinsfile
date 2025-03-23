@@ -56,7 +56,7 @@ pipeline {
                 # Start new container
                 docker run -d \
                     --name $CONTAINER_NAME \
-                    --network web_network \
+                    --network db_network \
                     -p $PORT:$PORT \
                     -e NODE_ENV=$NODE_ENV \
                     -e PORT=$PORT \
