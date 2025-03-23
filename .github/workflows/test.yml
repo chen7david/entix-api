@@ -1,4 +1,4 @@
-name: Production Test
+name: Test
 
 on:
   push:
