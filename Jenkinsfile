@@ -57,7 +57,6 @@ pipeline {
                 docker run -d \
                     --name $CONTAINER_NAME \
                     --network web_network \
-                    --network db_network \
                     -p $PORT:$PORT \
                     -e NODE_ENV=$NODE_ENV \
                     -e PORT=$PORT \
@@ -79,6 +78,9 @@ pipeline {
                     -e COGNITO_REGION=$COGNITO_REGION \
                     --restart unless-stopped \
                     $DOCKER_REGISTRY/$DOCKER_IMAGE:latest
+                
+                # Connect the container to web_network
+                docker network connect web_network $CONTAINER_NAME
                 '''
             }
         }
