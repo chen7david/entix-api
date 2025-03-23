@@ -38,9 +38,11 @@ pipeline {
                     env.CONTAINER_NAME = isProd ? 'prod-entix-api' : 'staging-entix-api'
                     env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
                     env.NEW_RELIC_APP_NAME = 'prod-entix-api'
+                    echo "NEW_RELIC_LICENSE_KEY: ${env.NEW_RELIC_LICENSE_KEY}"
                     if (!isProd) {
                         env.NEW_RELIC_LICENSE_KEY = ''
                     }
+                    echo "NEW_RELIC_LICENSE_KEY: ${env.NEW_RELIC_LICENSE_KEY}"
                 }
             }
         }
