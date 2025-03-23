@@ -2,7 +2,7 @@ name: Production Build and Publish to GHCR
 
 on:
   workflow_run:
-    workflows: ['Production Test']
+    workflows: ['Test']
     types:
       - completed
   workflow_dispatch:
