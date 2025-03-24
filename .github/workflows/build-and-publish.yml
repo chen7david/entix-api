@@ -7,13 +7,14 @@ on:
       - completed
     branches:
       - main
-      - staging
   push:
     branches:
       - main
-      - staging
     tags:
       - 'v*.*.*'
+  pull_request:
+    branches:
+      - staging
   workflow_dispatch:
     inputs:
       environment:
@@ -52,6 +53,8 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/heads/staging ]]; then
+            echo "ENVIRONMENT=staging" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             echo "ENVIRONMENT=production" >> $GITHUB_ENV
           else
@@ -113,7 +116,7 @@ jobs:
           if [[ "${{ env.ENVIRONMENT }}" == "staging" ]]; then
             echo "JENKINS_JOB_NAME=staging-entix-api" >> $GITHUB_ENV
           else
-            echo "JENKINS_JOB_NAME=entix-API" >> $GITHUB_ENV
+            echo "JENKINS_JOB_NAME=prod-entix-api" >> $GITHUB_ENV
           fi
 
       - name: Trigger Jenkins Job Webhook
