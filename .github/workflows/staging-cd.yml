@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Ensure Production Test Passed
-        if: github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success'
+        if: github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
@@ -62,4 +62,4 @@ jobs:
           url: ${{ secrets.JENKINS_URL }}
           user: ${{ secrets.JENKINS_USER }}
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: 'staging-entix-api'
+          job: staging-${{ secrets.JENKINS_JOB_NAME }}
