@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Ensure Production Test Passed
-        if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion != 'success'
+        if: github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'main' }}
             type=sha,format=short
 
       - name: Build and push Docker image
@@ -57,9 +57,4 @@ jobs:
 
       - name: Trigger Jenkins Job Webhook
         if: success()
-        uses: appleboy/jenkins-action@v1.1.1
-        with:
-          url: ${{ vars.JENKINS_URL }}
-          user: ${{ vars.JENKINS_USER }}
-          token: ${{ secrets.JENKINS_TOKEN }}
-          job: ${{ vars.JENKINS_JOB_NAME }}
+        uses: appleboy

@@ -19,8 +19,8 @@ jobs:
       packages: write
 
     steps:
-      - name: Ensure Production Test Passed
-        if: github.event.workflow_run.conclusion != 'success'
+      - name: Ensure Staging Test Passed
+        if: github.event.workflow_run.head_branch == 'staging' && github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/staging' }}
+            type=raw,value=latest,enable=${{ github.event.workflow_run.head_branch == 'staging' }}
             type=sha,format=short
 
       - name: Build and push Docker image
