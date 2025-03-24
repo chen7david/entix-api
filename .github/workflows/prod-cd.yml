@@ -1,10 +1,10 @@
-name: Production Build and Publish to GHCR
+name: Prod CD
 
 on:
   workflow_run:
-    workflows: ['Test']
-    types:
-      - completed
+    workflows: ['Prod CI']
+    types: ['completed']
+    if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
   workflow_dispatch:
 
 env:
@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Ensure Production Test Passed
-        if: github.event.workflow_run.conclusion != 'success'
+        if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
@@ -45,7 +45,6 @@ jobs:
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,format=short
-            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
