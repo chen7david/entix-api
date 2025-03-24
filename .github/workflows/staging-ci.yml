@@ -2,9 +2,9 @@ name: Staging CI
 
 on:
   push:
-    branches: [staging]
+    branches: [staging] # Only run on push to staging
   pull_request:
-    branches: [staging]
+    branches: [staging] # Only trigger for PRs targeting staging
 
 jobs:
   test:
