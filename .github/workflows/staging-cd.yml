@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Ensure Production Test Passed
-        if: github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success'
+        if: github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
