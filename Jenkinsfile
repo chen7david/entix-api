@@ -41,8 +41,8 @@ pipeline {
                     env.PORT = isProd ? PROD_PORT : STAGING_PORT
                     env.DB_NAME = isProd ? PROD_ID : STAGING_ID
                     env.CONTAINER_NAME = isProd ? PROD_ID : STAGING_ID
+                    env.NEW_RELIC_APP_NAME = isProd ? PROD_ID : ''
                     env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
-                    env.NEW_RELIC_APP_NAME = isProd ? PROD_ID : STAGING_ID
                     if (!isProd) {
                         env.NEW_RELIC_LICENSE_KEY = ''
                     }
