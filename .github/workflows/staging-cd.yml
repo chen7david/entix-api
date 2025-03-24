@@ -1,4 +1,4 @@
-name: Prod CD
+name: Staging CD
 
 on:
   workflow_run:
