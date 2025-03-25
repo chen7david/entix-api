@@ -19,9 +19,14 @@ jobs:
       packages: write
 
     steps:
-      - name: Ensure Production Test Passed
-        if: github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success'
-        run: exit 1 # Exit if the triggering workflow did not pass
+      - name: Ensure Workflow Was Triggered by a Merge to Staging
+        if: >
+          github.event.workflow_run.event != 'push' || 
+          github.event.workflow_run.head_branch != 'staging' ||
+          github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "Skipping: Not triggered by a successful merge into staging"
+          exit 1
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -42,8 +47,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/staging' }}
+            type=raw,value=staging-latest,enable=${{ github.event.workflow_run.head_branch == 'staging' }}
             type=sha,format=short
+
+      - name: Debug Workflow Run Data
+        run: |
+          echo "Workflow triggered by: ${{ github.event.workflow_run.event }}"
+          echo "Head Branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "Workflow Conclusion: ${{ github.event.workflow_run.conclusion }}"
 
       - name: Print Environment Variables
         run: |
