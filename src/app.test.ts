@@ -58,7 +58,11 @@ describe('App', () => {
       // Regular request should still work
       const response = await request(appWithoutCors).get('/health');
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ status: 'ok', timestamp: expect.any(String) });
+      expect(response.body).toEqual({
+        status: 'ok',
+        message: 'API is running',
+        timestamp: expect.any(String),
+      });
     });
 
     it('should enable request logging middleware when detailedLogging is true', async () => {
@@ -81,7 +85,11 @@ describe('App', () => {
     it('should return 200 status and a health check message', async () => {
       const response = await request(app).get('/health');
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ status: 'ok', timestamp: expect.any(String) });
+      expect(response.body).toEqual({
+        status: 'ok',
+        message: 'API is running',
+        timestamp: expect.any(String),
+      });
     });
 
     it('should include a valid ISO timestamp in the response', async () => {
