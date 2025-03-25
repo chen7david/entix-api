@@ -1,5 +1,5 @@
 name: Staging CD
-
+# workflow_run: has to be on the main branch for the workflow to trigger to work
 on:
   workflow_run:
     workflows: ['Staging CI']
