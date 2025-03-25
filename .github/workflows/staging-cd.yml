@@ -1,4 +1,4 @@
-name: Staging CD
+name: Prod CD
 
 on:
   workflow_run:
@@ -19,6 +19,10 @@ jobs:
       packages: write
 
     steps:
+      - name: Ensure Production Test Passed
+        if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion != 'success'
+        run: exit 1 # Exit if the triggering workflow did not pass
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
