@@ -1,5 +1,5 @@
 name: Staging CD
-# workflow_run: has to be on the main branch for the workflow to trigger to work
+
 on:
   workflow_run:
     workflows: ['Staging CI']
@@ -75,4 +75,4 @@ jobs:
           url: ${{ vars.JENKINS_URL }}
           user: ${{ vars.JENKINS_USER }}
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: staging-${{ vars.JENKINS_JOB_NAME }}
+          job: staging-entix-api
