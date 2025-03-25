@@ -47,6 +47,7 @@ pipeline {
                     if (!isProd) {
                         env.NEW_RELIC_LICENSE_KEY = ''
                         env.DOCKER_IMAGE_TAG = 'staging-latest'
+                        echo "setting DOCKER_IMAGE_TAG to $DOCKER_IMAGE_TAG"
                         env.NODE_ENV = 'staging'
                     }
                     echo "isProd: ${isProd}"
