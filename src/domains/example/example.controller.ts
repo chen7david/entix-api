@@ -1,49 +1,49 @@
 import { logger } from '@src/services/logger.service';
 import { JsonController, Get, Param, QueryParam } from 'routing-controllers';
 import { Injectable } from '@src/utils/typedi.util';
-import { TestService } from '@src/domains/example/example.service';
+import { ExampleService } from '@src/domains/example/example.service';
 
 /**
- * Test controller for demonstration purposes
+ * Example controller demonstrating basic REST endpoints
  */
-@JsonController('/test')
+@JsonController('/v1/examples')
 @Injectable()
-export class TestController {
+export class ExampleController {
   /**
-   * Creates a new TestController instance
-   * @param testService - The test service for business logic
+   * Creates a new ExampleController instance
+   * @param exampleService - The example service for business logic
    */
-  constructor(private testService: TestService) {}
+  constructor(private exampleService: ExampleService) {}
 
   /**
-   * Simple health check endpoint
+   * Lists all examples
    * @returns Object with status message
    */
   @Get('/')
   getAll(): { message: string } {
-    logger.info('TestController.getAll called');
-    return this.testService.getMessage();
+    logger.info('ExampleController.getAll called');
+    return this.exampleService.getMessage();
   }
 
   /**
-   * Endpoint with a query parameter
+   * Endpoint with a query parameter for greeting
    * @param name - Optional name query parameter
    * @returns Greeting message
    */
-  @Get('/hello')
+  @Get('/greeting')
   getGreeting(@QueryParam('name') name?: string): { greeting: string } {
-    logger.info(`TestController.getGreeting called with name: ${name || 'undefined'}`);
-    return this.testService.getGreeting(name);
+    logger.info(`ExampleController.getGreeting called with name: ${name || 'undefined'}`);
+    return this.exampleService.getGreeting(name);
   }
 
   /**
-   * Endpoint with a path parameter
+   * Retrieves a specific example by ID
    * @param id - The ID parameter from the URL
-   * @returns Object with the provided ID
+   * @returns Object with the provided ID and metadata
    */
   @Get('/:id')
-  getOne(@Param('id') id: string): { id: string; timestamp: string } {
-    logger.info(`TestController.getOne called with id ${id}`);
-    return this.testService.getById(id);
+  getOne(@Param('id') id: string): { id: string; timestamp: string; type: string } {
+    logger.info(`ExampleController.getOne called with id ${id}`);
+    return this.exampleService.getById(id);
   }
 }
