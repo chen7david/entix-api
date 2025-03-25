@@ -56,7 +56,9 @@ export class App {
 
     // Health check endpoint
     this.app.get('/health', (req, res) => {
-      res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+      res
+        .status(200)
+        .json({ status: 'ok', message: 'API is running', timestamp: new Date().toISOString() });
     });
   }
 
