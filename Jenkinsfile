@@ -6,6 +6,7 @@ pipeline {
         
         DOCKER_REGISTRY = 'ghcr.io'
         DOCKER_IMAGE = 'chen7david/entix-api'
+        DOCKER_IMAGE_TAG = 'latest'
         NODE_ENV = 'production'
 
         // Logger Configuration
@@ -45,7 +46,7 @@ pipeline {
                     env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
                     if (!isProd) {
                         env.NEW_RELIC_LICENSE_KEY = ''
-                        env.DOCKER_IMAGE = 'staging-' + env.DOCKER_IMAGE
+                        env.DOCKER_IMAGE_TAG = 'staging-latest'
                     }
                     echo "isProd: ${isProd}"
                 }
@@ -55,7 +56,7 @@ pipeline {
         stage('Pull Latest Image') {
             steps {
                 sh '''
-                docker pull $DOCKER_REGISTRY/$DOCKER_IMAGE:latest
+                docker pull $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_IMAGE_TAG
                 '''
             }
         }
@@ -91,7 +92,7 @@ pipeline {
                     -e COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID \
                     -e COGNITO_REGION=$COGNITO_REGION \
                     --restart unless-stopped \
-                    $DOCKER_REGISTRY/$DOCKER_IMAGE:latest
+                    $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_IMAGE_TAG
                 
                 # Connect the container to web_network
                 docker network connect web_network $CONTAINER_NAME
