@@ -2,7 +2,7 @@ name: Staging CD
 
 on:
   workflow_run:
-    workflows: ['Staging CI']
+    workflows: ['staging-ci']
     types: ['completed']
   workflow_dispatch:
 
