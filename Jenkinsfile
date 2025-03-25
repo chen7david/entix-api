@@ -45,6 +45,7 @@ pipeline {
                     env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
                     if (!isProd) {
                         env.NEW_RELIC_LICENSE_KEY = ''
+                        env.DOCKER_IMAGE = 'staging-' + env.DOCKER_IMAGE
                     }
                     echo "isProd: ${isProd}"
                 }

@@ -17,7 +17,12 @@
   "postCreateCommand": "npm install",
   "customizations": {
     "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode", "eamodio.gitlens"]
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "github.vscode-github-actions"
+      ]
     },
     "settings": {
       "editor.formatOnSave": true,
