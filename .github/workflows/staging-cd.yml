@@ -1,4 +1,4 @@
-name: Prod CD
+name: Staging CD
 
 on:
   workflow_run:
@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: staging-${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Ensure Production Test Passed
-        if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion != 'success'
+        if: github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success'
         run: exit 1 # Exit if the triggering workflow did not pass
 
       - name: Checkout repository
@@ -42,7 +42,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/staging' }}
             type=sha,format=short
 
       - name: Build and push Docker image
@@ -62,4 +62,4 @@ jobs:
           url: ${{ vars.JENKINS_URL }}
           user: ${{ vars.JENKINS_USER }}
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: ${{ vars.JENKINS_JOB_NAME }}
+          job: staging-${{ vars.JENKINS_JOB_NAME }}
