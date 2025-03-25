@@ -1,5 +1,5 @@
 name: Staging CD
-
+# This workflow is triggered by a successful merge into staging
 on:
   workflow_run:
     workflows: ['Staging CI']
@@ -29,7 +29,7 @@ jobs:
       - name: Ensure Workflow Was Triggered by Staging CI on Staging Branch
         if: >
           github.event.workflow_run.conclusion != 'success' ||
-          github.event.workflow_run.head_branch != 'refs/heads/staging'
+          github.event.workflow_run.head_branch != 'staging'
         run: |
           echo "Skipping: Not triggered by a successful merge into staging"
           exit 1
