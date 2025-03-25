@@ -54,6 +54,14 @@ pipeline {
             }
         }
 
+        stage('Echo Image URL') {
+            steps {
+                sh '''
+                echo "Image URL: $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_IMAGE_TAG"
+                '''
+            }
+        }
+
         stage('Pull Latest Image') {
             steps {
                 sh '''
