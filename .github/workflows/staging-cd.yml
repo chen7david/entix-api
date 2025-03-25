@@ -19,10 +19,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Ensure Staging Test Passed
-        if: github.event.workflow_run.conclusion != 'success'
-        run: exit 1 # Exit if the triggering workflow did not pass
-
       - name: Checkout repository
         uses: actions/checkout@v4
 

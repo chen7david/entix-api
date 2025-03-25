@@ -2,9 +2,9 @@ name: Prod CI
 
 on:
   push:
-    branches: [main] # Only run on push to main
+    branches: [main]
   pull_request:
-    branches: [main] # Only trigger for PRs targeting main (production)
+    branches: [main]
 
 jobs:
   test:
