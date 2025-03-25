@@ -34,7 +34,7 @@ jobs:
         run: echo "Current branch ref: ${{ github.ref }}"
 
       - name: Ensure Staging Test Passed
-        if: github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success'
+        if: ${{ github.ref == 'refs/heads/staging' && github.event.workflow_run.conclusion != 'success' }}
         run: |
           echo "Staging Test did not pass. Exiting."
           exit 1
