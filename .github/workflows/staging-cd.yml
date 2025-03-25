@@ -45,6 +45,19 @@ jobs:
             type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/staging' }}
             type=sha,format=short
 
+      - name: Print Environment Variables
+        run: |
+          echo "REGISTRY: ${{ env.REGISTRY }}"
+          echo "IMAGE_NAME: ${{ env.IMAGE_NAME }}"
+          echo "GitHub Repository: ${{ github.repository }}"
+          echo "GitHub Ref (branch): ${{ github.ref }}"
+          echo "Final image URL: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+      - name: Print Docker Tags and Metadata
+        run: |
+          echo "Generated Docker Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Generated Docker Labels: ${{ steps.meta.outputs.labels }}"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
