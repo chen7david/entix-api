@@ -2,22 +2,29 @@ pipeline {
     agent any
 
     environment {
-        NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')
-        
+        // App Configuration
+        APP_NAME = 'EntixAPI'
+        NODE_ENV = 'production'
+        PORT = '3000'
+
+        // Docker Configuration
         DOCKER_REGISTRY = 'ghcr.io'
         DOCKER_IMAGE = 'chen7david/entix-api'
         DOCKER_IMAGE_TAG = 'latest'
-        NODE_ENV = 'production'
+        CONTAINER_NAME = 'prod-entix-api'
 
         // Logger Configuration
-        APP_NAME = 'EntixAPI'
+        NEW_RELIC_LICENSE_KEY = credentials('NEW_RELIC_LICENSE_KEY')
         LOG_LEVEL = 'info'
+        NEW_RELIC_APP_NAME = 'prod-entix-api'
+        NEW_RELIC_ENABLED = 'true'
 
         // Database Configuration
-        DB_HOST = 'postgres'
         DB_PORT = '5432'
+        DB_HOST = 'postgres'
         DB_USER = 'postgres'
         DB_PASSWORD = 'postgres'
+        DB_NAME = 'prod-entix-api'
         CONNECTION_TIMEOUT_MILLIS = '5000'
         IDLE_TIMEOUT_MILLIS = '30000'
         MAX_POOL_SIZE = '20'
@@ -29,30 +36,6 @@ pipeline {
     }
 
     stages {
-        stage('Set Environment Variables') {
-            steps {
-                script {
-                    // Set environment variables based on the job name
-                    def isProd = env.JOB_NAME.contains('prod')
-                    def PROD_PORT = '3000'
-                    def STAGING_PORT = '4000'
-                    def PROD_ID = 'prod-entix-api'
-                    def STAGING_ID = 'staging-entix-api'
-
-                    env.PORT = isProd ? PROD_PORT : STAGING_PORT
-                    env.DB_NAME = isProd ? PROD_ID : STAGING_ID
-                    env.CONTAINER_NAME = isProd ? PROD_ID : STAGING_ID
-                    env.NEW_RELIC_APP_NAME = isProd ? PROD_ID : ''
-                    env.NEW_RELIC_ENABLED = isProd ? 'true' : 'false'
-                    if (!isProd) {
-                        env.NEW_RELIC_LICENSE_KEY = ''
-                        env.DOCKER_IMAGE_TAG = 'staging-latest'
-                        env.NODE_ENV = 'staging'
-                    }
-                    echo "isProd: ${isProd}"
-                }
-            }
-        }
 
         stage('Pull Latest Image') {
             steps {
