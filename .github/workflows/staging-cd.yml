@@ -1,5 +1,5 @@
 name: Staging CD
-
+# This workflow is triggered by a successful merge into staging
 on:
   workflow_run:
     workflows: ['Staging CI']
