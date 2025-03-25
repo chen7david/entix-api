@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: staging/${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -38,11 +38,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw
-            value=latest
-            enable=${{ github.ref == 'refs/heads/staging' }}
-            type=sha
-            format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -61,4 +58,4 @@ jobs:
           url: ${{ vars.JENKINS_URL }}
           user: ${{ vars.JENKINS_USER }}
           token: ${{ secrets.JENKINS_TOKEN }}
-          job: staging-${{ vars.JENKINS_JOB_NAME }}
+          job: ${{ vars.JENKINS_JOB_NAME }}
