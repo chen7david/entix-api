@@ -20,43 +20,52 @@ describe('Example Controller', () => {
     });
   });
 
-  describe('Test Controller', () => {
-    it('should return a welcome message from the test endpoint', async () => {
-      const response = await request(app).get('/api/test');
+  describe('Example Endpoints', () => {
+    it('should return a welcome message from the examples endpoint', async () => {
+      const response = await request(app).get('/api/v1/examples');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('message', 'Test controller is working!');
+      expect(response.body).toHaveProperty('message', 'Example service is working!');
     });
 
-    it('should return the provided ID from the test/:id endpoint', async () => {
-      const testId = '123';
-      const response = await request(app).get(`/api/test/${testId}`);
+    it('should return the provided ID and metadata from the examples/:id endpoint', async () => {
+      const exampleId = '123';
+      const response = await request(app).get(`/api/v1/examples/${exampleId}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('id', testId);
+      expect(response.body).toHaveProperty('id', exampleId);
       expect(response.body).toHaveProperty('timestamp');
+      expect(response.body).toHaveProperty('type', 'example');
     });
 
     it('should return a personalized greeting when name parameter is provided', async () => {
       const name = 'John';
-      const response = await request(app).get(`/api/test/hello?name=${name}`);
+      const response = await request(app).get(`/api/v1/examples/greeting?name=${name}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('greeting', `Hello, ${name}!`);
+      expect(response.body).toHaveProperty('greeting', `Welcome to the example API, ${name}!`);
     });
 
     it('should return a default greeting when no name parameter is provided', async () => {
-      const response = await request(app).get('/api/test/hello');
+      const response = await request(app).get('/api/v1/examples/greeting');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('greeting', 'Hello, World!');
+      expect(response.body).toHaveProperty('greeting', 'Welcome to the example API!');
+    });
+
+    it('should handle invalid IDs gracefully', async () => {
+      const response = await request(app).get('/api/v1/examples/invalid-id');
+
+      expect(response.status).toBe(200); // or 400 depending on your error handling
+      expect(response.body).toHaveProperty('id', 'invalid-id');
+      expect(response.body).toHaveProperty('type', 'example');
     });
   });
 
   describe('CORS', () => {
     it('should have CORS headers enabled', async () => {
       const response = await request(app)
-        .options('/api/test')
+        .options('/api/v1/examples')
         .set('Origin', 'http://example.com')
         .set('Access-Control-Request-Method', 'GET');
 
@@ -67,7 +76,16 @@ describe('Example Controller', () => {
 
   describe('404 Handling', () => {
     it('should return 404 for non-existent routes', async () => {
-      const response = await request(app).get('/api/non-existent-route');
+      const response = await request(app).get('/api/v1/non-existent-endpoint');
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toEqual('Not found');
+    });
+  });
+
+  describe('API Version Handling', () => {
+    it('should reject requests to invalid API versions', async () => {
+      const response = await request(app).get('/api/v2/examples');
 
       expect(response.status).toBe(404);
       expect(response.body.message).toEqual('Not found');
