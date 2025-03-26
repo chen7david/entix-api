@@ -46,4 +46,10 @@ export class ExampleController {
     logger.info(`ExampleController.getOne called with id ${id}`);
     return this.exampleService.getById(id);
   }
+
+  @Get('/:id/test')
+  Test(): { message: string; timestamp: string } {
+    logger.info(`Hello From Example Controller`);
+    return { message: 'Hello From Example Controller', timestamp: new Date().toISOString() };
+  }
 }
