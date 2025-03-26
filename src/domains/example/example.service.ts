@@ -2,17 +2,17 @@ import { Injectable } from '@src/utils/typedi.util';
 import { logger } from '@src/services/logger.service';
 
 /**
- * Service providing test functionality for the example domain
+ * Service providing example domain functionality
  */
 @Injectable()
-export class TestService {
+export class ExampleService {
   /**
-   * Returns a simple test message
+   * Returns a simple example message
    * @returns Object with a message string
    */
   getMessage(): { message: string } {
-    logger.debug('TestService.getMessage called');
-    return { message: 'Test controller is working!' };
+    logger.debug('ExampleService.getMessage called');
+    return { message: 'Example service is working!' };
   }
 
   /**
@@ -21,20 +21,23 @@ export class TestService {
    * @returns Object with a greeting string
    */
   getGreeting(name?: string): { greeting: string } {
-    logger.debug(`TestService.getGreeting called with name: ${name || 'undefined'}`);
-    return { greeting: name ? `Hello, ${name}!` : 'Hello, World!' };
+    logger.debug(`ExampleService.getGreeting called with name: ${name || 'undefined'}`);
+    return {
+      greeting: name ? `Welcome to the example API, ${name}!` : 'Welcome to the example API!',
+    };
   }
 
   /**
-   * Gets information for an entity by ID
-   * @param id - The entity ID
+   * Gets information for an example entity by ID
+   * @param id - The example entity ID
    * @returns Object with the ID and timestamp
    */
-  getById(id: string): { id: string; timestamp: string } {
-    logger.debug(`TestService.getById called with id: ${id}`);
+  getById(id: string): { id: string; timestamp: string; type: string } {
+    logger.debug(`ExampleService.getById called with id: ${id}`);
     return {
       id,
       timestamp: new Date().toISOString(),
+      type: 'example',
     };
   }
 }
