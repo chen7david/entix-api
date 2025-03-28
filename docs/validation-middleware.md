@@ -13,7 +13,7 @@ The validation middleware provides a simple, type-safe way to validate incoming 
 - Automatic integration with the global error handling system
 - Optional stripping of unknown properties
 - Custom error messages
-- Designed specifically for routing-controllers decorators
+- Compatible with routing-controllers decorators
 
 ## Installation
 
@@ -21,12 +21,14 @@ The validation middleware is already included in the Entix API project. It uses 
 
 ## Basic Usage
 
-The validation middleware is designed to be used with routing-controllers decorators.
+There are two main ways to use the validation middleware, depending on whether you're using routing-controllers decorators or traditional Express middleware.
+
+### With routing-controllers
 
 ```typescript
 import { Controller, Post, UseBefore } from 'routing-controllers';
 import { z } from 'zod';
-import { ValidateBody, ValidateParams, ValidateQuery } from '@src/middleware/validation.middleware';
+import { ValidationMiddleware, ValidationTarget } from '@src/middleware/validation.middleware';
 
 // Define your Zod schema
 const userSchema = z.object({
@@ -38,71 +40,91 @@ const userSchema = z.object({
 @Controller('/users')
 export class UserController {
   @Post('/')
-  @UseBefore(ValidateBody(userSchema))
+  @UseBefore(ValidationMiddleware(userSchema, ValidationTarget.BODY))
   createUser(req: Request, res: Response) {
     // req.body is now validated and typed as { name: string, email: string, age?: number }
     const user = req.body;
     // ... your controller logic
     return { id: 1, ...user };
   }
-
-  @Get('/:id')
-  @UseBefore(ValidateParams(z.object({ id: z.string().uuid() })))
-  getUserById(req: Request) {
-    const { id } = req.params;
-    // ... your controller logic
-    return { id, name: 'John Doe' };
-  }
-
-  @Get('/')
-  @UseBefore(
-    ValidateQuery(
-      z.object({
-        search: z.string().optional(),
-        limit: z.number().min(1).max(100).default(10),
-        page: z.number().min(1).default(1),
-      }),
-    ),
-  )
-  searchUsers(req: Request) {
-    const { search, limit, page } = req.query;
-    // ... your controller logic
-    return { users: [], total: 0 };
-  }
 }
+```
+
+### As Express Middleware
+
+```typescript
+import { Router } from 'express';
+import { z } from 'zod';
+import { validateBody, validateParams, validateQuery } from '@src/middleware/validation.middleware';
+
+const router = Router();
+
+// Define Zod schemas
+const userSchema = z.object({
+  name: z.string().min(3),
+  email: z.string().email(),
+});
+
+const idParamSchema = z.object({
+  id: z.string().uuid(),
+});
+
+const searchQuerySchema = z.object({
+  query: z.string().min(2).optional(),
+  limit: z.number().min(1).max(100).default(10),
+  page: z.number().min(1).default(1),
+});
+
+// Apply validation middleware to routes
+router.post('/users', validateBody(userSchema), (req, res) => {
+  // req.body is now validated
+  // ...
+});
+
+router.get('/users/:id', validateParams(idParamSchema), (req, res) => {
+  // req.params is now validated
+  const { id } = req.params;
+  // ...
+});
+
+router.get('/search', validateQuery(searchQuerySchema), (req, res) => {
+  // req.query is now validated and transformed
+  const { query, limit, page } = req.query;
+  // ...
+});
 ```
 
 ## API Reference
 
-### Factory Functions
+### Functions
 
-#### `ValidationMiddleware(schema, target, options)`
+#### `validate(schema, target, options)`
 
-The core factory function that creates a class-based middleware for routing-controllers.
+The core function that creates a validation middleware.
 
 - **schema**: A Zod schema defining the validation rules
 - **target**: What part of the request to validate (from `ValidationTarget` enum)
 - **options**: Optional configuration
 
-#### `ValidateBody(schema, options)`
+#### `validateBody(schema, options)`
 
-Convenience factory function for creating a middleware class that validates request body.
+Convenience function for validating request body.
 
-#### `ValidateParams(schema, options)`
+#### `validateParams(schema, options)`
 
-Convenience factory function for creating a middleware class that validates route parameters.
+Convenience function for validating route parameters.
 
-#### `ValidateQuery(schema, options)`
+#### `validateQuery(schema, options)`
 
-Convenience factory function for creating a middleware class that validates query parameters.
+Convenience function for validating query parameters.
 
-#### `ValidateHeaders(schema, options)`
+#### `validateHeaders(schema, options)`
 
-Convenience factory function for creating a middleware class that validates request headers.
+Convenience function for validating request headers.
 
-#### `ValidateCookies(schema, options)`
+#### `ValidationMiddleware(schema, target, options)`
 
-Convenience factory function for creating a middleware class that validates cookies.
+Factory function that creates a class-based middleware for use with routing-controllers.
 
 ### Enums
 
@@ -154,8 +176,7 @@ When validation fails, the middleware throws a `ValidationError` that is caught 
 ### Complex Object Validation
 
 ```typescript
-import { Controller, Post, UseBefore } from 'routing-controllers';
-import { ValidateBody } from '@src/middleware/validation.middleware';
+import { validateBody } from '@src/middleware/validation.middleware';
 import { z } from 'zod';
 
 const addressSchema = z.object({
@@ -173,23 +194,17 @@ const userSchema = z.object({
   tags: z.array(z.string()).min(1).max(5),
 });
 
-@Controller('/users')
-export class UserController {
-  @Post('/')
-  @UseBefore(ValidateBody(userSchema))
-  createUser(req: Request, res: Response) {
-    // req.body is fully validated including the nested address object
-    const user = req.body;
-    // ...
-  }
-}
+router.post('/users', validateBody(userSchema), (req, res) => {
+  // req.body is fully validated including the nested address object
+  const user = req.body;
+  // ...
+});
 ```
 
 ### Stripping Unknown Properties
 
 ```typescript
-import { Controller, Post, UseBefore } from 'routing-controllers';
-import { ValidateBody } from '@src/middleware/validation.middleware';
+import { validateBody } from '@src/middleware/validation.middleware';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -197,23 +212,17 @@ const schema = z.object({
   email: z.string().email(),
 });
 
-@Controller('/auth')
-export class AuthController {
-  @Post('/register')
-  @UseBefore(ValidateBody(schema, { stripUnknown: true }))
-  register(req: Request, res: Response) {
-    // Any properties other than name and email will be removed from req.body
-    console.log(req.body); // Only contains name and email
-    // ...
-  }
-}
+router.post('/register', validateBody(schema, { stripUnknown: true }), (req, res) => {
+  // Any properties other than name and email will be removed from req.body
+  console.log(req.body); // Only contains name and email
+  // ...
+});
 ```
 
 ### Custom Error Message
 
 ```typescript
-import { Controller, Post, UseBefore } from 'routing-controllers';
-import { ValidateBody } from '@src/middleware/validation.middleware';
+import { validateBody } from '@src/middleware/validation.middleware';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -221,44 +230,14 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
-@Controller('/auth')
-export class AuthController {
-  @Post('/login')
-  @UseBefore(ValidateBody(loginSchema, { errorMessage: 'Invalid login credentials' }))
-  login(req: Request, res: Response) {
+router.post(
+  '/login',
+  validateBody(loginSchema, { errorMessage: 'Invalid login credentials' }),
+  (req, res) => {
     // If validation fails, the error message will be "Invalid login credentials"
     // ...
-  }
-}
-```
-
-### Multiple Validation Middleware
-
-```typescript
-import { Controller, Get, UseBefore } from 'routing-controllers';
-import { ValidateParams, ValidateQuery } from '@src/middleware/validation.middleware';
-import { z } from 'zod';
-
-@Controller('/api')
-export class SearchController {
-  @Get('/search/:category')
-  @UseBefore(ValidateParams(z.object({ category: z.enum(['users', 'products', 'orders']) })))
-  @UseBefore(
-    ValidateQuery(
-      z.object({
-        term: z.string().min(2),
-        page: z.number().min(1).default(1),
-        limit: z.number().min(1).max(100).default(20),
-      }),
-    ),
-  )
-  search(req: Request) {
-    // Both route parameters and query parameters are validated
-    const { category } = req.params;
-    const { term, page, limit } = req.query;
-    // ...
-  }
-}
+  },
+);
 ```
 
 ## Best Practices
@@ -272,7 +251,7 @@ export class SearchController {
    type User = z.infer<typeof userSchema>;
    ```
 
-3. **Apply validation early** - Apply validation middleware as early as possible in your request handling chain using `@UseBefore`.
+3. **Validate early** - Apply validation middleware as early as possible in your request handling chain.
 
 4. **Be specific** - Create specific schemas for each endpoint rather than using overly permissive schemas.
 
