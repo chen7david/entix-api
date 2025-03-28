@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import { App, createApp } from './app';
+import { createApp } from './app';
 import { httpLogger } from '@src/services/logger.service';
 import { Request, Response } from 'express';
 
