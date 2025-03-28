@@ -8,6 +8,7 @@ import { env } from '@src/config/env.config';
 import { Container } from 'typedi';
 import { corsMiddleware } from './middleware/cors.middleware';
 import { notFoundMiddleware } from './middleware/not-found.middleware';
+import { ErrorHandlerMiddleware } from './middleware/error.middleware';
 import express from 'express';
 import path from 'path';
 
@@ -76,6 +77,8 @@ export class App {
       validation: false,
       classTransformer: false,
       cors: true,
+      // Register global error handler middleware
+      middlewares: [ErrorHandlerMiddleware],
     });
 
     // Log registered routes in development
