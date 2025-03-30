@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "removeComments": true,
     "sourceMap": true,
+    "noUnusedLocals": true,
     // emitDecoratorMetadata and experimentalDecorators have to be true for routing-controllers to work
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true

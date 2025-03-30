@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { z, ZodSchema, ZodObject } from 'zod';
+import { z, ZodSchema } from 'zod';
 import { ValidationError } from '@src/utils/error.util';
 
 /**

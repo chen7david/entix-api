@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ZodError, z } from 'zod';
 import { ErrorHandlerMiddleware } from './error.middleware';
-import { AppError, BadRequestError, InternalError, ValidationError } from '@src/utils/error.util';
+import { AppError, BadRequestError, InternalError } from '@src/utils/error.util';
 import { logger } from '@src/services/logger.service';
 
 // Mock the logger to avoid actual logging during tests
