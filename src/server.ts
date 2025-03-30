@@ -1,8 +1,9 @@
 import 'reflect-metadata';
-import http from 'http';
-import { createApp } from '@src/app';
-import { logger } from '@src/services/logger.service';
 import { env } from '@src/config/env.config';
+import { createApp } from '@src/app';
+import { gracefulShutdown } from './utils/app.util';
+import { logger } from '@src/services/logger.service';
+import http from 'http';
 
 /**
  * Starts the HTTP server with the Express application
@@ -30,14 +31,9 @@ async function bootstrap(): Promise<void> {
       process.exit(1);
     });
 
-    // Handle graceful shutdown
-    process.on('SIGTERM', () => {
-      logger.info('SIGTERM received, shutting down gracefully');
-      server.close(() => {
-        logger.info('Server closed');
-        process.exit(0);
-      });
-    });
+    // Handle graceful shutdown for different signals
+    process.on('SIGTERM', async () => await gracefulShutdown(server, 'SIGTERM'));
+    process.on('SIGINT', async () => await gracefulShutdown(server, 'SIGINT'));
   } catch (error) {
     logger.error('Failed to start server', {
       error: error instanceof Error ? error : new Error(String(error)),
