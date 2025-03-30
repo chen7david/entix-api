@@ -1,5 +1,4 @@
 import { corsConfig } from '@src/config/cors.config';
-import { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 
 /**
