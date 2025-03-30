@@ -87,7 +87,7 @@ describe('LoggerService', () => {
         },
       });
 
-      const logger = new LoggerService({
+      new LoggerService({
         destination: mockDestination,
       });
 
@@ -96,7 +96,7 @@ describe('LoggerService', () => {
     });
 
     it('should create a pretty transport for development environment', () => {
-      const logger = new LoggerService({
+      new LoggerService({
         env: Environment.DEVELOPMENT,
         prettyPrint: true,
       });

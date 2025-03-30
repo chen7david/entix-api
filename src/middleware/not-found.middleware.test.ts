@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { notFoundMiddleware } from './not-found.middleware';
 
 describe('Not Found Middleware', () => {
