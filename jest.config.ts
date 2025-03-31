@@ -16,12 +16,14 @@ const config: Config.InitialOptions = {
       },
     ],
   },
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
+  testRegex: '.*\\.test\\.tsx?$',
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   coverageDirectory: 'coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
   detectOpenHandles: true,
   verbose: true,
+  // Setup file to run before tests
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
 
 export default config;
