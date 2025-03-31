@@ -37,7 +37,7 @@ jest.mock('crypto', () => ({
 }));
 
 // Import the module under test
-import { LoggerService, LoggerConfig, LogContext, createLogger } from './logger.service';
+import { LoggerService, LoggerConfig, LogContext, createLogger } from '../logger.service';
 import { LogLevel } from '@src/constants/logger.constant';
 import { Environment } from '@src/constants/app.constant';
 import { Writable } from 'stream';

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { ZodError, z } from 'zod';
-import { ErrorHandlerMiddleware } from './error.middleware';
+import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
 import { AppError, BadRequestError, InternalError } from '@src/utils/error.util';
 import { logger } from '@src/services/logger.service';
 

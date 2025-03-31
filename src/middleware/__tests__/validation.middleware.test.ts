@@ -8,7 +8,7 @@ import {
   ValidateHeaders,
   ValidateCookies,
   ValidationTarget,
-} from './validation.middleware';
+} from '@src/middleware/validation.middleware';
 import { ValidationError } from '@src/utils/error.util';
 
 describe('Validation Middleware', () => {
