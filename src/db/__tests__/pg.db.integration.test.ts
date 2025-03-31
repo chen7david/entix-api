@@ -1,24 +1,26 @@
 import { getPool } from '../pg.db';
-
+import { Pool } from 'pg';
 /**
  * Integration tests for PostgreSQL database operations
  * These tests perform actual database operations
  */
+
 describe('PostgreSQL Database Integration Tests', () => {
   // Test table name with random suffix to avoid conflicts
   const TEST_TABLE = `test_users_${Math.floor(Math.random() * 10000)}`;
-  const pool = getPool();
+  let pool: Pool;
 
   beforeAll(async () => {
+    pool = await getPool();
     // Create test table
     await pool.query(`
-      CREATE TABLE ${TEST_TABLE} (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+        CREATE TABLE ${TEST_TABLE} (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(100) NOT NULL,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
   });
 
   afterAll(async () => {
