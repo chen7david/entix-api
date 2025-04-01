@@ -5,7 +5,7 @@ jest.mock('dotenv', () => ({
 }));
 
 import { getEnvFilename, loadConfig } from '@src/utils/env/env.util';
-import { Environment, EnvFilename } from '@src/app/app.constant';
+import { Environment, EnvFilename } from '@src/shared/constants/app.constant';
 import { z } from 'zod';
 
 /**

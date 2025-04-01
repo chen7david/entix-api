@@ -44,7 +44,7 @@ import {
   createLogger,
 } from '@src/services/logger/logger.service';
 import { LogLevel } from '@src/services/logger/logger.service.constant';
-import { Environment } from '@src/app/app.constant';
+import { Environment } from '@src/shared/constants/app.constant';
 import { Writable } from 'stream';
 
 describe('LoggerService', () => {

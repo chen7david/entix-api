@@ -3,7 +3,7 @@ import { ExpressErrorMiddlewareInterface, Middleware } from 'routing-controllers
 import { ZodError } from 'zod';
 import { logger } from '@src/services/logger/logger.service';
 import { AppError, createAppError } from '@src/utils/error/error.util';
-import { Environment } from '@src/app/app.constant';
+import { Environment } from '@src/shared/constants/app.constant';
 import { env } from '@src/config/env.config';
 import { Injectable } from '@src/utils/di/di.util';
 

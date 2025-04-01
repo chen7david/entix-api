@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { useExpressServer, getMetadataArgsStorage, useContainer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { Environment } from '@src/app/app.constant';
+import { Environment } from '@src/shared/constants/app.constant';
 import { httpLogger, logger } from '@src/services/logger/logger.service';
-import { AppConfig } from '@src/app/app.type';
+import { AppConfig } from '@src/shared/types/app.type';
 import { env } from '@src/config/env.config';
 import { Container } from 'typedi';
 import { corsMiddleware } from '../middleware/cors/cors.middleware';

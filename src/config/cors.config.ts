@@ -1,4 +1,4 @@
-import { HTTPMethod, HTTPHeaders, CorsOrigin } from '@src/app/app.constant';
+import { HTTPMethod, HTTPHeaders, CorsOrigin } from '@src/shared/constants/app.constant';
 
 /**
  * The methods that are allowed to be used in the CORS configuration

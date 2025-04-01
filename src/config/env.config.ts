@@ -1,4 +1,4 @@
-import { Environment } from '@src/app/app.constant';
+import { Environment } from '@src/shared/constants/app.constant';
 import { loadConfig, getEnvFilename } from '@src/utils/env/env.util';
 import { LogLevel } from '@src/services/logger/logger.service.constant';
 import { z } from 'zod';

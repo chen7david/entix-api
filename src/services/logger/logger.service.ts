@@ -1,6 +1,6 @@
 import pino, { Logger, LoggerOptions, DestinationStream } from 'pino';
 import { randomUUID } from 'crypto';
-import { Environment } from '@src/app/app.constant';
+import { Environment } from '@src/shared/constants/app.constant';
 import { env } from '@src/config/env.config';
 import { LogLevel } from '@src/services/logger/logger.service.constant';
 import { Injectable } from '@src/utils/di/di.util';
