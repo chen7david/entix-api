@@ -181,7 +181,7 @@ Example:
 ```typescript
 // domains/products/product.controller.ts
 import { JsonController, Get, Param } from 'routing-controllers';
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/typedi.util';
 import { logger } from '@src/services/logger.service';
 import { ProductService } from './product.service';
 
@@ -217,7 +217,7 @@ Example:
 
 ```typescript
 // domains/products/product.service.ts
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/typedi.util';
 import { logger } from '@src/services/logger.service';
 
 @Injectable()
@@ -249,7 +249,7 @@ Example:
 ```typescript
 // middleware/logging.middleware.ts
 import { ExpressMiddlewareInterface, Middleware } from 'routing-controllers';
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/typedi.util';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '@src/services/logger.service';
 

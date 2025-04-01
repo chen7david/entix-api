@@ -30,7 +30,7 @@ describe('PostgreSQL Database Connection', () => {
   describe('getPool function', () => {
     it('should reuse the pool when it exists and is not ended', () => {
       // Import the module fresh
-      const { getPool } = require('../pg.db');
+      const { getPool } = require('@src/db/pg.db');
 
       // Call getPool twice
       const pool1 = getPool();
@@ -43,7 +43,7 @@ describe('PostgreSQL Database Connection', () => {
 
     it('should create a new pool when the existing one is ended', () => {
       // Import the module fresh
-      const { getPool } = require('../pg.db');
+      const { getPool } = require('@src/db/pg.db');
 
       // First call to getPool
       const pool1 = getPool();

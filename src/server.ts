@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { env } from '@src/config/env.config';
-import { createApp } from '@src/app';
-import { gracefulShutdown } from './utils/app.util';
-import { logger } from '@src/services/logger.service';
+import { createApp } from '@src/app/app';
+import { gracefulShutdown } from './utils/app/app.util';
+import { logger } from '@src/services/logger/logger.service';
 import http from 'http';
 
 /**

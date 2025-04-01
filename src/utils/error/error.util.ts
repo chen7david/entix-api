@@ -5,7 +5,7 @@ import {
   ErrorDetail,
   ErrorResponse,
   HTTP_ERROR_MESSAGES,
-} from '@src/types/error.type';
+} from '@src/utils/error/error.util.type';
 
 /**
  * Base error class for all application errors

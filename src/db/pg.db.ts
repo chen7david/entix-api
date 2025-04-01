@@ -1,7 +1,7 @@
 import { env } from '@src/config/env.config';
 import { Pool } from 'pg';
-import { logger } from '@src/services/logger.service';
-import { InternalError } from '@src/utils/error.util';
+import { logger } from '@src/services/logger/logger.service';
+import { InternalError } from '@src/utils/error/error.util';
 
 /**
  * Singleton pool instance to be reused across the application

@@ -26,7 +26,7 @@ Example:
 
 ```typescript
 // Mock dependencies before imports
-jest.mock('@src/services/logger.service', () => ({
+jest.mock('@src/services/logger/logger.service', () => ({
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -224,7 +224,7 @@ Here's a complete example of a well-structured test suite:
 
 ```typescript
 // Mock dependencies before imports
-jest.mock('@src/services/logger.service', () => ({
+jest.mock('@src/services/logger/logger.service', () => ({
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -375,7 +375,7 @@ import { mockLogger } from './src/__tests__/mocks/logger.mock';
 /**
  * Jest setup file to configure global test environment
  */
-jest.mock('@src/services/logger.service', () => mockLogger());
+jest.mock('@src/services/logger/logger.service', () => mockLogger());
 ```
 
 This file is configured in `jest.config.ts`:

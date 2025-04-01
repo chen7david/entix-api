@@ -1,6 +1,6 @@
-import { logger } from '@src/services/logger.service';
+import { logger } from '@src/services/logger/logger.service';
 import { JsonController, Get, Param, QueryParam } from 'routing-controllers';
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/di.util';
 import { ExampleService } from '@src/domains/example/example.service';
 
 /**

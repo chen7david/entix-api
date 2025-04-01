@@ -2,7 +2,7 @@ export const mockLogger = () => {
   // Don't mock the logger in its own tests
   const testPath = expect.getState().testPath || '';
   if (testPath.includes('logger.service.test.ts')) {
-    return jest.requireActual('@src/services/logger.service');
+    return jest.requireActual('@src/services/logger/logger.service');
   }
 
   const mockLogMethod = jest.fn();

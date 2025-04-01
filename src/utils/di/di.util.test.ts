@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/di.util';
 
 // Test classes for dependency injection
 @Injectable()

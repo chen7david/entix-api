@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodSchema } from 'zod';
-import { ValidationError } from '@src/utils/error.util';
+import { ValidationError } from '@src/utils/error/error.util';
 
 /**
  * Request location to validate

@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { ExpressErrorMiddlewareInterface, Middleware } from 'routing-controllers';
 import { ZodError } from 'zod';
-import { logger } from '@src/services/logger.service';
-import { AppError, createAppError } from '@src/utils/error.util';
-import { Environment } from '@src/constants/app.constant';
+import { logger } from '@src/services/logger/logger.service';
+import { AppError, createAppError } from '@src/utils/error/error.util';
+import { Environment } from '@src/app/app.constant';
 import { env } from '@src/config/env.config';
-import { Injectable } from '@src/utils/typedi.util';
+import { Injectable } from '@src/utils/di/di.util';
 
 /**
  * Global error handler middleware that intercepts and processes all errors

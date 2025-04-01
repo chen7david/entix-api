@@ -10,7 +10,7 @@ import {
   UnauthorizedError,
   ValidationError,
   createAppError,
-} from '@src/utils/error.util';
+} from '@src/utils/error/error.util';
 
 describe('AppError', () => {
   describe('constructor', () => {

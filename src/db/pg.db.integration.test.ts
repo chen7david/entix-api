@@ -1,4 +1,4 @@
-import { getPool } from '../pg.db';
+import { getPool } from './pg.db';
 import { Pool } from 'pg';
 /**
  * Integration tests for PostgreSQL database operations

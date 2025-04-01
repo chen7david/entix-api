@@ -1,11 +1,11 @@
 import request from 'supertest';
 import express from 'express';
-import { createApp } from '@src/app';
-import { httpLogger } from '@src/services/logger.service';
+import { createApp } from '@src/app/app';
+import { httpLogger } from '@src/services/logger/logger.service';
 import { Request, Response } from 'express';
 
 // Mock dependencies before imports
-jest.mock('@src/services/logger.service', () => ({
+jest.mock('@src/services/logger/logger.service', () => ({
   httpLogger: jest.fn((req, res, next) => next()), // Mocking the logger middleware
   logger: {
     debug: jest.fn(),

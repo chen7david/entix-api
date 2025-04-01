@@ -1,5 +1,5 @@
-import { Injectable } from '@src/utils/typedi.util';
-import { logger } from '@src/services/logger.service';
+import { Injectable } from '@src/utils/di/di.util';
+import { logger } from '@src/services/logger/logger.service';
 
 /**
  * Service providing example domain functionality

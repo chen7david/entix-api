@@ -1,14 +1,14 @@
 import 'reflect-metadata';
 import { useExpressServer, getMetadataArgsStorage, useContainer } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { Environment } from '@src/constants/app.constant';
-import { httpLogger, logger } from '@src/services/logger.service';
-import { AppConfig } from '@src/types/app.type';
+import { Environment } from '@src/app/app.constant';
+import { httpLogger, logger } from '@src/services/logger/logger.service';
+import { AppConfig } from '@src/app/app.type';
 import { env } from '@src/config/env.config';
 import { Container } from 'typedi';
-import { corsMiddleware } from './middleware/cors.middleware';
-import { notFoundMiddleware } from './middleware/not-found.middleware';
-import { ErrorHandlerMiddleware } from './middleware/error.middleware';
+import { corsMiddleware } from '../middleware/cors/cors.middleware';
+import { notFoundMiddleware } from '../middleware/not-found/not-found.middleware';
+import { ErrorHandlerMiddleware } from '../middleware/error/error.middleware';
 import express from 'express';
 import path from 'path';
 
@@ -69,7 +69,7 @@ export class App {
   private setupControllers(): void {
     // Register controllers with routing-controllers
     useExpressServer(this.app, {
-      controllers: [path.join(__dirname, 'domains', '**', '*.controller.{ts,js}')],
+      controllers: [path.join(__dirname, '..', 'domains', '**', '*.controller.{ts,js}')],
       defaultErrorHandler: false,
       routePrefix: '/api',
       development: env.NODE_ENV !== Environment.PRODUCTION,

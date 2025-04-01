@@ -8,8 +8,8 @@ import {
   ValidateHeaders,
   ValidateCookies,
   ValidationTarget,
-} from '@src/middleware/validation.middleware';
-import { ValidationError } from '@src/utils/error.util';
+} from '@src/middleware/validation/validation.middleware';
+import { ValidationError } from '@src/utils/error/error.util';
 
 describe('Validation Middleware', () => {
   // Mock Express request, response, and next function

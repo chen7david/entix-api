@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '@src/services/logger.service';
+import { logger } from '@src/services/logger/logger.service';
 
 /**
  * Not Found Middleware

@@ -1,5 +1,5 @@
 import { shutdownDb } from '@src/db/pg.db';
-import { logger } from '@src/services/logger.service';
+import { logger } from '@src/services/logger/logger.service';
 import http from 'http';
 
 /**

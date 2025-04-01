@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { notFoundMiddleware } from '@src/middleware/not-found.middleware';
+import { notFoundMiddleware } from '@src/middleware/not-found/not-found.middleware';
 
 describe('Not Found Middleware', () => {
   // Mock Express request, response, and next function

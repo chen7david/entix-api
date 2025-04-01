@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { ZodError, z } from 'zod';
-import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
-import { AppError, BadRequestError, InternalError } from '@src/utils/error.util';
-import { logger } from '@src/services/logger.service';
+import { ErrorHandlerMiddleware } from '@src/middleware/error/error.middleware';
+import { AppError, BadRequestError, InternalError } from '@src/utils/error/error.util';
+import { logger } from '@src/services/logger/logger.service';
 
 // Mock the logger to avoid actual logging during tests
-jest.mock('@src/services/logger.service', () => ({
+jest.mock('@src/services/logger/logger.service', () => ({
   logger: {
     createRequestContext: jest.fn().mockReturnValue({ correlationId: 'test-id' }),
     trace: jest.fn(),
