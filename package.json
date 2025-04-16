@@ -6,7 +6,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node --project tsconfig/tsconfig.dev.json src/server.ts"
+    "dev": "nodemon --exec ts-node --project tsconfig/tsconfig.dev.json src/server.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
