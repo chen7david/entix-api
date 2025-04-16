@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "nodemon --exec ts-node --project tsconfig/tsconfig.dev.json src/server.ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "build": "rimraf dist && tsc -p tsconfig/tsconfig.build.json"
   },
   "repository": {
     "type": "git",
