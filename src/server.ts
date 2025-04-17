@@ -6,7 +6,7 @@ const server = new ServerService({
   app: appService.getApp(),
   port: env.PORT,
   onListening: ({ port, ip }) => {
-    console.log(`Server is running on port ${port} at ${ip}`);
+    console.log(`Server is running at http://${ip}:${port}`);
   },
 });
 
