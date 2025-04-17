@@ -28,6 +28,7 @@ Jest is configured for TypeScript, with type definitions registered in the appro
 - [Jest Setup](docs/setup-jest.md)
 - [Path Aliases Setup](docs/setup-path-aliases.md)
 - [How to Add a Path Alias](docs/add-path-alias.md)
+- [Prettier Configuration](docs/setup-prettier.md)
 
 ### Purpose of the Repository
 
