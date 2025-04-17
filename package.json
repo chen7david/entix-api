@@ -53,5 +53,9 @@
     "tabWidth": 2,
     "trailingComma": "es5",
     "printWidth": 80
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "zod": "^3.24.3"
   }
 }
