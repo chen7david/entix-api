@@ -6,10 +6,10 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node --project tsconfig/tsconfig.dev.json src/server.ts",
+    "dev": "nodemon --exec ts-node src/server.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "build": "rimraf dist && tsc -p tsconfig/tsconfig.build.json"
+    "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,8 @@
     "supertest": "^7.1.0",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.15",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   }
 }
