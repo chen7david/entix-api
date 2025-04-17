@@ -14,6 +14,17 @@ We have set up the base project structure and defined the necessary packages in 
 
 We use a base TypeScript configuration (`tsconfig.base.json`) to centralize common settings. Other configs (for build, test, etc.) extend from this base, ensuring consistency and maintainability. See the documentation below for details.
 
+- [TypeScript Setup](docs/setup-typescript.md)
+- [Jest Setup](docs/setup-jest.md)
+- [Path Aliases Setup](docs/setup-path-aliases.md)
+- [How to Add a Path Alias](docs/add-path-alias.md)
+- [Prettier Configuration](docs/setup-prettier.md)
+- [ESLint Configuration](docs/setup-eslint.md)
+
+### Prettier & ESLint
+
+This project uses Prettier and ESLint together for code formatting and linting. See [Prettier Configuration](docs/setup-prettier.md) and [ESLint Configuration](docs/setup-eslint.md) for details.
+
 ### Path Aliases
 
 Path aliases (e.g., `@src/*`) are configured for cleaner imports. We use `tsc-alias` and `tsconfig-paths` to support these aliases at build and runtime.
