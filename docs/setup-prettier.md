@@ -21,3 +21,7 @@ npm run format
 ```
 
 This will apply the Prettier formatting rules to your codebase.
+
+## ESLint Integration
+
+This project uses ESLint alongside Prettier to ensure both code quality and consistent formatting. For details on the ESLint setup and how it integrates with Prettier, see [ESLint Configuration](./setup-eslint.md).
