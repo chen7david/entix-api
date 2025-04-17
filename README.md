@@ -20,6 +20,7 @@ We use a base TypeScript configuration (`tsconfig.base.json`) to centralize comm
 - [How to Add a Path Alias](docs/add-path-alias.md)
 - [Prettier Configuration](docs/setup-prettier.md)
 - [ESLint Configuration](docs/setup-eslint.md)
+- [Environment Loader](docs/setup-env-loader.md)
 
 ### Prettier & ESLint
 
