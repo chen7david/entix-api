@@ -8,9 +8,13 @@ const config: Config.InitialOptions = {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        tsconfig: "tsconfig/tsconfig.test.json",
+        tsconfig: "tsconfig.json",
       },
     ],
+  },
+  moduleNameMapper: {
+    "^@src/(.*)$": "<rootDir>/src/$1",
+    // add other path aliases here mirror the tsconfig.json
   },
   testRegex: ".*\\.test\\.tsx?$",
   moduleFileExtensions: ["ts", "js", "json", "node"],

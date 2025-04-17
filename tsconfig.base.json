@@ -10,9 +10,13 @@
     "removeComments": true,
     "sourceMap": true,
     "noUnusedLocals": true,
-    "rootDir": "../src",
-    "outDir": "../dist"
+    "rootDir": "src",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": ["src/*"]
+    }
   },
-  "include": ["../src/**/*"],
-  "exclude": ["../node_modules", "../dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
