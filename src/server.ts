@@ -1,5 +1,3 @@
-console.log('Hello World');
+import { env } from '@src/config/env.config';
 
-export function testServer() {
-  return true;
-}
+console.log(env);
