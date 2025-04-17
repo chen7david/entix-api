@@ -1,7 +1,7 @@
-import { testServer } from "@src/server";
+import { testServer } from '@src/server';
 
-describe("example", () => {
-  it("should run", () => {
+describe('example', () => {
+  it('should run', () => {
     expect(testServer()).toBe(true);
   });
 });

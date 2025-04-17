@@ -1,3 +1,3 @@
-import { testServer } from "@src/server";
+import { testServer } from '@src/server';
 
 console.log(testServer());

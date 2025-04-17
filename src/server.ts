@@ -1,4 +1,4 @@
-console.log("Hello World");
+console.log('Hello World');
 
 export function testServer() {
   return true;
