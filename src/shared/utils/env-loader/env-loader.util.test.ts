@@ -1,4 +1,4 @@
-import { EnvLoader } from '@src/services/env-loader/env-loader.service';
+import { EnvLoader } from '@src/shared/utils/env-loader/env-loader.util';
 import { z } from 'zod';
 
 // Mock modules
