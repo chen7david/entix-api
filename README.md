@@ -62,6 +62,7 @@ See the [Deployment Guide](docs/deployment.md) for detailed instructions.
 - [Deployment Guide](docs/deployment.md)
 - [GitHub Actions](docs/github-actions.md)
 - [Error Handling](docs/error-handling.md)
+- [Dependency Injection](docs/dependency-injection.md)
 
 ### Purpose of the Repository
 
@@ -77,3 +78,4 @@ For detailed documentation on specific components:
 - [AppService](docs/app-service.md) - Express application setup with routing-controllers
 - [Deployment Guide](docs/deployment.md) - Building and running in production
 - [Error Handling](docs/error-handling.md) - Comprehensive error management system
+- [Dependency Injection](docs/dependency-injection.md) - TypeDI usage and best practices
