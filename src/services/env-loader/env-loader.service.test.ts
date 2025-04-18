@@ -1,11 +1,19 @@
 import { EnvLoader } from '@src/services/env-loader/env-loader.service';
 import { z } from 'zod';
 
+// Mock modules
 jest.mock('dotenv', () => ({ config: jest.fn() }));
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
 
-const mockDotenv = require('dotenv');
-const mockFs = require('fs');
+// Import mocked modules through ESM syntax
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+
+// Cast mocks to the right types
+const mockDotenvConfig = dotenv.config as jest.MockedFunction<
+  typeof dotenv.config
+>;
+const mockFsExists = fs.existsSync as jest.MockedFunction<typeof fs.existsSync>;
 
 describe('EnvLoader', () => {
   const schema = z.object({
@@ -20,41 +28,49 @@ describe('EnvLoader', () => {
   });
 
   it('should load and validate environment variables successfully', () => {
-    (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+    mockFsExists.mockReturnValue(true);
     expect(() => new EnvLoader(schema)).not.toThrow();
     const loader = new EnvLoader(schema);
     expect(loader.env.NODE_ENV).toBe('dev');
     expect(loader.env.PORT).toBe('3000');
-    expect(mockDotenv.config).toHaveBeenCalled();
+    expect(mockDotenvConfig).toHaveBeenCalled();
   });
 
   it('should not throw if .env file does not exist', () => {
-    (mockFs.existsSync as jest.Mock).mockReturnValue(false);
+    mockFsExists.mockReturnValue(false);
     expect(() => new EnvLoader(schema)).not.toThrow();
-    expect(mockDotenv.config).not.toHaveBeenCalled();
+    expect(mockDotenvConfig).not.toHaveBeenCalled();
   });
 
   it('should throw a formatted error if validation fails', () => {
-    (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+    mockFsExists.mockReturnValue(true);
     process.env.PORT = 'not-a-number';
     try {
       new EnvLoader(schema);
       fail('Should have thrown');
-    } catch (err: any) {
-      expect(err.message).toMatch('Environment variable validation failed:');
-      expect(err.message).toMatch('PORT');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        expect(err.message).toMatch('Environment variable validation failed:');
+        expect(err.message).toMatch('PORT');
+      } else {
+        fail('Error should be an instance of Error');
+      }
     }
   });
 
   it('should throw a formatted error if required env var is missing', () => {
-    (mockFs.existsSync as jest.Mock).mockReturnValue(true);
+    mockFsExists.mockReturnValue(true);
     delete process.env.PORT;
     try {
       new EnvLoader(schema);
       fail('Should have thrown');
-    } catch (err: any) {
-      expect(err.message).toMatch('Environment variable validation failed:');
-      expect(err.message).toMatch('PORT');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        expect(err.message).toMatch('Environment variable validation failed:');
+        expect(err.message).toMatch('PORT');
+      } else {
+        fail('Error should be an instance of Error');
+      }
     }
   });
 });

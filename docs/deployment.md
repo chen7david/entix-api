@@ -73,7 +73,26 @@ docker run -p 3000:3000 -e PORT=3000 entix-api
 
 ## Continuous Integration/Deployment
 
-For CI/CD pipelines, a typical workflow would be:
+### GitHub Actions
+
+This project includes a GitHub Actions workflow that automatically runs tests and builds the application on pull requests to the `genesis-v1` branch and when changes are merged into that branch.
+
+The workflow is defined in `.github/workflows/ci.yml` and performs the following steps:
+
+1. Checks out the code
+2. Sets up Node.js
+3. Installs dependencies
+4. Creates necessary environment files
+5. Runs linting checks
+6. Runs tests
+7. Builds the application
+8. Verifies the build output
+
+To see the status of your workflow runs, go to the "Actions" tab in your GitHub repository.
+
+### Setting Up Your Own CI/CD Pipeline
+
+For CI/CD pipelines outside of GitHub Actions, a typical workflow would be:
 
 1. Run tests: `npm test`
 2. Build the application: `npm run build`
@@ -100,3 +119,4 @@ For CI/CD pipelines, a typical workflow would be:
 - [Server Service](./server-service.md)
 - [AppService](./app-service.md)
 - [Environment Loader](./setup-env-loader.md)
+- [GitHub Actions](./github-actions.md)

@@ -35,6 +35,10 @@ Path aliases (e.g., `@src/*`) are configured for cleaner imports. We use `tsc-al
 
 Jest is configured for TypeScript, with type definitions registered in the appropriate `tsconfig` files to ensure editor and build-time support for Jest globals.
 
+### Continuous Integration
+
+The project uses GitHub Actions for continuous integration, automatically running tests and building the application on pull requests to and merges into the `genesis-v1` branch. See the [Deployment Guide](docs/deployment.md#github-actions) for details.
+
 ### Deployment
 
 For production deployment, follow these steps:
@@ -56,6 +60,7 @@ See the [Deployment Guide](docs/deployment.md) for detailed instructions.
 - [Environment Loader Testing](docs/setup-env-loader-testing.md)
 - [AppService](docs/app-service.md)
 - [Deployment Guide](docs/deployment.md)
+- [GitHub Actions](docs/github-actions.md)
 
 ### Purpose of the Repository
 

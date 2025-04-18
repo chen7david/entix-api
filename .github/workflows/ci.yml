@@ -1,0 +1,77 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [genesis-v1]
+  pull_request:
+    branches: [genesis-v1]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check ESLint version
+        run: npx eslint --version
+
+      - name: Setup environment files
+        run: |
+          # Create .env.test for testing environment
+          echo "NODE_ENV=test" > .env.test
+          echo "PORT=3000" >> .env.test
+
+          # Create .env file for development/production
+          echo "NODE_ENV=prod" > .env
+          echo "PORT=3000" >> .env
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+        env:
+          NODE_ENV: test
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build failed: dist directory not found"
+            exit 1
+          fi
+
+          if [ ! -f "dist/server.js" ]; then
+            echo "Build failed: server.js not found in dist"
+            exit 1
+          fi
+
+  notify:
+    needs: build-and-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check build result
+        if: ${{ needs.build-and-test.result == 'success' }}
+        run: echo "All tests passed successfully!"
+
+      - name: Report failure
+        if: ${{ needs.build-and-test.result != 'success' }}
+        run: echo "Build or tests failed. Please check the logs for details."
