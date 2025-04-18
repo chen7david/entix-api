@@ -6,7 +6,7 @@ export type AppServiceOptions = {
   controllers: RoutingControllersOptions['controllers'];
   middlewares?: RoutingControllersOptions['middlewares'];
   currentUserChecker?: (action: Action) => Promise<unknown> | unknown;
-  authorizationChecker?: (action: Action) => Promise<unknown> | unknown;
+  authorizationChecker?: (action: Action) => Promise<boolean> | boolean;
   beforeRoutes: (app: express.Application) => void;
   afterRoutes: (app: express.Application) => void;
 };

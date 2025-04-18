@@ -7,7 +7,7 @@ on:
     branches: [genesis-v1]
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
