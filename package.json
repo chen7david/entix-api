@@ -2,6 +2,7 @@
   "name": "entix-api",
   "version": "0.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "directories": {
     "doc": "docs"
   },
@@ -22,7 +23,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "bugs": {
     "url": "https://github.com/chen7david/entix-api/issues"
   },
