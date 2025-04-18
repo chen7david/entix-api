@@ -64,14 +64,14 @@ jobs:
           fi
 
   notify:
-    needs: build-and-test
+    needs: test
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check build result
-        if: ${{ needs.build-and-test.result == 'success' }}
+        if: ${{ needs.test.result == 'success' }}
         run: echo "All tests passed successfully!"
 
       - name: Report failure
-        if: ${{ needs.build-and-test.result != 'success' }}
+        if: ${{ needs.test.result != 'success' }}
         run: echo "Build or tests failed. Please check the logs for details."
