@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import express from 'express';
-import { useExpressServer } from 'routing-controllers';
+import { useExpressServer, useContainer } from 'routing-controllers';
 import { AppServiceOptions } from './app.types';
+import { Container } from '@src/shared/utils/typedi/typedi.util';
 
 /**
  * AppService creates and configures an Express application
@@ -16,6 +17,11 @@ export class AppService {
    * @param options - Configuration options for the Express application
    */
   constructor(options: AppServiceOptions) {
+    /**
+     * Use the Container from typedi for routing-controllers
+     */
+    useContainer(Container);
+
     if (!options) {
       throw new Error('AppServiceOptions is required');
     }

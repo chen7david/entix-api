@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { AppError, createAppError } from '@src/shared/utils/errors/error.util';
 import { NodeEnv } from '@src/shared/constants/app.constants';
 import { env } from '@src/config/env.config';
+import { Injectable } from '@src/shared/utils/typedi/typedi.util';
 import {
   ExpressErrorMiddlewareInterface,
   Middleware,
@@ -13,6 +14,7 @@ import {
  * error response to the client.
  */
 @Middleware({ type: 'after' })
+@Injectable()
 export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
   /**
    * Handles all errors in the application
