@@ -9,6 +9,7 @@ We have set up the base project structure and defined the necessary packages in 
 - **`dev`**: Runs TypeScript files directly using `ts-node`.
 - **`test`**: Runs tests using Jest with TypeScript support.
 - **`build`**: Compiles TypeScript to JavaScript and rewrites path aliases for production.
+- **`start`**: Runs the compiled application in production mode.
 
 ### Configuration Management
 
@@ -34,6 +35,15 @@ Path aliases (e.g., `@src/*`) are configured for cleaner imports. We use `tsc-al
 
 Jest is configured for TypeScript, with type definitions registered in the appropriate `tsconfig` files to ensure editor and build-time support for Jest globals.
 
+### Deployment
+
+For production deployment, follow these steps:
+
+1. Build the application: `npm run build`
+2. Run in production: `npm start`
+
+See the [Deployment Guide](docs/deployment.md) for detailed instructions.
+
 ## Links
 
 - [TypeScript Setup](docs/setup-typescript.md)
@@ -45,6 +55,7 @@ Jest is configured for TypeScript, with type definitions registered in the appro
 - [Environment Loader](docs/setup-env-loader.md)
 - [Environment Loader Testing](docs/setup-env-loader-testing.md)
 - [AppService](docs/app-service.md)
+- [Deployment Guide](docs/deployment.md)
 
 ### Purpose of the Repository
 
@@ -58,3 +69,4 @@ For detailed documentation on specific components:
 
 - [Server Service](docs/server-service.md) - HTTP server management and lifecycle
 - [AppService](docs/app-service.md) - Express application setup with routing-controllers
+- [Deployment Guide](docs/deployment.md) - Building and running in production

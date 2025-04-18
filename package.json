@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=dev nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "test": "cross-env NODE_ENV=test jest",
+    "start": "cross-env NODE_ENV=prod node dist/server.js",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format": "prettier --write .",
