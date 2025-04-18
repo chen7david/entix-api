@@ -1,6 +1,6 @@
 import { config as dotenvConfig } from 'dotenv';
 import { ZodSchema, ZodError } from 'zod';
-import { NodeEnv, EnvFile } from '@src/services/app/app.constants';
+import { NodeEnv, EnvFile } from '@src/shared/constants/app.constants';
 import * as fs from 'fs';
 import * as path from 'path';
 

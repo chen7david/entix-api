@@ -1,4 +1,4 @@
-import { EnvLoader } from '@src/services/env-loader/env-loader.service';
+import { EnvLoader } from '@src/shared/utils/env-loader/env-loader.util';
 import { appConfigSchema } from './schema.config';
 
 export const envLoader = new EnvLoader(appConfigSchema);

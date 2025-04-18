@@ -61,6 +61,7 @@ See the [Deployment Guide](docs/deployment.md) for detailed instructions.
 - [AppService](docs/app-service.md)
 - [Deployment Guide](docs/deployment.md)
 - [GitHub Actions](docs/github-actions.md)
+- [Error Handling](docs/error-handling.md)
 
 ### Purpose of the Repository
 
@@ -75,3 +76,4 @@ For detailed documentation on specific components:
 - [Server Service](docs/server-service.md) - HTTP server management and lifecycle
 - [AppService](docs/app-service.md) - Express application setup with routing-controllers
 - [Deployment Guide](docs/deployment.md) - Building and running in production
+- [Error Handling](docs/error-handling.md) - Comprehensive error management system
