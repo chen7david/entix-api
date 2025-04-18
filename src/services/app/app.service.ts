@@ -1,33 +1,76 @@
 import 'reflect-metadata';
-import path from 'path';
 import express from 'express';
 import { useExpressServer } from 'routing-controllers';
 import { AppServiceOptions } from './app.types';
 
+/**
+ * AppService creates and configures an Express application
+ * with routing-controllers integration.
+ */
 export class AppService {
   private app: express.Application;
 
+  /**
+   * Creates a new AppService instance with the provided options.
+   *
+   * @param options - Configuration options for the Express application
+   */
   constructor(options: AppServiceOptions) {
+    if (!options) {
+      throw new Error('AppServiceOptions is required');
+    }
+
     this.app = express();
+
+    if (typeof options.beforeRoutes !== 'function') {
+      throw new Error('beforeRoutes must be a function');
+    }
+
+    if (typeof options.afterRoutes !== 'function') {
+      throw new Error('afterRoutes must be a function');
+    }
+
     options.beforeRoutes(this.app);
-    this.applyRoutes();
+    this.applyRoutes(options);
     options.afterRoutes(this.app);
   }
 
-  public getApp() {
+  /**
+   * Returns the configured Express application.
+   *
+   * @returns The Express application instance
+   */
+  public getApp(): express.Application {
     return this.app;
   }
 
-  public applyRoutes() {
+  /**
+   * Applies routes and middleware to the Express application
+   * using routing-controllers.
+   *
+   * @param options - Configuration options for routing-controllers
+   */
+  public applyRoutes({
+    controllers,
+    routePrefix,
+    middlewares,
+    authorizationChecker,
+    currentUserChecker,
+  }: AppServiceOptions): void {
+    if (!controllers || controllers.length === 0) {
+      throw new Error('At least one controller is required');
+    }
+
     useExpressServer(this.app, {
-      routePrefix: '/api',
+      routePrefix,
       validation: false,
       classTransformer: false,
       defaultErrorHandler: false,
       cors: true,
-      controllers: [
-        path.join(__dirname, '..', 'domains', '**', '*.controller.{ts,js}'),
-      ],
+      controllers,
+      middlewares,
+      authorizationChecker,
+      currentUserChecker,
     });
   }
 }

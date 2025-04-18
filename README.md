@@ -41,9 +41,20 @@ Jest is configured for TypeScript, with type definitions registered in the appro
 - [Path Aliases Setup](docs/setup-path-aliases.md)
 - [How to Add a Path Alias](docs/add-path-alias.md)
 - [Prettier Configuration](docs/setup-prettier.md)
+- [ESLint Configuration](docs/setup-eslint.md)
+- [Environment Loader](docs/setup-env-loader.md)
+- [Environment Loader Testing](docs/setup-env-loader-testing.md)
+- [AppService](docs/app-service.md)
 
 ### Purpose of the Repository
 
 This repository aims to serve as a base for collaborating and applying industry best practices within reasonable limits. By following a structured approach, we ensure that our code is clean, maintainable, and scalable, making it easier for developers to contribute and understand the project.
 
 We invite you to explore the code, contribute, and learn about the best practices in TypeScript and Express development.
+
+## Documentation
+
+For detailed documentation on specific components:
+
+- [Server Service](docs/server-service.md) - HTTP server management and lifecycle
+- [AppService](docs/app-service.md) - Express application setup with routing-controllers
