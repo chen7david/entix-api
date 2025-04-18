@@ -12,8 +12,8 @@
     "test:watch": "cross-env NODE_ENV=test jest --watch",
     "build": "rimraf dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "format": "prettier --write .",
-    "lint": "eslint 'src/**/*.{ts,js}'",
-    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix"
+    "lint": "eslint --max-warnings=100 src",
+    "lint:fix": "eslint --max-warnings=100 src --fix"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/chen7david/entix-api/issues"
   },

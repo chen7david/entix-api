@@ -74,6 +74,18 @@ These files ensure that:
 - The build process has the necessary configuration
 - Our environment validator doesn't throw errors due to missing variables
 
+## ESLint Configuration
+
+This project uses ESLint 9.x with the new configuration format (`eslint.config.js`). The GitHub Actions workflow is set up to handle this by:
+
+1. Using Node.js 20.x for better compatibility with newer ESLint versions
+2. Running ESLint with the modern flat configuration format
+3. Outputting the ESLint version during CI for debugging purposes
+
+### ESLint Configuration Files
+
+- `eslint.config.js` - Modern ESM-style configuration (ESLint 9.x)
+
 ## Customizing the Workflow
 
 To customize the GitHub Actions workflow:
