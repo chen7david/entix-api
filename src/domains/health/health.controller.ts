@@ -6,7 +6,6 @@ export const healthController = (
 ): void => {
   response.status(200).json({
     status: 'ok',
-    message: 'API is running',
     timestamp: new Date().toISOString(),
   });
 };

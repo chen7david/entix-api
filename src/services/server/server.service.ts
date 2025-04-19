@@ -9,6 +9,12 @@ import { ServerServiceOptions, ServerListeningInfo } from './server.types';
 import express from 'express';
 import http from 'http';
 import os from 'os';
+// import { LoggerService } from '@src/services/logger/logger.service';
+// import { Container } from '@src/shared/utils/typedi/typedi.util';
+
+// const logger = Container.has(LoggerService);
+// console.log({ logger });
+// const serverLogger = logger.getChildLogger({ context: 'ServerService' });
 
 export class ServerService {
   /** The Express application instance */
@@ -37,7 +43,7 @@ export class ServerService {
    * const serverService = new ServerService({
    *   app,
    *   port: 3000,
-   *   onListening: ({ port, ip }) => console.log(`Server running at http://${ip}:${port}`),
+  //  *   onListening: ({ port, ip }) =>logger.info(`Server running at http://${ip}:${port}`),
    * });
    * ```
    */
@@ -128,18 +134,18 @@ export class ServerService {
       }
       this.isShuttingDown = true;
 
-      console.log('Starting graceful shutdown...');
+      // logger.info('Starting graceful shutdown...');
 
       try {
         if (options.beforeShutdown) {
-          console.log('Running beforeShutdown handler...');
+          // logger.info('Running beforeShutdown handler...');
           await Promise.resolve(options.beforeShutdown());
         }
 
         if (this.isRunning) {
-          console.log('Stopping server...');
+          // logger.info('Stopping server...');
           await this.stop();
-          console.log('Server stopped successfully');
+          // logger.info('Server stopped successfully');
         }
       } catch (error) {
         console.error('Error during shutdown:', error);

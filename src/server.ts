@@ -2,19 +2,22 @@ import { ServerService } from '@src/services/server/server.service';
 import { appService } from '@src/app';
 import { ConfigService } from './services/config/config.service';
 import { Container } from '@src/shared/utils/typedi/typedi.util';
+import { LoggerService } from './services/logger/logger.service';
 
-const configService = Container.get(ConfigService);
+const config = Container.get(ConfigService);
+const logger = Container.get(LoggerService);
+const serverLogger = logger.getChildLogger({ context: 'Server' });
 
 const server = new ServerService({
   app: appService.getApp(),
-  port: configService.env.PORT,
+  port: config.env.PORT,
 
   onListening: async ({ port, ip }) => {
-    console.log(`Server is running at http://${ip}:${port}`);
+    serverLogger.info(`Server is running at http://${ip}:${port}`);
   },
 
   onError: async (error) => {
-    console.error('Server error:', error);
+    logger.error('Server error:', error);
   },
 
   beforeShutdown: async () => {

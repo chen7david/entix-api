@@ -8,6 +8,8 @@ import {
   Middleware,
 } from 'routing-controllers';
 import { ConfigService } from '@src/services/config/config.service';
+import { LoggerService } from '@src/services/logger/logger.service';
+
 /**
  * Global error handler middleware that intercepts and processes all errors
  * from the application, formats them appropriately, and returns a standardized
@@ -16,7 +18,10 @@ import { ConfigService } from '@src/services/config/config.service';
 @Middleware({ type: 'after' })
 @Injectable()
 export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: LoggerService
+  ) {}
 
   /**
    * Handles all errors in the application
@@ -33,6 +38,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
   ): void {
     // Convert to AppError for consistent handling
     const appError = this.normalizeError(error);
+    console.log(error);
 
     // Log the error
     this.logError(appError, request);
@@ -81,18 +87,18 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
     // For now, just console log errors until a proper logger is implemented
     if (error.status >= 500) {
       // Server errors
-      console.error(`Server error: ${error.message}`, context);
+      this.logger.error(`Server error: ${error.message}`, context);
     } else if (error.status >= 400) {
       // Client errors
-      console.warn(`Client error: ${error.message}`, context);
+      this.logger.warn(`Client error: ${error.message}`, context);
     } else {
       // Other errors
-      console.info(`Error: ${error.message}`, context);
+      this.logger.info(`Error: ${error.message}`, context);
     }
 
     // In development, log the stack trace for easier debugging
     if (this.configService.env.NODE_ENV !== NodeEnv.PROD && error.stack) {
-      console.debug(`Stack trace: ${error.stack}`);
+      this.logger.debug(`Stack trace: ${error.stack}`);
     }
   }
 }
