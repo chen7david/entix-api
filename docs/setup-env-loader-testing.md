@@ -1,12 +1,12 @@
-# Testing the Environment Loader (`EnvLoader`)
+# Testing the ConfigService
 
-This guide explains how to write robust, maintainable tests for the `EnvLoader` class and similar configuration or service classes in your project.
+This guide explains how to write robust, maintainable tests for the `ConfigService` class and similar configuration or service classes in your project.
 
 ## Types of Tests
 
 - **Unit Tests:** Test a single unit (e.g., a class or function) in isolation. Use mocks/stubs for dependencies (like `dotenv` or `fs`).
-- **Integration Tests:** Test how multiple units work together. For config loaders, this might mean loading real `.env` files (not recommended for CI).
-- **End-to-End (E2E) Tests:** Test the entire application stack. Not typically needed for config loaders.
+- **Integration Tests:** Test how multiple units work together. For config services, this might mean loading real `.env` files (not recommended for CI).
+- **End-to-End (E2E) Tests:** Test the entire application stack. Not typically needed for config services.
 
 ## When and Why to Mock
 

@@ -22,6 +22,9 @@ npm install express routing-controllers reflect-metadata
 
 ```typescript
 import { AppService } from '@src/services/app/app.service';
+import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
+import { NotFoundMiddleware } from '@src/middleware/not-found.middleware';
+import express from 'express';
 import path from 'path';
 
 const appService = new AppService({
@@ -36,9 +39,8 @@ const appService = new AppService({
 
   afterRoutes: (app) => {
     // Configure middleware that should run after the controllers
-    app.use((req, res, next) => {
-      res.status(404).json({ message: 'Not found' });
-    });
+    app.use(NotFoundMiddleware);
+    app.use(ErrorHandlerMiddleware);
   },
 });
 
@@ -57,19 +59,22 @@ You can customize the AppService with additional options:
 
 ```typescript
 import { AppService } from '@src/services/app/app.service';
-import { authMiddleware } from '@src/middleware/auth.middleware';
-import { errorMiddleware } from '@src/middleware/error.middleware';
+import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
+import { NotFoundMiddleware } from '@src/middleware/not-found.middleware';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 
 const appService = new AppService({
   routePrefix: '/api/v1',
   controllers: [
-    // Provide explicit controller classes
+    // Provide explicit controller classes or paths
     UserController,
     ProductController,
   ],
 
-  // Add custom middlewares
-  middlewares: [authMiddleware, errorMiddleware],
+  // Add custom middlewares (routing-controllers)
+  middlewares: [ErrorHandlerMiddleware, NotFoundMiddleware],
 
   // Add an authorization checker
   authorizationChecker: async (action) => {
@@ -91,8 +96,8 @@ const appService = new AppService({
   },
 
   afterRoutes: (app) => {
-    app.use(notFoundMiddleware);
-    app.use(errorHandlerMiddleware);
+    // Any additional middleware to run after
+    // routing-controllers has set up the routes
   },
 });
 ```
@@ -136,6 +141,8 @@ The `AppService` includes basic error handling to ensure proper configuration:
 import 'reflect-metadata';
 import express from 'express';
 import { AppService } from '@src/services/app/app.service';
+import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
+import { NotFoundMiddleware } from '@src/middleware/not-found.middleware';
 import path from 'path';
 
 export const appService = new AppService({
@@ -148,9 +155,8 @@ export const appService = new AppService({
   },
 
   afterRoutes: (app) => {
-    app.use((req, res) => {
-      res.status(404).json({ message: 'Not found' });
-    });
+    app.use(NotFoundMiddleware);
+    app.use(ErrorHandlerMiddleware);
   },
 });
 
@@ -168,43 +174,29 @@ app.listen(PORT, () => {
 ### Example 2: API with Authentication
 
 ```typescript
-// auth.middleware.ts
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-
-export const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Invalid token' });
-  }
-};
-
 // app.ts
 import 'reflect-metadata';
 import express from 'express';
 import { AppService } from '@src/services/app/app.service';
-import { authMiddleware } from './middleware/auth.middleware';
+import { ErrorHandlerMiddleware } from '@src/middleware/error.middleware';
+import { NotFoundMiddleware } from '@src/middleware/not-found.middleware';
+import jwt from 'jsonwebtoken';
 
 export const appService = new AppService({
   routePrefix: '/api',
   controllers: [__dirname + '/controllers/*.js'],
-  middlewares: [authMiddleware],
 
   authorizationChecker: async (action) => {
-    return !!action.request.user;
+    try {
+      const token = action.request.headers.authorization?.split(' ')[1];
+      if (!token) return false;
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+      action.request.user = decoded;
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 
   currentUserChecker: async (action) => {
@@ -216,9 +208,8 @@ export const appService = new AppService({
   },
 
   afterRoutes: (app) => {
-    app.use((err, req, res, next) => {
-      res.status(500).json({ message: 'Internal server error' });
-    });
+    app.use(NotFoundMiddleware);
+    app.use(ErrorHandlerMiddleware);
   },
 });
 ```
