@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import express from 'express';
-import { useExpressServer, useContainer } from 'routing-controllers';
+import { useExpressServer } from 'routing-controllers';
 import { AppServiceOptions } from './app.types';
-import { Container } from '@src/shared/utils/typedi/typedi.util';
-import { EnvService } from '@src/services/env/env.service';
+// import { Container } from '@src/shared/utils/typedi/typedi.util';
+// import { EnvService } from '@src/services/env/env.service';
 /**
  * AppService creates and configures an Express application
  * with routing-controllers integration.
@@ -20,7 +20,7 @@ export class AppService {
     /**
      * Use the Container from typedi for routing-controllers
      */
-    this.registerContainer();
+    // this.registerContainer();
 
     if (!options) {
       throw new Error('AppServiceOptions is required');
@@ -53,12 +53,12 @@ export class AppService {
   /**
    * Registers the Container and manually registers services that are not injectable below
    */
-  private registerContainer(): void {
-    useContainer(Container);
+  // private registerContainer(): void {
+  //   useContainer(Container);
 
-    // Manualy register services that are not injectable below
-    Container.set(EnvService, new EnvService());
-  }
+  //   // Manually register services that are not injectable below
+  //   // Container.set(EnvService, new EnvService());
+  // }
 
   /**
    * Applies routes and middleware to the Express application

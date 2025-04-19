@@ -1,61 +1,103 @@
-# Testing the Environment Loader (`EnvLoader`)
+# Testing the Environment Service
 
-This guide explains how to write robust, maintainable tests for the `EnvLoader` class and similar configuration or service classes in your project.
+This guide explains how to write robust, maintainable tests for the `EnvService` and similar injectable services in your project.
 
 ## Types of Tests
 
-- **Unit Tests:** Test a single unit (e.g., a class or function) in isolation. Use mocks/stubs for dependencies (like `dotenv` or `fs`).
-- **Integration Tests:** Test how multiple units work together. For config loaders, this might mean loading real `.env` files (not recommended for CI).
-- **End-to-End (E2E) Tests:** Test the entire application stack. Not typically needed for config loaders.
+- **Unit Tests:** Test a single unit (e.g., a class or function) in isolation. Use mocks/stubs for dependencies.
+- **Integration Tests:** Test how multiple units work together, usually with DI.
+- **End-to-End (E2E) Tests:** Test the entire application stack. Not typically needed for config services.
 
 ## When and Why to Mock
 
 - **When:**
-  - When you want to isolate the logic of your class from external dependencies (e.g., file system, environment, third-party libraries).
-  - When you want to simulate different scenarios (e.g., missing files, invalid env values) without changing your real environment.
+  - To isolate service logic from external dependencies (file system, environment variables, third-party libraries).
+  - To simulate different scenarios (missing files, invalid environment values) without changing your real environment.
 - **Why:**
   - To ensure tests are deterministic and fast.
-  - To avoid side effects (e.g., modifying real env vars or files).
+  - To avoid side effects (modifying real env vars or files).
 
-## How to Mock
+## Testing Injectable Services
 
-- Use Jest's `jest.mock()` to mock modules like `dotenv` and `fs`.
-- Use `jest.spyOn()` or direct assignment to control/mock function return values.
+There are two approaches to testing injectable services:
 
-**Example:**
+### 1. Direct Construction with Mocked Dependencies
 
-```ts
+```typescript
+import { EnvService } from '@src/services/env/env.service';
+import { z } from 'zod';
+
+// Mock dependencies
 jest.mock('dotenv', () => ({ config: jest.fn() }));
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
 
-const mockDotenv = require('dotenv');
-const mockFs = require('fs');
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
 
-(mockFs.existsSync as jest.Mock).mockReturnValue(true);
+describe('EnvService - Direct Construction', () => {
+  // Test setup and tests...
+
+  it('should load environment variables', () => {
+    // Set up mocks
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+
+    // Create service directly with custom schema
+    const envService = new EnvService(testSchema);
+
+    // Assertions
+    expect(envService.env.PORT).toBe(3000);
+  });
+});
 ```
 
-## Example Test Cases
+### 2. Using TypeDI Container for Integration Tests
 
-- Loads and validates environment variables successfully
-- Does not throw if `.env` file is missing
-- Throws a formatted error if validation fails
-- Throws a formatted error if a required env var is missing
+```typescript
+import { Container } from '@src/shared/utils/typedi/typedi.util';
+import { EnvService } from '@src/services/env/env.service';
 
-## Test Coverage
+describe('EnvService - Container Injection', () => {
+  beforeEach(() => {
+    // Reset the container before each test
+    Container.reset();
+  });
 
-- Use Jest's coverage tools: `npm run test -- --coverage`
-- Aim for high coverage, but prioritize meaningful tests over 100% coverage.
-- Cover all branches: success, missing file, validation error, missing key, etc.
+  it('should be injectable in other services', () => {
+    // Override with test implementation
+    const mockEnvService = { env: { PORT: 3000 } };
+    Container.set(EnvService, mockEnvService);
+
+    // Get test service that uses EnvService
+    const testService = Container.get(TestService);
+
+    // Test the service with injected mock
+    expect(testService.getPort()).toBe(3000);
+  });
+});
+```
+
+## Example Test Cases for EnvService
+
+- **Load and validate environment variables successfully**
+- **Do not throw if .env file is missing**
+- **Throw a formatted error if validation fails**
+- **Throw a formatted error if required env var is missing**
+- **Integration with dependent services**
 
 ## Best Practices
 
-- Keep tests isolated and stateless (reset mocks and env vars between tests).
-- Use clear, descriptive test names.
-- Mock only what you need—avoid over-mocking.
-- Place test files next to the code they test or in a `__tests__` folder.
-- Document any non-obvious test logic.
+- **Test in isolation:** Use mocks and stubs for dependencies.
+- **Check error formatting:** Validate the error message format for invalid inputs.
+- **Reset container between tests:** When using TypeDI, always reset the container in `beforeEach`.
+- **Test real scenarios:** Make sure your tests cover actual use cases.
+- **Keep tests isolated and deterministic:** Reset environment variables between tests.
+
+## Example Implementation
+
+See the [src/services/env/env.service.test.ts](../src/services/env/env.service.test.ts) file for a complete example of testing the EnvService with mocks.
 
 ## References
 
 - [Jest Documentation](https://jestjs.io/docs/mock-functions)
+- [TypeDI Testing](https://github.com/typestack/typedi#testing)
 - [Testing Best Practices](https://github.com/goldbergyoni/javascript-testing-best-practices)

@@ -32,6 +32,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
     _next: NextFunction
   ): void {
     // Convert to AppError for consistent handling
+    console.log(error);
     const appError = this.normalizeError(error);
 
     // Log the error

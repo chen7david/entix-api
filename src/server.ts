@@ -1,13 +1,18 @@
+import 'reflect-metadata';
+import { useContainer } from 'routing-controllers';
+import { Container } from '@src/shared/utils/typedi/typedi.util';
 import { ServerService } from '@src/services/server/server.service';
 import { appService } from '@src/app';
-import { EnvService } from '@src/services/env/env.service';
+import { EnvService } from './services/env/env.service';
+// import { EnvService } from '@src/services/env/env.service';
+console.log(Container.has(EnvService));
+useContainer(Container);
 
-// Initialize the env service
-const envService = new EnvService();
+// const envService = Container.get(EnvService);
 
 const server = new ServerService({
   app: appService.getApp(),
-  port: envService.env.PORT,
+  port: 3000,
 
   onListening: async ({ port, ip }) => {
     console.log(`Server is running at http://${ip}:${port}`);

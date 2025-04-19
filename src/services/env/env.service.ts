@@ -1,9 +1,18 @@
 import type { ZodSchema, ZodError } from 'zod';
 import { envShema } from '@src/config/config.schema';
 import { NodeEnv, EnvFile } from '@src/shared/constants/app.constants';
+import { IoC } from '@src/shared/constants/ioc.constants';
 import { config as dotenvConfig } from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  Container,
+  Inject,
+  Injectable,
+} from '@src/shared/utils/typedi/typedi.util';
+
+// Set the env schema for dependency injection
+Container.set(IoC.ENV_SCHEMA, envShema);
 
 /**
  * Injectable service for loading and validating environment variables.
@@ -28,6 +37,8 @@ import * as path from 'path';
  * }
  * ```
  */
+
+@Injectable()
 export class EnvService<T = typeof envShema._type> {
   /**
    * The parsed and validated environment variables.
@@ -39,8 +50,8 @@ export class EnvService<T = typeof envShema._type> {
    *
    * @param schema - Optional Zod schema for environment validation. Defaults to envShema.
    */
-  constructor(schema?: ZodSchema<T>) {
-    const effectiveSchema = (schema || envShema) as ZodSchema<T>;
+  constructor(@Inject(IoC.ENV_SCHEMA) private readonly schema: ZodSchema<T>) {
+    const effectiveSchema = this.schema as ZodSchema<T>;
     const nodeEnv = process.env.NODE_ENV as NodeEnv | undefined;
     this.loadEnvFile(this.getEnvFile(nodeEnv));
     const result = effectiveSchema.safeParse(process.env);

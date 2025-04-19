@@ -207,12 +207,14 @@ Create a Config class for application settings:
 ```typescript
 // src/shared/utils/config/config.util.ts
 import { Injectable } from '@src/shared/utils/typedi/typedi.util';
-import { env } from '@src/config/env.config';
+import { EnvService } from '@src/services/env/env.service';
 
 @Injectable()
 export class Config {
-  get<T>(key: keyof typeof env): T {
-    return env[key] as unknown as T;
+  constructor(private envService: EnvService) {}
+
+  get<T>(key: keyof typeof this.envService.env): T {
+    return this.envService.env[key] as unknown as T;
   }
 
   get isDevelopment(): boolean {
@@ -243,8 +245,8 @@ export class UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    const dbHost = this.config.get<string>('DB_HOST');
-    this.logger.debug(`Connecting to DB at ${dbHost}`);
+    const port = this.config.get<number>('PORT');
+    this.logger.debug(`Server running on port ${port}`);
     // ...rest of method
   }
 }

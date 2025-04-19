@@ -24,7 +24,7 @@ describe('EnvService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.NODE_ENV = 'development';
+    process.env.NODE_ENV = 'dev';
     process.env.PORT = '3000';
   });
 
@@ -32,7 +32,7 @@ describe('EnvService', () => {
     mockFsExists.mockReturnValue(true);
     expect(() => new EnvService(schema)).not.toThrow();
     const envService = new EnvService(schema);
-    expect(envService.env.NODE_ENV).toBe('development');
+    expect(envService.env.NODE_ENV).toBe('dev');
     expect(envService.env.PORT).toBe(3000);
     expect(mockDotenvConfig).toHaveBeenCalled();
   });

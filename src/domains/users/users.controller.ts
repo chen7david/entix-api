@@ -10,5 +10,6 @@ export class UsersController {
   @Get('/')
   public async getUsers() {
     return this.usersService.getUsers();
+    // return 'Hello World';
   }
 }

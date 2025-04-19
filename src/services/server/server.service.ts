@@ -9,7 +9,9 @@ import { ServerServiceOptions, ServerListeningInfo } from './server.types';
 import express from 'express';
 import http from 'http';
 import os from 'os';
+import { Injectable } from '@src/shared/utils/typedi/typedi.util';
 
+@Injectable()
 export class ServerService {
   /** The Express application instance */
   private readonly app: express.Application;
