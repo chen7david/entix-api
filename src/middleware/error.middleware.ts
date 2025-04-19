@@ -2,12 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { AppError, createAppError } from '@src/shared/utils/errors/error.util';
 import { NodeEnv } from '@src/shared/constants/app.constants';
-import { env } from '@src/config/env.config';
 import { Injectable } from '@src/shared/utils/typedi/typedi.util';
+import { EnvService } from '@src/services/env/env.service';
 import {
   ExpressErrorMiddlewareInterface,
   Middleware,
 } from 'routing-controllers';
+
 /**
  * Global error handler middleware that intercepts and processes all errors
  * from the application, formats them appropriately, and returns a standardized
@@ -16,6 +17,7 @@ import {
 @Middleware({ type: 'after' })
 @Injectable()
 export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
+  constructor(private readonly envService: EnvService) {}
   /**
    * Handles all errors in the application
    * @param error - Error that was thrown
@@ -89,7 +91,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
     }
 
     // In development, log the stack trace for easier debugging
-    if (env.NODE_ENV !== NodeEnv.PROD && error.stack) {
+    if (this.envService.env.NODE_ENV !== NodeEnv.PROD && error.stack) {
       console.debug(`Stack trace: ${error.stack}`);
     }
   }
