@@ -1,6 +1,6 @@
-# Environment Loader (`EnvLoader`)
+# ConfigService
 
-The `EnvLoader` class provides a robust, type-safe way to load and validate environment variables in your project. It is designed for scalable, enterprise-grade applications and integrates seamlessly with [dotenv](https://www.npmjs.com/package/dotenv) and [Zod](https://zod.dev/).
+The `ConfigService` class provides a robust, type-safe way to load and validate environment variables in your project. It is designed for scalable, enterprise-grade applications and integrates seamlessly with [dotenv](https://www.npmjs.com/package/dotenv) and [Zod](https://zod.dev/).
 
 ## Features
 
@@ -8,7 +8,7 @@ The `EnvLoader` class provides a robust, type-safe way to load and validate envi
 - Does **not** throw if the `.env` file is missing (for CI/CD compatibility).
 - Validates `process.env` using a Zod schema.
 - Throws a formatted error if validation fails, listing missing/invalid keys and their errors.
-- Designed for future dependency injection (IoC/DI) use.
+- Integrated with dependency injection using TypeDI.
 
 ## Usage
 
@@ -27,13 +27,20 @@ export const envSchema = z.object({
 2. **Load and validate environment variables:**
 
 ```ts
-import { EnvLoader } from '../config/env-loader.service';
+import { Container } from '@src/shared/utils/typedi/typedi.util';
+import { ConfigService } from '@src/services/config/config.service';
+import { IoC } from '@src/shared/constants/ioc.constants';
 import { envSchema } from './env.schema';
 
-const envLoader = new EnvLoader(envSchema);
-const env = envLoader.env;
+// Register the schema with the container
+Container.set(IoC.ENV_SCHEMA, envSchema);
 
-// Now use env.PORT, env.NODE_ENV, etc. with full type safety
+// Get the ConfigService instance
+const configService = Container.get(ConfigService);
+
+// Access environment variables
+const port = configService.env.PORT;
+const nodeEnv = configService.env.NODE_ENV;
 ```
 
 ## Error Handling
@@ -43,11 +50,12 @@ const env = envLoader.env;
 
 ## Best Practices
 
-- Place your Zod schema in a dedicated file (e.g., `src/config/env.schema.ts`).
-- Use the `EnvLoader` in your application entry point to ensure all environment variables are validated before the app starts.
+- Place your Zod schema in a dedicated file (e.g., `src/config/config.schema.ts`).
+- Use the `ConfigService` in your application entry point to ensure all environment variables are validated before the app starts.
 - For large projects, keep all configuration logic in `src/config`.
 
 ## References
 
 - [dotenv documentation](https://www.npmjs.com/package/dotenv)
 - [Zod documentation](https://zod.dev/)
+- [ConfigService Documentation](./config-service.md)

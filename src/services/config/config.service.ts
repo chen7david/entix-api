@@ -1,31 +1,29 @@
+import { IoC } from '@src/shared/constants/ioc.constants';
+import { ZodError, ZodSchema } from 'zod';
 import { config as dotenvConfig } from 'dotenv';
-import { ZodSchema, ZodError } from 'zod';
-import { NodeEnv, EnvFile } from '@src/shared/constants/app.constants';
-import * as fs from 'fs';
-import * as path from 'path';
+import { envSchema, EnvSchema } from '@src/config/config.schema';
+import { EnvFile, NodeEnv } from '@src/shared/constants/app.constants';
+import path from 'path';
+import fs from 'fs';
+import {
+  Container,
+  Inject,
+  Injectable,
+} from '@src/shared/utils/typedi/typedi.util';
 
-/**
- * Loads and validates environment variables using dotenv and Zod.
- *
- * - Loads the appropriate .env file based on NODE_ENV and NodeEnv/EnvFile enums.
- * - Does not throw if the .env file is missing (for CI/CD compatibility).
- * - Validates process.env using a provided Zod schema.
- * - Throws a formatted error if validation fails, listing missing/invalid keys and their errors.
- */
-export class EnvLoader<T> {
-  /**
-   * The parsed and validated environment variables.
-   */
-  public readonly env: T;
+Container.set(IoC.ENV_SCHEMA, envSchema);
 
-  /**
-   * Loads the .env file and validates process.env using the provided schema.
-   * @param schema Zod schema to validate environment variables.
-   */
-  constructor(schema: ZodSchema<T>) {
+@Injectable()
+export class ConfigService {
+  public readonly env: EnvSchema;
+
+  constructor(@Inject(IoC.ENV_SCHEMA) schema: ZodSchema) {
+    // load env file into process.env
     const nodeEnv = process.env.NODE_ENV as NodeEnv | undefined;
     const envFile = this.getEnvFile(nodeEnv);
     this.loadEnvFile(envFile);
+
+    // validate process.env
     const result = schema.safeParse(process.env);
     if (!result.success) {
       throw new Error(this.formatZodErrors(result.error));

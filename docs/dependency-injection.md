@@ -55,7 +55,7 @@ The typical injection hierarchy is:
 Controllers → Services → Repositories
 ```
 
-Each layer can also use shared utilities like Logger or Config.
+Each layer can also use shared utilities like Logger or ConfigService.
 
 ## Examples
 
@@ -145,45 +145,10 @@ export class UsersController {
 
 ## Injecting Shared Utilities
 
-### Logger
-
-Create a Logger class that can be injected anywhere:
+### Logger Example
 
 ```typescript
-// src/shared/utils/logger/logger.util.ts
-import { Injectable } from '@src/shared/utils/typedi/typedi.util';
-
-@Injectable()
-export class Logger {
-  private context: string = 'App';
-
-  setContext(context: string): this {
-    this.context = context;
-    return this;
-  }
-
-  info(message: string, meta?: Record<string, unknown>): void {
-    console.info(`[${this.context}] ${message}`, meta || '');
-  }
-
-  error(message: string, meta?: Record<string, unknown>): void {
-    console.error(`[${this.context}] ${message}`, meta || '');
-  }
-
-  warn(message: string, meta?: Record<string, unknown>): void {
-    console.warn(`[${this.context}] ${message}`, meta || '');
-  }
-
-  debug(message: string, meta?: Record<string, unknown>): void {
-    console.debug(`[${this.context}] ${message}`, meta || '');
-  }
-}
-```
-
-Then inject it into your classes:
-
-```typescript
-// Using Logger in a service
+// Using a Logger utility in a service
 @Injectable()
 export class UserService {
   constructor(
@@ -200,51 +165,24 @@ export class UserService {
 }
 ```
 
-### Config
+### ConfigService
 
-Create a Config class for application settings:
-
-```typescript
-// src/shared/utils/config/config.util.ts
-import { Injectable } from '@src/shared/utils/typedi/typedi.util';
-import { env } from '@src/config/env.config';
-
-@Injectable()
-export class Config {
-  get<T>(key: keyof typeof env): T {
-    return env[key] as unknown as T;
-  }
-
-  get isDevelopment(): boolean {
-    return this.get<string>('NODE_ENV') === 'dev';
-  }
-
-  get isProduction(): boolean {
-    return this.get<string>('NODE_ENV') === 'prod';
-  }
-
-  get isTest(): boolean {
-    return this.get<string>('NODE_ENV') === 'test';
-  }
-}
-```
-
-Then inject it where needed:
+The `ConfigService` provides access to environment variables in a type-safe way:
 
 ```typescript
-// Using Config in a repository
+// Using ConfigService in a repository
 @Injectable()
 export class UserRepository {
   constructor(
-    private config: Config,
+    private configService: ConfigService,
     private logger: Logger
   ) {
     this.logger.setContext('UserRepository');
   }
 
   async findById(id: string): Promise<User | null> {
-    const dbHost = this.config.get<string>('DB_HOST');
-    this.logger.debug(`Connecting to DB at ${dbHost}`);
+    const port = this.configService.env.PORT;
+    this.logger.debug(`Server running on port ${port}`);
     // ...rest of method
   }
 }
@@ -345,7 +283,7 @@ describe('UserService', () => {
 
 2. **Constructor Injection** - Use constructor injection rather than property or method injection.
 
-3. **Interface Segregation** - Inject only what you need. Don't inject the entire Config if you only need one setting.
+3. **Interface Segregation** - Inject only what you need. Don't inject the entire ConfigService if you only need one setting.
 
 4. **Circular Dependencies** - Avoid circular dependencies between injectable classes.
 
@@ -357,7 +295,7 @@ describe('UserService', () => {
 
 ## Service Lifetime Management
 
-By default, TypeDI services are singletons. One instance is created and reused throughout the application. This is usually desired for services like Logger, Config, and Repositories.
+By default, TypeDI services are singletons. One instance is created and reused throughout the application. This is usually desired for services like Logger, ConfigService, and Repositories.
 
 For per-request scoping, additional configuration is required. See the TypeDI documentation for details on service scoping.
 
@@ -377,10 +315,15 @@ src/
   │   └── utils/
   │       ├── typedi/
   │       │   └── typedi.util.ts       # TypeDI exports
-  │       ├── logger/
-  │       │   └── logger.util.ts       # Injectable logger
-  │       └── config/
-  │           └── config.util.ts       # Injectable configuration
+  │       └── errors/
+  │           └── error.util.ts        # Error utilities
+  ├── services/
+  │   ├── config/
+  │   │   └── config.service.ts        # Injectable configuration
+  │   ├── app/
+  │   │   └── app.service.ts           # Express app service
+  │   └── server/
+  │       └── server.service.ts        # HTTP server service
 ```
 
 ## Conclusion

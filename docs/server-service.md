@@ -49,14 +49,15 @@ import { AppService } from '@src/services/app/app.service';
 import { ServerService } from '@src/services/server/server.service';
 
 const appService = new AppService();
-const app = appService.getExpressApp();
+const app = appService.getApp();
 
 const serverService = new ServerService({
   app,
   port: 3000,
   beforeShutdown: async () => {
     // Will be called during graceful shutdown (CTRL+C)
-    await appService.cleanup();
+    // Perform any necessary cleanup here
+    console.log('Running cleanup tasks...');
   },
   onError: (error) => {
     console.error('Server error:', error);
@@ -200,14 +201,15 @@ While `ServerService` can be used standalone, it's designed to work with `AppSer
 
 1. `AppService` manages the Express application configuration and middleware
 2. `ServerService` manages the HTTP server lifecycle
-3. Both services coordinate during shutdown for clean resource cleanup
+3. Both services coordinate during shutdown for proper cleanup
 
 See the [AppService documentation](./app-service.md) for more details on the integration.
 
 ## Related Documentation
 
 - [AppService](./app-service.md) - Express application setup with routing-controllers
-- [Environment Loader](./setup-env-loader.md)
+- [Environment Management](./setup-env-loader.md)
+- [ConfigService](./config-service.md)
 - [TypeScript Setup](./setup-typescript.md)
 - [Path Aliases](./setup-path-aliases.md)
 - [Testing Setup](./setup-jest.md)
