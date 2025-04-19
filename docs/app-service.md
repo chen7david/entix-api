@@ -217,7 +217,8 @@ export const appService = new AppService({
 ## Related Documentation
 
 - [Server Service](./server-service.md)
-- [Environment Loader](./setup-env-loader.md)
+- [Environment Management](./setup-env-loader.md)
+- [ConfigService](./config-service.md)
 - [TypeScript Setup](./setup-typescript.md)
 - [Path Aliases](./setup-path-aliases.md)
 - [Testing Setup](./setup-jest.md)

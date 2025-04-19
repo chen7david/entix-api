@@ -58,3 +58,4 @@ const nodeEnv = configService.env.NODE_ENV;
 
 - [dotenv documentation](https://www.npmjs.com/package/dotenv)
 - [Zod documentation](https://zod.dev/)
+- [ConfigService Documentation](./config-service.md)

@@ -208,7 +208,8 @@ See the [AppService documentation](./app-service.md) for more details on the int
 ## Related Documentation
 
 - [AppService](./app-service.md) - Express application setup with routing-controllers
-- [Environment Loader](./setup-env-loader.md)
+- [Environment Management](./setup-env-loader.md)
+- [ConfigService](./config-service.md)
 - [TypeScript Setup](./setup-typescript.md)
 - [Path Aliases](./setup-path-aliases.md)
 - [Testing Setup](./setup-jest.md)
