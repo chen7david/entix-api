@@ -16,3 +16,7 @@ export const CreateUserDto = z.object({
  * TypeScript type for a user, inferred from the Zod schema.
  */
 export type CreateUserDto = z.infer<typeof CreateUserDto>;
+
+export const UpdateUserDto = CreateUserDto.partial();
+
+export type UpdateUserDto = z.infer<typeof UpdateUserDto>;

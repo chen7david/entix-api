@@ -1,9 +1,9 @@
 import { Injectable } from '@shared/utils/ioc.util';
 import { LoggerService, Logger } from '@shared/services/logger/logger.service';
 import { validateBody } from '@shared/middleware/validation.middleware';
-import { CreateUserDto } from '@domains/user/user.dto';
+import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { UserRepository } from '@domains/user/user.repository';
-import { User, UserUpdatePayload } from '@domains/user/user.model';
+import { User } from '@domains/user/user.model';
 import {
   JsonController,
   Get,
@@ -63,7 +63,8 @@ export class UsersController {
    * Update a user by ID.
    */
   @Put('/:id')
-  async update(@Param('id') id: number, @Body() data: UserUpdatePayload): Promise<User> {
+  @UseBefore(validateBody(UpdateUserDto))
+  async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
     this.logger.info({ id }, 'Updating user');
     return this.userRepository.update(id, data);
   }

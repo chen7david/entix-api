@@ -11,6 +11,14 @@ import type { RequestSource, ValidationSchemas } from '@shared/types/validation.
  * @throws ValidationError if invalid
  */
 function parseOrThrow<T>(schema: ZodTypeAny, context: { data: unknown; source: RequestSource }): T {
+  // Reject empty body for 'body' source
+  if (
+    context.source === 'body' &&
+    (!context.data ||
+      (typeof context.data === 'object' && Object.keys(context.data as object).length === 0))
+  ) {
+    throw new ValidationError('Request body is required');
+  }
   try {
     return schema.parse(context.data);
   } catch (err) {

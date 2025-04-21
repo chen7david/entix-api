@@ -33,6 +33,14 @@ describe('validation.middleware', () => {
       validateBody(schema)(req, res, next);
       expect(next.mock.calls[0][0]).toBeInstanceOf(ValidationError);
     });
+
+    it('calls next with ValidationError for empty body', () => {
+      const req = httpMocks.createRequest({ body: {} });
+      const res = httpMocks.createResponse();
+      validateBody(schema)(req, res, next);
+      expect(next.mock.calls[0][0]).toBeInstanceOf(ValidationError);
+      expect(next.mock.calls[0][0].message).toMatch(/required/i);
+    });
   });
 
   describe('validateQuery', () => {
