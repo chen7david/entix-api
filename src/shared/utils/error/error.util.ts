@@ -193,6 +193,26 @@ export class RateLimitError extends AppError {
 export function createAppError(error: unknown): AppError {
   if (error instanceof AppError) return error;
   if (error instanceof ZodError) return AppError.fromZodError(error);
+
+  // Handle Postgres unique constraint violation (error code 23505)
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === '23505'
+  ) {
+    // Optionally, extract the field from error.detail for a better message
+    const detail = (error as { detail?: string }).detail;
+    let message = 'Resource already exists';
+    if (detail) {
+      const match = detail.match(/\(([^)]+)\)=\(([^)]+)\)/);
+      if (match) {
+        message = `Resource with ${match[1]} "${match[2]}" already exists`;
+      }
+    }
+    return new ConflictError(message);
+  }
+
   if (error instanceof Error) {
     return new InternalError({
       message: 'An unexpected error occurred',
