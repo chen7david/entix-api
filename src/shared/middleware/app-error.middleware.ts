@@ -22,6 +22,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
    * @param response - Express response object
    * @param _next - Express next function
    */
+  /* eslint-disable-next-line max-params */
   error(error: unknown, request: Request, response: Response, _next: NextFunction): void {
     // Convert to AppError for consistent handling
     const appError = this.normalizeError(error);
