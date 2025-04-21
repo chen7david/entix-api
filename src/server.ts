@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
-import { ServerService } from '@shared/services/server.service';
+import { ServerService } from '@shared/services/server/server.service';
 
 /**
  * Entry point: bootstraps and starts the server.

@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
-import { ServerService } from '@shared/services/server.service';
-import { AppService } from '@shared/services/app.service';
-import { ConfigService } from '@shared/services/config.service';
+import { ServerService } from '@shared/services/server/server.service';
+import { AppService } from '@shared/services/app/app.service';
+import { ConfigService } from '@shared/services/config/config.service';
 
 describe('ServerService', () => {
   /**

@@ -1,6 +1,6 @@
-import { AppService } from '@shared/services/app.service';
-import { ConfigService } from '@shared/services/config.service';
-import { LoggerService } from '@shared/services/logger.service';
+import { AppService } from '@shared/services/app/app.service';
+import { ConfigService } from '@shared/services/config/config.service';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
 import type pino from 'pino';

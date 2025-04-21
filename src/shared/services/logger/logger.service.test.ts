@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { LoggerService } from './logger.service';
-import { ConfigService } from './config.service';
+import { LoggerService } from '@shared/services/logger/logger.service';
+import { ConfigService } from '@shared/services/config/config.service';
 import pino from 'pino';
 
 jest.mock('pino');

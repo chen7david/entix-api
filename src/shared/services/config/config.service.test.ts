@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/config/config.service';
 
 describe('ConfigService', () => {
   beforeEach(() => {

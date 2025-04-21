@@ -1,6 +1,6 @@
 import { JsonController, Get } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
-import { LoggerService, Logger } from '@src/shared/services/logger.service';
+import { LoggerService, Logger } from '@shared/services/logger/logger.service';
 
 /**
  * UsersController handles user-related endpoints.
