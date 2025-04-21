@@ -1,6 +1,7 @@
 import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
+import { DatabaseService } from '@shared/services/database/database.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
 import type pino from 'pino';
@@ -19,6 +20,7 @@ export class ServerService {
     private readonly appService: AppService,
     private readonly configService: ConfigService,
     private readonly loggerService: LoggerService,
+    private readonly databaseService: DatabaseService,
   ) {}
 
   /**
@@ -43,11 +45,11 @@ export class ServerService {
       logger.info(`Server started on http://localhost:${port}`);
     });
 
-    // Register config cleanup
-    // this.cleanup(async (logger) => {
-    //   await this.exampleService.cleanup();
-    //   logger.info('ExampleService cleaned up');
-    // });
+    // Register database cleanup
+    this.cleanup(async (logger) => {
+      await this.databaseService.cleanup();
+      logger.info('DatabaseService cleaned up');
+    });
 
     // Handle process signals for graceful shutdown
     const shutdown = async () => {

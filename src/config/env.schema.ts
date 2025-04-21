@@ -9,6 +9,7 @@ export const envSchema = z.object({
   PORT: z.string().regex(/^\d+$/).transform(Number),
   NODE_ENV: z.nativeEnum(NodeEnv),
   LOG_LEVEL: z.nativeEnum(LogLevel),
+  DATABASE_URL: z.string(),
   // Add more environment variables as needed
 });
 
