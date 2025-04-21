@@ -18,6 +18,7 @@ src/
       app.service.ts      # Configures Express and routing-controllers
       config.service.ts   # Loads and validates env, exposes config
       server.service.ts   # Manages server lifecycle
+      logger.service.ts   # Manages logging
     utils/
       ioc.util.ts         # Exports Injectable, Inject, and all TypeDI decorators
 server.ts                 # Entry point
@@ -28,8 +29,130 @@ server.ts                 # Entry point
 - **Dependency Injection**: All services use TypeDI via a shared `@Injectable` decorator from `@shared/utils/ioc.util`.
 - **Path Aliases**: All imports use aliases (e.g. `@shared/services/...`, `@src/config/...`) for clarity and maintainability.
 - **Validation**: Environment variables are validated with Zod, not class-validator.
-- **Graceful Shutdown**: `ServerService` supports async cleanup hooks for safe shutdown.
+- **Logging**: All logging is performed via a singleton `LoggerService` using [Pino](https://getpino.io/), with pretty-printing in development and structured JSON in production. Log levels are type-safe and DRY via a shared enum.
+- **Graceful Shutdown**: `ServerService` supports async cleanup hooks for safe shutdown, and passes the logger to all cleanup functions for structured logging during shutdown.
 - **DRY & Modular**: Each service has a single responsibility and is easily testable.
+
+## Logger Service
+
+### Rationale
+
+Logging is handled by a dedicated `LoggerService` that wraps [Pino](https://getpino.io/), providing:
+
+- Consistent, high-performance logging across all environments
+- Pretty logs in development, structured JSON in production
+- Type-safe log levels via a shared enum (`LogLevel`)
+- Dependency-injected logger for testability and modularity
+- A `cleanup()` method for future extensibility (e.g., log flushing, New Relic integration)
+
+### Usage Example
+
+#### 1. Logger Service (`@shared/services/logger.service.ts`)
+
+```ts
+import { Injectable } from '@shared/utils/ioc.util';
+import pino, { Logger as PinoLogger, Level } from 'pino';
+import { LogLevel } from '@shared/constants/logger.constants';
+import { ConfigService } from '@shared/services/config.service';
+
+@Injectable()
+export class LoggerService {
+  // ... see codebase for full implementation
+}
+```
+
+#### 2. Injecting Logger in Services
+
+```ts
+import { LoggerService } from '@shared/services/logger.service';
+
+@Injectable()
+export class SomeService {
+  constructor(private readonly loggerService: LoggerService) {}
+
+  doSomething() {
+    this.loggerService.log({ level: LogLevel.INFO, msg: 'Doing something' });
+  }
+}
+```
+
+#### 3. Cleanup Pattern in ServerService
+
+```ts
+import { LoggerService } from '@shared/services/logger.service';
+import type pino from 'pino';
+
+@Injectable()
+export class ServerService {
+  private cleanupTasks: ((logger: pino.Logger) => Promise<void>)[] = [];
+  constructor(/* ... */) {
+    /* ... */
+  }
+
+  cleanup(fn: (logger: pino.Logger) => Promise<void>): void {
+    this.cleanupTasks.push(fn);
+  }
+
+  async start(): Promise<void> {
+    const logger = this.loggerService.getLogger();
+    // ...
+    const shutdown = async () => {
+      await Promise.all(this.cleanupTasks.map((fn) => fn(logger)));
+      logger.info('Cleanup complete. Exiting.');
+      process.exit(0);
+    };
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+  }
+}
+```
+
+#### 4. Registering a Cleanup Task
+
+```ts
+serverService.cleanup(async (logger) => {
+  // ... perform cleanup
+  logger.info('Service cleaned up');
+});
+```
+
+### Logging Best Practices
+
+- Use the `LoggerService` for all logs; do not use `console.log`.
+- Use the `LogLevel` enum for type-safe log levels.
+- Add context to logs using Pino's child loggers or metadata objects.
+- Never log sensitive data.
+- Use the logger in cleanup functions for visibility during shutdown.
+- In tests, mock or stub the logger to avoid noisy output.
+
+### Example: Entry Point (`src/server.ts`)
+
+```ts
+import 'reflect-metadata';
+import { Container } from 'typedi';
+import { ServerService } from '@shared/services/server.service';
+import { AppService } from '@shared/services/app.service';
+import { ConfigService } from '@shared/services/config.service';
+import { LoggerService } from '@shared/services/logger.service';
+
+async function main() {
+  const configService = Container.get(ConfigService);
+  const loggerService = Container.get(LoggerService);
+  const appService = new AppService();
+  const serverService = new ServerService({
+    appService,
+    configService,
+    loggerService,
+  });
+  await serverService.start();
+}
+main().catch((err) => {
+  // Use a fallback logger if DI fails
+  // eslint-disable-next-line no-console
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});
+```
 
 ## Usage Example
 

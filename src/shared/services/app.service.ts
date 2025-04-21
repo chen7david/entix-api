@@ -11,7 +11,10 @@ import { Injectable } from '@shared/utils/ioc.util';
 export class AppService {
   private app: Express;
 
-  constructor() {
+  /**
+   * @param _deps Dependency injection object (future-proof for logger, etc.)
+   */
+  constructor(_deps?: Record<string, unknown>) {
     useContainer(Container);
     this.app = express();
     useExpressServer(this.app, {
