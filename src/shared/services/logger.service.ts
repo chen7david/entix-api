@@ -4,6 +4,7 @@ import { ConfigService } from '@shared/services/config.service';
 import { NodeEnv } from '../constants/app.constants';
 import type { LogLevel } from '@shared/types/logger.types';
 
+export * from 'pino';
 /**
  * LoggerService provides a singleton, environment-aware logger using Pino.
  * It supports pretty-printing in development and structured JSON in production.
