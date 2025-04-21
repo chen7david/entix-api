@@ -1,8 +1,9 @@
+import { ErrorHandlerMiddleware } from '@src/shared/middleware/app-error.middleware';
 import { useContainer, useExpressServer } from 'routing-controllers';
-import { Container } from 'typedi';
-import express, { Express } from 'express';
-import path from 'path';
 import { Injectable } from '@shared/utils/ioc.util';
+import express, { Express } from 'express';
+import { Container } from 'typedi';
+import path from 'path';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.
@@ -19,9 +20,11 @@ export class AppService {
     this.app = express();
     useExpressServer(this.app, {
       routePrefix: '/api',
-      controllers: [path.join(__dirname, '../../domains/**/*.controller.{ts,js}')],
+      controllers: [path.join(__dirname, '../../../domains/**/*.controller.{ts,js}')],
       validation: false, // Disable class-validator
       classTransformer: false, // Disable class-transformer
+      middlewares: [ErrorHandlerMiddleware],
+      defaultErrorHandler: false,
     });
   }
 

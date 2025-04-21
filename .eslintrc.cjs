@@ -12,7 +12,7 @@ module.exports = {
     es2021: true,
   },
   rules: {
-    'max-params': ['error', 2],
+    'max-params': ['error', 4],
     '@typescript-eslint/no-unused-vars': [
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },

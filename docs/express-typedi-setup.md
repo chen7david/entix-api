@@ -257,6 +257,81 @@ Register async cleanup hooks with `serverService.cleanup(async () => { ... })`.
 - **No request validation**: Add Zod validation in controllers for request bodies as needed.
 - **Dependency Injection**: All DI must use the shared IoC utility to avoid multiple container instances.
 
+## Global Error Handling
+
+The API uses a centralized global error handler for all routes and controllers, ensuring consistent error responses and robust logging. This is implemented using a custom `GlobalErrorMiddleware` registered with `routing-controllers`.
+
+### Error Class Hierarchy
+
+All custom errors extend the base `AppError` class, which provides a standard structure for error responses:
+
+- `AppError` (base)
+- `NotFoundError`
+- `UnauthorizedError`
+- `ForbiddenError`
+- `BadRequestError`
+- `ValidationError` (used for Zod validation failures)
+- `InternalServerError`
+
+All error classes accept a message and optional details. Throw these errors in your controllers or services to return a structured error response to the client.
+
+#### Example Usage
+
+```ts
+import { NotFoundError } from '@shared/services/app/http-errors';
+
+@Get('/user/:id')
+getUser(@Param('id') id: string) {
+  const user = findUser(id);
+  if (!user) throw new NotFoundError('User not found');
+  return user;
+}
+```
+
+### Zod Validation Errors
+
+If a Zod schema validation fails, the error is automatically caught and formatted as a `ValidationError`, returning a 422 status and a clean, user-friendly error structure.
+
+### Unknown Errors
+
+If an unknown error occurs, the middleware logs the error with a unique reference ID using the `LoggerService` and returns a generic 500 Internal Server Error to the client, including the reference ID for support/debugging.
+
+### Example Error Response
+
+```json
+{
+  "error": "NotFoundError",
+  "message": "User not found"
+}
+```
+
+For validation errors:
+
+```json
+{
+  "error": "ValidationError",
+  "message": "Validation failed",
+  "details": [{ "path": "email", "message": "Invalid email address", "code": "invalid_string" }]
+}
+```
+
+For unknown errors:
+
+```json
+{
+  "error": "InternalServerError",
+  "message": "An unexpected error occurred.",
+  "referenceId": "b1c2d3e4-..."
+}
+```
+
+### Best Practices
+
+- Always throw `AppError` or its subclasses for predictable errors.
+- Use Zod for validation and let the middleware handle formatting.
+- Never leak sensitive information in error messages.
+- Use the reference ID from 500 errors for debugging and support.
+
 ## Further Reading
 
 - [routing-controllers docs](https://github.com/typestack/routing-controllers)
