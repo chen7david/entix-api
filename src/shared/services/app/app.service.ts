@@ -18,6 +18,9 @@ export class AppService {
   constructor(_deps?: Record<string, unknown>) {
     useContainer(Container);
     this.app = express();
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+
     useExpressServer(this.app, {
       routePrefix: '/api',
       controllers: [path.join(__dirname, '../../../domains/**/*.controller.{ts,js}')],

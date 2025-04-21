@@ -90,7 +90,7 @@ describe('validation.middleware', () => {
       // Use string for header key, but value must be string or string[]
       const req = httpMocks.createRequest({ headers: { 'x-custom': '123' } });
       // Now forcibly set to a number to simulate the error
-      req.headers['x-custom'] = 123 as any;
+      req.headers['x-custom'] = 123 as unknown as string;
       const res = httpMocks.createResponse();
       validateHeaders(schema)(req, res, next);
       expect(next.mock.calls[0][0]).toBeInstanceOf(ValidationError);
