@@ -14,6 +14,8 @@ const config: Config = {
   collectCoverage: false,
   moduleNameMapper: {
     '^@src/(.*)$': '<rootDir>/src/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@domains/(.*)$': '<rootDir>/src/domains/$1',
   },
 };
 
