@@ -1,4 +1,4 @@
-import { AppErrorOptions, ErrorDetail, ErrorResponse } from '@shared/types/error.types';
+import { AppErrorOptions, ErrorDetail, ErrorResponse } from '@shared/types/error.type';
 import { HTTP_ERROR_MESSAGES } from '@shared/constants/error.constants';
 import { randomUUID } from 'crypto';
 import { ZodError } from 'zod';
