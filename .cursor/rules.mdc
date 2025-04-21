@@ -1,0 +1,68 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Agent Permissions:
+  - full access to codebase
+  - full internet access
+  - command line access
+
+- Task Sequence:
+
+1. TASK: clarify-requirements
+  - ACTIONS:
+    - load and parse `package.json` and any relevant files
+    - load full codebase if necessary
+    - extract current implementation details
+    - compare against feature or system requirements
+    - identify missing functionality
+    - document all known requirements clearly
+  - OUTPUT: list of understood requirements
+
+2. TASK: build-knowledge-context
+  - ACTIONS:
+    - search for the most recent documentation of relevant packages
+    - research best architectural patterns and implementations based on current requirements
+    - reference industry standards and current best practices
+  - OUTPUT: research summary to support design and implementation
+
+3. TASK: create-implementation-plan
+  - ACTIONS:
+    - define step-by-step implementation plan based on current knowledge
+    - structure plan to prioritize readability, maintainability, and system consistency
+  - OUTPUT: implementation plan with clearly defined steps
+
+4. TASK: execute-implementation
+  - ACTIONS:
+    - follow the implementation plan step by step
+    - ensure time complexity remains below O(n^2) when possible
+    - write code in line with architectural best practices
+    - prioritize clean organization and readability
+  - OUTPUT: completed code changes
+
+5. TASK: test-implementation
+  - ACTIONS:
+    - determine if testing is required based on the nature of the changes
+    - if testing is required:
+      - identify whether to create or update tests
+      - decide where tests should be located (existing or new test files)
+      - run all relevant tests
+      - debug and adjust code or tests until all pass
+  - OUTPUT: test results and final validation
+
+6. TASK: update-documentation
+  - ACTIONS:
+    - decide whether new documentation is needed or existing should be updated
+    - write clear explanation of the change, including rationale and implementation approach
+    - include clean usage examples
+    - explain relevant principles used
+    - note any known limitations or vulnerabilities
+    - provide links to helpful resources if any concepts or packages are introduced
+  - OUTPUT: updated or new documentation
+
+7. TASK: finalize
+  - ACTIONS:
+    - review all prior steps for completion
+    - if any task was skipped, revisit and complete it as needed
+  - OUTPUT: final verification log

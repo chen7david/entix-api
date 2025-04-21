@@ -1,3 +1,3 @@
-import { hello } from "../../../server";
+import { hello } from '../../../server';
 
 hello();
