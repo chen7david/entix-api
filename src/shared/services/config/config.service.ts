@@ -1,6 +1,7 @@
 import { envSchema, Env } from '@src/config/env.schema';
 import dotenv from 'dotenv';
 import { Injectable } from '@shared/utils/ioc.util';
+import { InternalError } from '@shared/utils/error/error.util';
 
 /**
  * ConfigService loads and validates environment variables using dotenv and zod.
@@ -26,10 +27,10 @@ export class ConfigService {
    */
   get<K extends keyof Env>(key: K): Env[K] {
     if (this.configError) {
-      throw new Error(this.configError);
+      throw new InternalError(this.configError);
     }
     if (!this.config) {
-      throw new Error('Config not loaded.');
+      throw new InternalError('Config not loaded.');
     }
     return this.config[key];
   }
