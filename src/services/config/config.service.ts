@@ -1,17 +1,11 @@
 import { IoC } from '@src/shared/constants/ioc.constants';
 import { ZodError, ZodSchema } from 'zod';
 import { config as dotenvConfig } from 'dotenv';
-import { envSchema, EnvSchema } from '@src/config/config.schema';
+import { EnvSchema } from '@src/config/config.schema';
 import { EnvFile, NodeEnv } from '@src/shared/constants/app.constants';
 import path from 'path';
 import fs from 'fs';
-import {
-  Container,
-  Inject,
-  Injectable,
-} from '@src/shared/utils/typedi/typedi.util';
-
-Container.set(IoC.ENV_SCHEMA, envSchema);
+import { Inject, Injectable } from '@src/shared/utils/typedi/typedi.util';
 
 @Injectable()
 export class ConfigService {

@@ -3,11 +3,13 @@ import express from 'express';
 import { useExpressServer, useContainer } from 'routing-controllers';
 import { AppServiceOptions } from './app.types';
 import { Container } from '@src/shared/utils/typedi/typedi.util';
+import { Injectable } from '@src/shared/utils/typedi/typedi.util';
 
 /**
  * AppService creates and configures an Express application
  * with routing-controllers integration.
  */
+@Injectable()
 export class AppService {
   private app: express.Application;
 

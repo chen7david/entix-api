@@ -9,6 +9,10 @@ import { ServerServiceOptions, ServerListeningInfo } from './server.types';
 import express from 'express';
 import http from 'http';
 import os from 'os';
+import { Injectable } from '@src/shared/utils/typedi/typedi.util';
+import { AppService } from '@src/services/app/app.service';
+import { ConfigService } from '@src/services/config/config.service';
+import { LoggerService } from '@src/services/logger/logger.service';
 // import { LoggerService } from '@src/services/logger/logger.service';
 // import { Container } from '@src/shared/utils/typedi/typedi.util';
 
@@ -16,6 +20,7 @@ import os from 'os';
 // console.log({ logger });
 // const serverLogger = logger.getChildLogger({ context: 'ServerService' });
 
+@Injectable()
 export class ServerService {
   /** The Express application instance */
   private readonly app: express.Application;
@@ -32,6 +37,10 @@ export class ServerService {
   /** Tracks if shutdown is in progress */
   private isShuttingDown = false;
 
+  private onListening?: (info: ServerListeningInfo) => void;
+  private onError?: (error: Error) => void;
+  private beforeShutdown?: () => Promise<void>;
+
   /**
    * Creates a new ServerService instance.
    * @param options - Configuration options for the server
@@ -47,18 +56,25 @@ export class ServerService {
    * });
    * ```
    */
-  constructor(options: ServerServiceOptions) {
-    if (!options?.app) {
-      throw new Error('Express application instance is required');
-    }
-    if (typeof options.port !== 'number') {
-      throw new Error('Port number is required');
-    }
-
-    this.app = options.app;
-    this.port = options.port;
+  constructor(
+    private readonly appService: AppService,
+    private readonly configService: ConfigService,
+    private readonly loggerService: LoggerService
+  ) {
+    this.app = this.appService.getApp();
+    this.port = this.configService.env.PORT;
     this.server = http.createServer(this.app);
-    this.setupEventHandlers(options);
+    this.setupEventHandlers();
+  }
+
+  public setOptions(options: Partial<ServerServiceOptions>): void {
+    this.onListening = options.onListening;
+    this.onError = options.onError;
+    if (options.beforeShutdown) {
+      this.beforeShutdown = async () => {
+        await Promise.resolve(options.beforeShutdown!());
+      };
+    }
   }
 
   /**
@@ -126,55 +142,41 @@ export class ServerService {
    * @param options - Server configuration options containing event handlers
    * @internal
    */
-  private setupEventHandlers(options: ServerServiceOptions): void {
+  private setupEventHandlers(): void {
     const shutdownHandler = async () => {
-      // Prevent multiple shutdown attempts
-      if (this.isShuttingDown) {
-        return;
-      }
+      if (this.isShuttingDown) return;
       this.isShuttingDown = true;
-
-      // logger.info('Starting graceful shutdown...');
-
       try {
-        if (options.beforeShutdown) {
-          // logger.info('Running beforeShutdown handler...');
-          await Promise.resolve(options.beforeShutdown());
+        if (this.beforeShutdown) {
+          this.loggerService.info('beforeShutdown');
+          await Promise.resolve(this.beforeShutdown());
         }
-
         if (this.isRunning) {
-          // logger.info('Stopping server...');
           await this.stop();
-          // logger.info('Server stopped successfully');
         }
       } catch (error) {
-        console.error('Error during shutdown:', error);
-        if (options.onError) {
-          options.onError(error as Error);
+        this.loggerService.error('Error during shutdown:', error);
+        if (this.onError) {
+          this.onError(error as Error);
         }
         process.exit(1);
       }
-
       process.exit(0);
     };
-
-    // Use process.once to ensure handlers run only once
     process.once('SIGTERM', shutdownHandler);
     process.once('SIGINT', shutdownHandler);
-
     this.server.on('error', (error: Error) => {
-      if (options.onError) {
-        options.onError(error);
+      if (this.onError) {
+        this.onError(error);
       }
     });
-
     this.server.on('listening', () => {
-      if (options.onListening) {
+      if (this.onListening) {
         const info: ServerListeningInfo = {
           port: this.port,
           ip: this.getServerIp(),
         };
-        options.onListening(info);
+        this.onListening(info);
       }
     });
   }
