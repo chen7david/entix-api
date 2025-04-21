@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -31,9 +32,10 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.6",
+    "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "ts-jest": "^29.3.2",
-    "tsx": "^4.19.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "prettier": {
