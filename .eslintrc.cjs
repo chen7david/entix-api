@@ -18,6 +18,24 @@ module.exports = {
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
     'prettier/prettier': 'error',
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: ['../*', './*'],
+        paths: [
+          {
+            name: '..',
+            message:
+              'Use path aliases (e.g., @src/, @shared/, @domains/) instead of relative imports.',
+          },
+          {
+            name: '.',
+            message:
+              'Use path aliases (e.g., @src/, @shared/, @domains/) instead of relative imports.',
+          },
+        ],
+      },
+    ],
   },
   ignorePatterns: ['dist', 'node_modules'],
 };
