@@ -12,6 +12,9 @@ const config: Config = {
   testEnvironment: 'node',
   testMatch: ['<rootDir>/src/**/*.test.ts'],
   collectCoverage: false,
+  moduleNameMapper: {
+    '^@src/(.*)$': '<rootDir>/src/$1',
+  },
 };
 
 export default config;
