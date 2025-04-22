@@ -35,6 +35,9 @@ alwaysApply: true
 
 4. TASK: execute-implementation
   - ACTIONS:
+    - only user path aliases in this project as defined in root tsconfig
+    - always add @OpenApi descritpion of new routes 
+    - always update @OpenApi descritpion when updates effect that routes use
     - follow the implementation plan step by step
     - ensure time complexity remains below O(n^2) when possible
     - write code in line with architectural best practices
