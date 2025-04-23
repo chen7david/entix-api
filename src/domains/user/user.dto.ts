@@ -1,4 +1,5 @@
 import { z } from '@shared/utils/zod.util';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 /**
  * Zod schema for creating a user. Used for request body validation.
@@ -76,3 +77,13 @@ export const UserDto = z
  * Type alias for UserDto inferred type.
  */
 export type UserDto = z.infer<typeof UserDto>;
+
+/**
+ * Registers user-related Zod schemas with the OpenAPI registry.
+ * @param registry - The OpenAPIRegistry instance to register schemas on.
+ */
+export function registerOpenApiUserSchemas(registry: OpenAPIRegistry): void {
+  registry.register('CreateUserDto', CreateUserDto);
+  registry.register('UpdateUserDto', UpdateUserDto);
+  registry.register('UserDto', UserDto);
+}

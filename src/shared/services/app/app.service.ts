@@ -6,7 +6,7 @@ import { Container } from 'typedi';
 import path from 'path';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { CreateUserDto, UpdateUserDto, UserDto } from '@src/domains/user/user.dto';
+import { registerSchemas } from '@src/openapi/register-schemas';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.
@@ -38,12 +38,8 @@ export class AppService {
      */
     this.app.get('/api/openapi.json', (_req, res) => {
       const registry = new OpenAPIRegistry();
-
-      // --- Register Zod Schemas Here ---
-      registry.register('CreateUserDto', CreateUserDto);
-      registry.register('UpdateUserDto', UpdateUserDto);
-      registry.register('UserDto', UserDto);
-      // Add registrations for other schemas used across controllers if any
+      // Register all Zod schemas
+      registerSchemas(registry);
 
       // Generate OpenAPI schema components from Zod schemas
       const generator = new OpenApiGeneratorV3(registry.definitions);
