@@ -1,7 +1,7 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
 import { AppError, NotFoundError, ValidationError } from '@shared/utils/error/error.util';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import { ZodError, z } from 'zod';
+import { ZodError, z } from '@shared/utils/zod.util';
 import { Request, Response, NextFunction } from 'express';
 
 const createMockRes = (): Response => {

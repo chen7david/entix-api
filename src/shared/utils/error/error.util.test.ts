@@ -11,7 +11,7 @@ import {
   RateLimitError,
   createAppError,
 } from '@shared/utils/error/error.util';
-import { ZodError, z } from 'zod';
+import { ZodError, z } from '@shared/utils/zod.util';
 
 describe('AppError and subclasses', () => {
   it('constructs with a message (overload)', () => {

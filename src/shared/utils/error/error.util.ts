@@ -1,7 +1,7 @@
 import { AppErrorOptions, ErrorDetail, ErrorResponse } from '@shared/types/error.type';
 import { HTTP_ERROR_MESSAGES } from '@shared/constants/error.constants';
 import { randomUUID } from 'crypto';
-import { ZodError } from 'zod';
+import { ZodError } from '@shared/utils/zod.util';
 
 /**
  * Base error class for all application errors

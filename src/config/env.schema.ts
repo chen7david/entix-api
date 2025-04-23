@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@shared/utils/zod.util';
 import { LogLevel } from '@shared/constants/logger.constants';
 import { NodeEnv } from '@src/shared/constants/app.constants';
 

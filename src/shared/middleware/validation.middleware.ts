@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodTypeAny, ZodError } from 'zod';
+import { ZodTypeAny, ZodError } from '@shared/utils/zod.util';
 import { ValidationError } from '@shared/utils/error/error.util';
 import type { RequestSource, ValidationSchemas } from '@shared/types/validation.type';
 

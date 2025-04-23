@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@shared/utils/zod.util';
 
 /**
  * Zod schema for creating a user. Used for request body validation.

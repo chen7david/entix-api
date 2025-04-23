@@ -4,7 +4,7 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorResponse } from '@shared/types/error.type';
 import { Injectable } from '@shared/utils/ioc.util';
-import { ZodError } from 'zod';
+import { ZodError } from '@shared/utils/zod.util';
 
 /**
  * Global error handler middleware that intercepts and processes all errors
