@@ -15,7 +15,7 @@ import {
   Delete,
   OnUndefined,
 } from 'routing-controllers';
-import { OpenAPI } from 'routing-controllers-openapi';
+import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 /**
  * UsersController handles user-related endpoints.
@@ -40,18 +40,19 @@ export class UsersController {
     summary: 'Get all users',
     description: 'Returns a list of all users in the system.',
     responses: {
-      '200': {
-        description: 'A list of users',
-        content: {
-          'application/json': {
-            schema: { type: 'array', items: { $ref: '#/components/schemas/User' } },
-          },
-        },
-      },
+      // Response schema defined by @ResponseSchema below
+      // '200': {
+      //   description: 'A list of users',
+      //   content: {
+      //     'application/json': {
+      //       schema: { type: 'array', items: { $ref: '#/components/schemas/UserDto' } },
+      //     },
+      //   },
+      // },
     },
     tags: ['Users'],
   })
-  // TODO: Use a runtime class or Zod-to-JSON-schema utility for @ResponseSchema if available
+  @ResponseSchema('UserDto', { isArray: true })
   async getAll(): Promise<User[]> {
     this.logger.info('Fetching all users');
     return this.userRepository.getAll();
@@ -74,19 +75,20 @@ export class UsersController {
       },
     ],
     responses: {
-      '200': {
-        description: 'The user object',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/User' },
-          },
-        },
-      },
+      // Response schema defined by @ResponseSchema below
+      // '200': {
+      //   description: 'The user object',
+      //   content: {
+      //     'application/json': {
+      //       schema: { $ref: '#/components/schemas/UserDto' },
+      //     },
+      //   },
+      // },
       '404': { description: 'User not found' },
     },
     tags: ['Users'],
   })
-  // TODO: Use a runtime class or Zod-to-JSON-schema utility for @ResponseSchema if available
+  @ResponseSchema('UserDto')
   async getById(@Param('id') id: number): Promise<User> {
     this.logger.info({ id }, 'Fetching user by ID');
     return this.userRepository.getById(id);
@@ -109,19 +111,20 @@ export class UsersController {
       },
     },
     responses: {
-      '200': {
-        description: 'The created user',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/User' },
-          },
-        },
-      },
+      // Response schema defined by @ResponseSchema below
+      // '200': {
+      //   description: 'The created user',
+      //   content: {
+      //     'application/json': {
+      //       schema: { $ref: '#/components/schemas/UserDto' },
+      //     },
+      //   },
+      // },
       '400': { description: 'Invalid input' },
     },
     tags: ['Users'],
   })
-  // TODO: Use a runtime class or Zod-to-JSON-schema utility for @ResponseSchema if available
+  @ResponseSchema('UserDto')
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     this.logger.info({ email: createUserDto.email }, 'Creating user');
     return this.userRepository.create(createUserDto);
@@ -153,19 +156,20 @@ export class UsersController {
       },
     },
     responses: {
-      '200': {
-        description: 'The updated user',
-        content: {
-          'application/json': {
-            schema: { $ref: '#/components/schemas/User' },
-          },
-        },
-      },
+      // Response schema defined by @ResponseSchema below
+      // '200': {
+      //   description: 'The updated user',
+      //   content: {
+      //     'application/json': {
+      //       schema: { $ref: '#/components/schemas/UserDto' },
+      //     },
+      //   },
+      // },
       '404': { description: 'User not found' },
     },
     tags: ['Users'],
   })
-  // TODO: Use a runtime class or Zod-to-JSON-schema utility for @ResponseSchema if available
+  @ResponseSchema('UserDto')
   async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
     this.logger.info({ id }, 'Updating user');
     return this.userRepository.update(id, data);

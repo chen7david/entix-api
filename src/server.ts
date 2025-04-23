@@ -1,4 +1,7 @@
 import 'reflect-metadata';
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+extendZodWithOpenApi(z);
 import { Container } from 'typedi';
 import { ServerService } from '@shared/services/server/server.service';
 
