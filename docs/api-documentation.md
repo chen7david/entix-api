@@ -58,6 +58,75 @@ async getAll(): Promise<User[]> { /* ... */ }
 - Reference DTOs or schemas in your OpenAPI docs for request and response bodies.
 - If using Zod or other runtime schemas, consider using a Zod-to-OpenAPI tool for advanced schema generation.
 
+### 4. Registering Zod Schemas with the OpenAPI Registry
+
+We generate a fresh `OpenAPIRegistry()` in our application bootstrap (in `AppService`) and then explicitly wire up each Zod schema using modular registration helpers defined alongside the DTO files. This pattern ensures clarity, modularity, and testability.
+
+**Per-Domain Registration Helpers**
+
+In each DTO file (e.g., `src/domains/user/user.dto.ts`), export a function:
+
+```ts
+// src/domains/user/user.dto.ts
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+
+// ... CreateUserDto, UpdateUserDto, UserDto definitions ...
+
+/**
+ * Registers user-related Zod schemas with the OpenAPI registry.
+ */
+export function registerUserSchemas(registry: OpenAPIRegistry): void {
+  registry.register('CreateUserDto', CreateUserDto);
+  registry.register('UpdateUserDto', UpdateUserDto);
+  registry.register('UserDto', UserDto);
+}
+```
+
+- **Publish your helper:** Add `registerUserSchemas` to the central `src/openapi/register-schemas.ts` (see below).
+
+**Then in AppService**  
+Import and invoke the central registrar instead of wiring each DTO directly:
+
+```ts
+// src/shared/services/app/app.service.ts
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { registerSchemas } from '@src/openapi/register-schemas';
+
+this.app.get('/api/openapi.json', (_req, res) => {
+  const registry = new OpenAPIRegistry();
+  // Call the centralized schema registrar:
+  registerSchemas(registry);
+  // ... generate and return the spec ...
+});
+```
+
+**Aggregating Multiple Domains**
+
+Centralize all per-domain helpers here so you only touch one place when adding new DTOs:
+
+```ts
+// src/openapi/register-schemas.ts
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import { registerUserSchemas } from '@src/domains/user/user.dto';
+// import other registerXxxSchemas...
+
+/**
+ * Registers all Zod schemas across domains in one place.
+ */
+export function registerSchemas(registry: OpenAPIRegistry): void {
+  registerUserSchemas(registry);
+  // registerProductSchemas(registry);
+  // registerOrderSchemas(registry);
+  // …add your new registerXxxSchemas here
+}
+```
+
+**Flow when adding a new DTO:**
+
+1. In your new DTO file, define `export function registerYourDtoSchemas(registry: OpenAPIRegistry) { /*…*/ }`.
+2. Add an import and call to your helper in `src/openapi/register-schemas.ts` under `registerSchemas`.
+3. Bootstrapping in `AppService` now automatically picks up your new schemas via `registerSchemas(registry)`.
+
 ---
 
 ## How the CI/CD Pipeline Keeps Docs Up to Date
@@ -80,6 +149,7 @@ async getAll(): Promise<User[]> { /* ... */ }
 - **Keep it DRY**: Reference shared schemas/components where possible.
 - **Review regularly**: Make documentation updates part of your code review process.
 - **Automate**: Rely on the CI/CD pipeline to keep your docs and Postman collection in sync.
+- **Modular Schema Registration**: Define `registerXxxSchemas` functions next to your DTOs and import them explicitly in your bootstrap. This avoids global side-effects and keeps your spec generation clear and maintainable.
 
 ---
 
