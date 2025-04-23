@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { registerUserSchemas } from '@src/domains/user/user.dto';
+import { registerUserSchemas } from '@domains/user/user.dto';
 
 /**
  * Registers all Zod schemas across domains in one place.

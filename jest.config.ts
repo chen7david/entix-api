@@ -15,9 +15,11 @@ const config: Config = {
   detectOpenHandles: true,
   verbose: true,
   moduleNameMapper: {
-    '^@src/(.*)$': '<rootDir>/src/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
     '^@domains/(.*)$': '<rootDir>/src/domains/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@openapi/(.*)$': '<rootDir>/src/openapi/$1',
+    '^@database/(.*)$': '<rootDir>/src/database/$1',
   },
 };
 

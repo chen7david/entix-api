@@ -1,5 +1,5 @@
 import { ExpressErrorMiddlewareInterface, Middleware } from 'routing-controllers';
-import { AppError, createAppError } from '@src/shared/utils/error/error.util';
+import { AppError, createAppError } from '@shared/utils/error/error.util';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorResponse } from '@shared/types/error.type';

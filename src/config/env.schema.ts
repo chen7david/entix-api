@@ -1,6 +1,6 @@
 import { z } from '@shared/utils/zod.util';
 import { LogLevel } from '@shared/constants/logger.constants';
-import { NodeEnv } from '@src/shared/constants/app.constants';
+import { NodeEnv } from '@shared/constants/app.constants';
 
 /**
  * Zod schema for environment variables.

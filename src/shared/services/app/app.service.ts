@@ -1,4 +1,4 @@
-import { ErrorHandlerMiddleware } from '@src/shared/middleware/app-error.middleware';
+import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
 import { useContainer, useExpressServer, getMetadataArgsStorage } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
 import express, { Express } from 'express';
@@ -6,7 +6,7 @@ import { Container } from 'typedi';
 import path from 'path';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { registerSchemas } from '@src/openapi/register-schemas';
+import { registerSchemas } from '@openapi/register-schemas';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.

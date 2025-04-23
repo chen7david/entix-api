@@ -1,4 +1,4 @@
-import { envSchema, Env } from '@src/config/env.schema';
+import { envSchema, Env } from '@config/env.schema';
 import dotenv from 'dotenv';
 import { Injectable } from '@shared/utils/ioc.util';
 import { InternalError } from '@shared/utils/error/error.util';
