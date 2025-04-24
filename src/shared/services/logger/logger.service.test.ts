@@ -2,7 +2,9 @@ import 'reflect-metadata';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import pino from 'pino';
+import { Container } from 'typedi';
 
+// We still need to mock external dependencies like pino
 jest.mock('pino');
 
 /**
@@ -14,6 +16,9 @@ describe('LoggerService', () => {
   let configService: ConfigService;
 
   beforeEach(() => {
+    // Reset the container before each test
+    Container.reset();
+
     mockLogger = {
       fatal: jest.fn(),
       error: jest.fn(),
@@ -24,7 +29,9 @@ describe('LoggerService', () => {
       child: jest.fn().mockReturnThis(),
       flush: jest.fn((cb) => cb && cb()),
     };
+
     (pino as unknown as jest.Mock).mockReturnValue(mockLogger);
+
     configService = {
       get: jest.fn((key) => {
         if (key === 'NODE_ENV') return 'development';
@@ -32,7 +39,12 @@ describe('LoggerService', () => {
         return undefined;
       }),
     } as unknown as ConfigService;
-    loggerService = new LoggerService(configService);
+
+    // Register mocks with the container
+    Container.set(ConfigService, configService);
+
+    // Get the service from the container
+    loggerService = Container.get(LoggerService);
   });
 
   afterEach(() => {

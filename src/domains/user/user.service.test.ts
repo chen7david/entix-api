@@ -1,19 +1,17 @@
+import 'reflect-metadata';
 import { UserService } from '@domains/user/user.service';
 import { UserRepository } from '@domains/user/user.repository';
-import { LoggerService } from '@shared/services/logger/logger.service';
+import { LoggerService, Logger } from '@shared/services/logger/logger.service';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { User } from '@domains/user/user.model';
-
-// Mock dependencies
-jest.mock('@domains/user/user.repository');
-jest.mock('@shared/services/logger/logger.service');
+import { Container } from 'typedi';
 
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: jest.Mocked<UserRepository>;
   let loggerService: jest.Mocked<LoggerService>;
-  let loggerChild: jest.Mock;
+  let mockLogger: jest.Mocked<Logger>;
 
   const mockUser = {
     id: 1,
@@ -25,19 +23,20 @@ describe('UserService', () => {
   };
 
   beforeEach(() => {
-    // Clear all mocks
-    jest.clearAllMocks();
+    // Reset the container before each test
+    Container.reset();
 
-    // Setup mocks
-    loggerChild = jest.fn().mockReturnValue({
+    // Create mock logger
+    mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
-    });
+    } as unknown as jest.Mocked<Logger>;
 
+    // Create mock services
     loggerService = {
-      child: loggerChild,
+      child: jest.fn().mockReturnValue(mockLogger),
     } as unknown as jest.Mocked<LoggerService>;
 
     userRepository = {
@@ -48,8 +47,16 @@ describe('UserService', () => {
       delete: jest.fn(),
     } as unknown as jest.Mocked<UserRepository>;
 
-    // Create service instance with mocked dependencies
-    userService = new UserService(loggerService, userRepository);
+    // Register mocks with the container
+    Container.set(LoggerService, loggerService);
+    Container.set(UserRepository, userRepository);
+
+    // Get the service under test from the container
+    userService = Container.get(UserService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('findAll', () => {

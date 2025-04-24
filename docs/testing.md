@@ -1,0 +1,126 @@
+# Testing Guide
+
+This guide covers best practices for testing within the Entix API project, with a focus on dependency injection using TypeDI.
+
+## Testing Philosophy
+
+Our tests follow these core principles:
+
+1. **Isolation**: Tests should be isolated and not depend on the execution of other tests.
+2. **Repeatability**: Tests should produce the same results when run multiple times.
+3. **Speed**: Tests should run quickly to encourage frequent testing.
+4. **Clarity**: Tests should clearly indicate what they're testing and what went wrong when they fail.
+
+## Using TypeDI Container in Tests
+
+### Why Use the DI Container for Testing?
+
+Using TypeDI for dependency injection in tests offers several advantages over traditional mocking:
+
+1. **Real-world usage**: Tests reflect how services are actually instantiated and used in production.
+2. **Fewer mocks**: You can register mock implementations directly in the container, reducing the need for `jest.mock()` calls.
+3. **Better encapsulation**: The DI container handles dependency resolution, so your tests don't need to know the internal structure of services.
+4. **Simpler refactoring**: When service dependencies change, often only the container configuration needs updating, not all test files.
+5. **Cleaner test code**: Container-based tests are typically more readable and maintainable.
+
+### Key Differences from Traditional Mocking
+
+Traditional approach with `jest.mock()`:
+
+```typescript
+// Mock dependencies at the module level
+jest.mock('@domains/user/user.repository');
+jest.mock('@shared/services/logger/logger.service');
+
+// In your test:
+const userRepository = new UserRepository() as jest.Mocked<UserRepository>;
+userRepository.findById.mockResolvedValue({ id: 1, name: 'Test' });
+
+const service = new UserService(loggerService, userRepository);
+```
+
+Container-based approach:
+
+```typescript
+// In your test:
+Container.reset();
+
+const mockRepo = { findById: jest.fn().mockResolvedValue({ id: 1, name: 'Test' }) };
+Container.set(UserRepository, mockRepo);
+
+// Get the service directly from the container
+const service = Container.get(UserService);
+```
+
+### Best Practices
+
+1. **Always reset the container**: Call `Container.reset()` in `beforeEach` to ensure a clean state.
+2. **Mock only what's necessary**: External dependencies (like databases or HTTP clients) should still be mocked.
+3. **Register mock implementations**: Use `Container.set()` to register your mock implementations.
+4. **Get your service from the container**: Instead of using `new Service()`, get the service from the container.
+5. **Clean up after tests**: Use `afterEach` or `afterAll` for cleanup if needed.
+
+## Example: Testing with TypeDI
+
+```typescript
+import 'reflect-metadata';
+import { Container } from 'typedi';
+import { UserService } from '@domains/user/user.service';
+import { UserRepository } from '@domains/user/user.repository';
+
+describe('UserService', () => {
+  let userService: UserService;
+  let mockUserRepository: Partial<UserRepository>;
+
+  beforeEach(() => {
+    // Reset container
+    Container.reset();
+
+    // Create mock repository
+    mockUserRepository = {
+      findById: jest.fn().mockResolvedValue({ id: 1, name: 'Test User' }),
+      // ... other methods
+    };
+
+    // Register with container
+    Container.set(UserRepository, mockUserRepository);
+
+    // Get service from container
+    userService = Container.get(UserService);
+  });
+
+  it('should find a user by id', async () => {
+    const user = await userService.findById(1);
+    expect(user).toEqual({ id: 1, name: 'Test User' });
+    expect(mockUserRepository.findById).toHaveBeenCalledWith(1);
+  });
+});
+```
+
+## When to Still Use jest.mock()
+
+While the container-based approach is preferred, there are cases where `jest.mock()` is still appropriate:
+
+1. **External libraries**: For dependencies that aren't part of the DI container, like `fs`, `axios`, etc.
+2. **Global utilities**: For stateless utilities that are imported directly rather than injected.
+3. **Complex mocking needs**: When you need to mock specific behaviors that can't be easily achieved with simple objects.
+
+## Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- path/to/file.test.ts
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run tests in watch mode
+npm test -- --watch
+```
+
+## Continuous Integration
+
+Our CI pipeline runs all tests automatically on pull requests and merges to main branches. Tests must pass before code can be merged.

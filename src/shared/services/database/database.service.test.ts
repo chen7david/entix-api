@@ -1,7 +1,9 @@
+import 'reflect-metadata';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import { Container } from 'typedi';
 
 jest.mock('pg', () => {
   const mPool = {
@@ -22,13 +24,21 @@ describe('DatabaseService', () => {
   let dbService: DatabaseService;
 
   beforeEach(() => {
+    // Reset the container before each test
+    Container.reset();
+
     configService = {
       get: jest.fn().mockImplementation((key) => {
         if (key === 'DATABASE_URL') return 'postgres://test';
         throw new Error('Unknown key');
       }),
     } as unknown as ConfigService;
-    dbService = new DatabaseService(configService);
+
+    // Register mock with the container
+    Container.set(ConfigService, configService);
+
+    // Get the service from the container
+    dbService = Container.get(DatabaseService);
   });
 
   it('should initialize with a drizzle instance and pool', () => {
