@@ -2,9 +2,9 @@ import { Injectable } from '@shared/utils/ioc.util';
 import { LoggerService, Logger } from '@shared/services/logger/logger.service';
 import { validateBody } from '@shared/middleware/validation.middleware';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
-import { UserRepository } from '@domains/user/user.repository';
 import { User } from '@domains/user/user.model';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
+import { UserService } from '@domains/user/user.service';
 import {
   JsonController,
   Get,
@@ -28,7 +28,7 @@ export class UsersController {
 
   constructor(
     private readonly loggerService: LoggerService,
-    private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
   ) {
     this.logger = this.loggerService.child({ controller: 'UsersController' });
   }
@@ -45,7 +45,7 @@ export class UsersController {
   @ResponseSchema('UserDto', { isArray: true })
   async getAll(): Promise<User[]> {
     this.logger.info('Fetching all users');
-    return this.userRepository.findAll();
+    return this.userService.findAll();
   }
 
   /**
@@ -72,7 +72,7 @@ export class UsersController {
   @ResponseSchema('UserDto', { statusCode: 200, description: 'The user object' })
   async getById(@Param('id') id: number): Promise<User> {
     this.logger.info({ id }, 'Fetching user by ID');
-    return this.userRepository.findById(id);
+    return this.userService.findById(id);
   }
 
   /**
@@ -99,7 +99,7 @@ export class UsersController {
   @ResponseSchema('UserDto', { statusCode: 201, description: 'The created user' })
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     this.logger.info({ email: createUserDto.email }, 'Creating user');
-    return this.userRepository.create(createUserDto);
+    return this.userService.create(createUserDto);
   }
 
   /**
@@ -136,7 +136,7 @@ export class UsersController {
   @HttpCode(201)
   async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
     this.logger.info({ id }, 'Updating user');
-    return this.userRepository.update(id, data);
+    return this.userService.update(id, data);
   }
 
   /**
@@ -164,6 +164,6 @@ export class UsersController {
   })
   async delete(@Param('id') id: number): Promise<void> {
     this.logger.info({ id }, 'Deleting user');
-    await this.userRepository.delete(id);
+    await this.userService.delete(id);
   }
 }
