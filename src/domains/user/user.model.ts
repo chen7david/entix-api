@@ -7,10 +7,12 @@ export type User = {
   name: string | null;
   createdAt: Date;
   isActive: boolean;
+  deletedAt: Date | null;
 };
 
 /**
  * Type representing the payload for updating a user.
+ * Exclude deletedAt from direct update payload.
  */
 export type UserUpdatePayload = Partial<Pick<User, 'email' | 'name' | 'isActive'>>;
 

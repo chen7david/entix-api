@@ -1,71 +1,33 @@
 import { Injectable } from '@shared/utils/ioc.util';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { users } from '@domains/user/user.schema';
-import { User, UserId, UserUpdatePayload } from '@domains/user/user.model';
-import { createAppError, NotFoundError } from '@shared/utils/error/error.util';
-import { eq } from 'drizzle-orm';
+import { User, UserId } from '@domains/user/user.model';
+import { BaseRepository } from '@shared/repositories/base.repository';
 
 /**
- * Repository for user CRUD operations using Drizzle ORM.
+ * Repository for user data access, extending the BaseRepository.
+ * Handles specific user-related operations and provides concrete table/column info.
  */
 @Injectable()
-export class UserRepository {
-  constructor(private readonly dbService: DatabaseService) {}
+export class UserRepository extends BaseRepository<typeof users, User, UserId> {
+  // Provide concrete implementations for abstract properties
+  protected readonly table = users;
+  protected readonly idColumn = users.id;
+  // Specify the soft delete column for the User domain
+  protected readonly deletedAtColumn = users.deletedAt;
 
   /**
-   * Create a new user.
+   * Creates an instance of UserRepository.
+   * @param dbService - The DatabaseService instance, passed to the base repository.
    */
-  async create(data: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-    try {
-      const [user] = await this.dbService.db.insert(users).values(data).returning();
-      return user as User;
-    } catch (err) {
-      throw createAppError(err);
-    }
+  constructor(protected readonly dbService: DatabaseService) {
+    super(dbService); // Call the base class constructor
   }
 
-  /**
-   * Get a user by ID.
-   */
-  async getById(id: UserId): Promise<User> {
-    const user = await this.dbService.db.select().from(users).where(eq(users.id, id));
-    if (!user[0]) throw new NotFoundError('User not found');
-    return user[0] as User;
-  }
+  // All basic CRUD methods (create, findById, findAll, update, delete with soft delete)
+  // are inherited from BaseRepository.
 
-  /**
-   * Get all users.
-   */
-  async getAll(): Promise<User[]> {
-    return (await this.dbService.db.select().from(users)) as User[];
-  }
-
-  /**
-   * Update a user by ID.
-   */
-  async update(id: UserId, data: UserUpdatePayload): Promise<User> {
-    try {
-      const [user] = await this.dbService.db
-        .update(users)
-        .set(data)
-        .where(eq(users.id, id))
-        .returning();
-      if (!user) throw new NotFoundError('User not found');
-      return user as User;
-    } catch (err) {
-      throw createAppError(err);
-    }
-  }
-
-  /**
-   * Delete a user by ID.
-   */
-  async delete(id: UserId): Promise<void> {
-    try {
-      const result = await this.dbService.db.delete(users).where(eq(users.id, id));
-      if (result.rowCount === 0) throw new NotFoundError('User not found');
-    } catch (err) {
-      throw createAppError(err);
-    }
-  }
+  // Add any user-specific methods here if needed in the future.
+  // For example:
+  // async findByEmail(email: string): Promise<User | null> { ... }
 }

@@ -4,6 +4,7 @@ import { validateBody } from '@shared/middleware/validation.middleware';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { UserRepository } from '@domains/user/user.repository';
 import { User } from '@domains/user/user.model';
+import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import {
   JsonController,
   Get,
@@ -14,8 +15,8 @@ import {
   Put,
   Delete,
   OnUndefined,
+  HttpCode,
 } from 'routing-controllers';
-import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 /**
  * UsersController handles user-related endpoints.
@@ -39,23 +40,12 @@ export class UsersController {
   @OpenAPI({
     summary: 'Get all users',
     description: 'Returns a list of all users in the system.',
-    responses: {
-      // Response schema defined by @ResponseSchema below
-      // '200': {
-      //   description: 'A list of users',
-      //   content: {
-      //     'application/json': {
-      //       schema: { type: 'array', items: { $ref: '#/components/schemas/UserDto' } },
-      //     },
-      //   },
-      // },
-    },
     tags: ['Users'],
   })
   @ResponseSchema('UserDto', { isArray: true })
   async getAll(): Promise<User[]> {
     this.logger.info('Fetching all users');
-    return this.userRepository.getAll();
+    return this.userRepository.findAll();
   }
 
   /**
@@ -75,23 +65,14 @@ export class UsersController {
       },
     ],
     responses: {
-      // Response schema defined by @ResponseSchema below
-      // '200': {
-      //   description: 'The user object',
-      //   content: {
-      //     'application/json': {
-      //       schema: { $ref: '#/components/schemas/UserDto' },
-      //     },
-      //   },
-      // },
       '404': { description: 'User not found' },
     },
     tags: ['Users'],
   })
-  @ResponseSchema('UserDto')
+  @ResponseSchema('UserDto', { statusCode: 200, description: 'The user object' })
   async getById(@Param('id') id: number): Promise<User> {
     this.logger.info({ id }, 'Fetching user by ID');
-    return this.userRepository.getById(id);
+    return this.userRepository.findById(id);
   }
 
   /**
@@ -111,20 +92,11 @@ export class UsersController {
       },
     },
     responses: {
-      // Response schema defined by @ResponseSchema below
-      // '200': {
-      //   description: 'The created user',
-      //   content: {
-      //     'application/json': {
-      //       schema: { $ref: '#/components/schemas/UserDto' },
-      //     },
-      //   },
-      // },
       '400': { description: 'Invalid input' },
     },
     tags: ['Users'],
   })
-  @ResponseSchema('UserDto')
+  @ResponseSchema('UserDto', { statusCode: 201, description: 'The created user' })
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     this.logger.info({ email: createUserDto.email }, 'Creating user');
     return this.userRepository.create(createUserDto);
@@ -156,20 +128,12 @@ export class UsersController {
       },
     },
     responses: {
-      // Response schema defined by @ResponseSchema below
-      // '200': {
-      //   description: 'The updated user',
-      //   content: {
-      //     'application/json': {
-      //       schema: { $ref: '#/components/schemas/UserDto' },
-      //     },
-      //   },
-      // },
       '404': { description: 'User not found' },
     },
     tags: ['Users'],
   })
   @ResponseSchema('UserDto')
+  @HttpCode(201)
   async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
     this.logger.info({ id }, 'Updating user');
     return this.userRepository.update(id, data);

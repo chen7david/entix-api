@@ -51,13 +51,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   },
-  "prettier": {
-    "semi": true,
-    "singleQuote": true,
-    "trailingComma": "all",
-    "tabWidth": 2,
-    "printWidth": 100
-  },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
     "body-parser": "^2.2.0",
@@ -74,5 +67,12 @@
     "routing-controllers-openapi": "^5.0.0",
     "typedi": "^0.10.0",
     "zod": "^3.24.3"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "tabWidth": 2,
+    "printWidth": 100
   }
 }

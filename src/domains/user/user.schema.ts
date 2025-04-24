@@ -9,4 +9,5 @@ export const users = pgTable('users', {
   name: text('name'),
   isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at').defaultNow(),
+  deletedAt: timestamp('deleted_at'),
 });
