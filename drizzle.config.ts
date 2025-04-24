@@ -1,7 +1,20 @@
 import { defineConfig } from 'drizzle-kit';
 import dotenv from 'dotenv';
 
-dotenv.config();
+function getDatabaseUrl() {
+  const isTest = process.env.NODE_ENV === 'test';
+  const envFile = isTest ? '.env.test' : '.env';
+
+  dotenv.config({ path: envFile });
+
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is not set');
+  }
+
+  return databaseUrl;
+}
 
 /**
  * Drizzle configuration for PostgreSQL.
@@ -15,6 +28,6 @@ export default defineConfig({
   schema: './src/**/*.schema.ts',
   out: './src/database/drizzle',
   dbCredentials: {
-    url: process.env.DATABASE_URL || '',
+    url: getDatabaseUrl(),
   },
 });
