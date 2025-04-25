@@ -20,13 +20,14 @@
    - Jest uses `ts-jest` to transform and run all test files matching `src/**/*.test.ts`.
 
 2. **Development server**:
-   - The `dev` script (`npm run dev`) uses `nodemon` to watch for changes in the `src` directory.
-   - On changes, `nodemon` restarts the server using `ts-node`, which runs TypeScript files directly without pre-compiling them.
+   - The `dev` script (`npm run dev`) uses `ts-node-dev` to watch for changes in the `src` directory.
+   - On changes, `ts-node-dev` efficiently restarts the server using `ts-node` with `--transpile-only` for faster startup, running TypeScript files directly without pre-compiling or full type-checking.
 
 ## Summary
 
-- **`ts-node`**: Required for Jest to load TypeScript config files and for running the dev server with TypeScript.
+- **`ts-node`**: Required for Jest to load TypeScript config files and for `ts-node-dev` to run the dev server.
 - **`ts-jest`**: Required for Jest to run TypeScript test files.
 - **`nodemon`**: Watches for file changes and restarts the dev server automatically.
+- **`ts-node-dev`**: Replaces `nodemon` for faster development restarts by using `ts-node`'s transpile-only mode.
 
-> **Best Practice:** Always keep `ts-node` and `ts-jest` up to date to ensure compatibility with the latest TypeScript and Jest features.
+> **Best Practice:** Always keep `ts-node`, `ts-jest`, and `ts-node-dev` up to date to ensure compatibility with the latest TypeScript and Jest features.

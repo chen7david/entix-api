@@ -60,7 +60,7 @@ async getAll(): Promise<User[]> { /* ... */ }
 
 ### 4. Registering Zod Schemas with the OpenAPI Registry
 
-We generate a fresh `OpenAPIRegistry()` in our application bootstrap (in `AppService`) and then explicitly wire up each Zod schema using modular registration helpers defined alongside the DTO files. This pattern ensures clarity, modularity, and testability.
+We generate a fresh `OpenAPIRegistry()` within the `OpenApiService` and then explicitly wire up each Zod schema using modular registration helpers defined alongside the DTO files. This pattern ensures clarity, modularity, and testability.
 
 **Per-Domain Registration Helpers**
 
@@ -82,50 +82,64 @@ export function registerUserSchemas(registry: OpenAPIRegistry): void {
 }
 ```
 
-- **Publish your helper:** Add `registerUserSchemas` to the central `src/openapi/register-schemas.ts` (see below).
+**Then in OpenApiService**
 
-**Then in AppService**  
-Import and invoke the central registrar instead of wiring each DTO directly:
+Import and invoke the central registrar:
 
 ```ts
-// src/shared/services/app/app.service.ts
-import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { registerSchemas } from '@src/openapi/register-schemas';
+import { Injectable } from '@shared/utils/ioc.util';
+import { getMetadataArgsStorage } from 'routing-controllers';
+import { routingControllersToSpec } from 'routing-controllers-openapi';
+import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
+import { registerSchemas } from '@domains/openapi/openapi.schema';
 
-this.app.get('/api/openapi.json', (_req, res) => {
-  const registry = new OpenAPIRegistry();
-  // Call the centralized schema registrar:
-  registerSchemas(registry);
-  // ... generate and return the spec ...
-});
+@Injectable()
+export class OpenApiService {
+  public generateSpec(): unknown {
+    const registry = new OpenAPIRegistry();
+    // Call the centralized schema registrar:
+    registerSchemas(registry);
+
+    const generator = new OpenApiGeneratorV3(registry.definitions);
+    const components = generator.generateComponents();
+
+    return routingControllersToSpec(
+      getMetadataArgsStorage(),
+      { routePrefix: '/api' },
+      {
+        components: components.components,
+        info: {
+          /* ... */
+        },
+      },
+    );
+  }
+}
 ```
 
 **Aggregating Multiple Domains**
 
-Centralize all per-domain helpers here so you only touch one place when adding new DTOs:
+Centralize all per-domain registration function calls within the `registerSchemas` function:
 
 ```ts
-// src/openapi/register-schemas.ts
+// src/domains/openapi/openapi.schema.ts
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { registerUserSchemas } from '@src/domains/user/user.dto';
 // import other registerXxxSchemas...
 
-/**
- * Registers all Zod schemas across domains in one place.
- */
+/** Registers all domain Zod schemas with OpenAPI registry. */
 export function registerSchemas(registry: OpenAPIRegistry): void {
   registerUserSchemas(registry);
   // registerProductSchemas(registry);
   // registerOrderSchemas(registry);
-  // …add your new registerXxxSchemas here
 }
 ```
 
 **Flow when adding a new DTO:**
 
 1. In your new DTO file, define `export function registerYourDtoSchemas(registry: OpenAPIRegistry) { /*…*/ }`.
-2. Add an import and call to your helper in `src/openapi/register-schemas.ts` under `registerSchemas`.
-3. Bootstrapping in `AppService` now automatically picks up your new schemas via `registerSchemas(registry)`.
+2. Add an import and call to your helper in `src/domains/openapi/openapi.schema.ts` within the `registerSchemas` function.
+3. `OpenApiService` now automatically picks up your new schemas via its call to `registerSchemas(registry)`.
 
 ---
 

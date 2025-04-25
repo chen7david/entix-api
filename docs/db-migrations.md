@@ -83,11 +83,16 @@ npm run db:migrate
 **Best Practice:**
 
 - Use a separate `.env.test` file with a different `DATABASE_URL` for your test database.
-- Before running tests, apply migrations to the test DB:
-
-```sh
-DATABASE_URL=postgres://user:pass@localhost:5432/your_test_db npm run db:migrate
-```
+- Before running tests, ensure your test database schema matches your current models.
+- You can either apply migrations:
+  ```sh
+  DATABASE_URL=postgres://user:pass@localhost:5432/your_test_db npm run db:migrate
+  ```
+- Or, for faster schema synchronization without versioned migrations, use `db:push-test`:
+  ```sh
+  npm run db:push-test
+  ```
+  This script reads `NODE_ENV=test`, loads `.env.test`, and pushes the schema defined in your TS files directly to the test database.
 
 Or set up your test runner to do this automatically.
 
@@ -153,8 +158,9 @@ npm run db:studio
 
 2. **Test:**
 
-   - Apply migrations to your test DB:  
-     `DATABASE_URL=... npm run db:migrate`
+   - Apply migrations or push schema to your test DB:
+     - Migrations: `DATABASE_URL=... npm run db:migrate`
+     - Direct Push: `npm run db:push-test`
    - Run your test suite.
 
 3. **Staging/Pre-Prod:**
@@ -193,13 +199,14 @@ npm run db:studio
 
 ## 10. Summary Table
 
-| Task                | Command               | Notes                           |
-| ------------------- | --------------------- | ------------------------------- |
-| Generate migration  | `npm run db:generate` | After editing schema files      |
-| Apply migration     | `npm run db:migrate`  | Applies to DB in `DATABASE_URL` |
-| Push schema         | `npm run db:push`     | Syncs schema, use with caution  |
-| Seed database       | `npm run db:seed`     | Runs `src/database/seed.ts`     |
-| Open Drizzle Studio | `npm run db:studio`   | Visual schema management        |
+| Task               | Command                | Notes                           |
+| ------------------ | ---------------------- | ------------------------------- |
+| Generate migration | `npm run db:generate`  | After editing schema files      |
+| Apply migration    | `npm run db:migrate`   | Applies to DB in `DATABASE_URL` |
+| Push schema        | `npm run db:push`      | Syncs schema, use with caution  |
+| Push schema (test) | `npm run db:push-test` | Syncs schema for test DB        |
+| View DB structure  | `npm run db:studio`    | Opens Drizzle Studio            |
+| Seed database      | `npm run db:seed`      | Runs seed script                |
 
 ---
 

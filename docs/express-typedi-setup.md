@@ -9,11 +9,19 @@ src/
   config/
     env.schema.ts         # Zod schema for environment variables
   domains/
+    openapi/
+      openapi.controller.ts # Serves OpenAPI spec
+      openapi.schema.ts     # Aggregates Zod schema registration
+      openapi.service.ts    # Generates OpenAPI spec
+    health/
+      health.controller.ts  # Handles /health endpoint
     users/
-      users.controller.ts # Example controller
+      users.controller.ts # Example domain controller
+      user.dto.ts           # User-related DTOs and schema registration
   shared/
-    config/
-      (empty or for future config modules)
+    middleware/
+      app-error.middleware.ts # Handles global errors
+      not-found.middleware.ts # Handles 404 errors
     services/
       app.service.ts      # Configures Express and routing-controllers
       config.service.ts   # Loads and validates env, exposes config
@@ -154,6 +162,52 @@ main().catch((err) => {
 });
 ```
 
+## Application Bootstrap (`AppService`)
+
+The `AppService` is responsible for setting up the core Express application:
+
+```ts
+// src/shared/services/app/app.service.ts
+import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
+import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
+import { useContainer, useExpressServer } from 'routing-controllers';
+import express, { Express } from 'express';
+import { Container } from 'typedi';
+import path from 'path';
+import { Injectable } from '@shared/utils/ioc.util';
+
+@Injectable()
+export class AppService {
+  private app: Express;
+
+  constructor(_deps?: Record<string, unknown>) {
+    useContainer(Container);
+    this.app = express();
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+
+    // Configure routing-controllers with all controllers and middlewares
+    useExpressServer(this.app, {
+      controllers: [path.join(__dirname, '../../../domains/**/*.controller.{ts,js}')],
+      validation: false, // Disable class-validator
+      classTransformer: false, // Disable class-transformer
+      middlewares: [ErrorHandlerMiddleware, NotFoundMiddleware],
+      defaultErrorHandler: false,
+    });
+  }
+
+  getApp(): Express {
+    return this.app;
+  }
+}
+```
+
+- It initializes Express and common middleware (`json`, `urlencoded`).
+- It uses `routing-controllers` to:
+  - Register all controllers found in `src/domains/**/*.controller.ts`.
+  - Register global middleware (`ErrorHandlerMiddleware`, `NotFoundMiddleware`).
+- The `/health` endpoint is now managed by `HealthController` and `/api/openapi.json` by `OpenapiController`.
+
 ## Usage Example
 
 ### 1. Environment Schema (`src/config/env.schema.ts`)
@@ -181,17 +235,7 @@ export class ConfigService {
 
 ### 3. App Service (`@shared/services/app.service.ts`)
 
-```ts
-import { useContainer, useExpressServer } from 'routing-controllers';
-import { Container } from 'typedi';
-import express from 'express';
-import { Injectable } from '@shared/utils/ioc.util';
-
-@Injectable()
-export class AppService {
-  // ... see codebase for full implementation
-}
-```
+_See the **Application Bootstrap** section above for the updated `AppService` implementation._
 
 ### 4. Server Service (`@shared/services/server.service.ts`)
 
