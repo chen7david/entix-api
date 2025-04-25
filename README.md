@@ -163,3 +163,49 @@ Explore the `docs/` directory for more in-depth guides:
 - **Linting:** [ESLint](https://eslint.org/)
 - **Formatting:** [Prettier](https://prettier.io/)
 - **Development Environment:** [Docker](https://www.docker.com/) / [Dev Containers](https://containers.dev/)
+
+## CI/CD Pipeline
+
+This project utilizes GitHub Actions for its Continuous Integration (CI) and Continuous Deployment (CD) pipeline, ensuring code quality and automating deployments.
+
+**Workflow Overview:**
+
+1.  **Pull Request (PR) Checks (`*-ci.yml`):**
+
+    - **Trigger:** When a PR is opened or updated targeting the `main` or `staging` branch.
+    - **Jobs:**
+      - `test`: Runs on `ubuntu-latest`.
+        - Sets up a PostgreSQL service (using `postgres:15-alpine`) for the test database.
+        - Checks out the code.
+        - Sets up Node.js v20 and caches npm dependencies.
+        - Installs dependencies using `npm ci`.
+        - Synchronizes the test database schema using `npm run db:push-test` (which uses `.env.test`).
+        - Runs the full test suite using `npm test` with `NODE_ENV=test` and the correct `DATABASE_URL`.
+    - **Purpose:** Ensures that code changes pass all tests before they can be merged into `staging` or `main`.
+
+2.  **Merge/Push Deployments (`*-deploy.yaml`):**
+    - **Trigger:** When code is pushed (typically after merging a PR) to the `main` or `staging` branch.
+    - **Jobs:**
+      - `CI`: (Runs first) Repeats the same test execution steps as the PR check to provide a final verification gate before deployment.
+      - `CD`: (Runs after `CI` succeeds)
+        - Checks out the code.
+        - Sets up Docker Buildx.
+        - Logs into GitHub Container Registry (GHCR).
+        - Builds the production Docker image using the multi-stage `Dockerfile`.
+        - Tags the image:
+          - `main` branch: `latest` and commit SHA.
+          - `staging` branch: `staging-latest` and commit SHA.
+        - Pushes the tagged image to GHCR (`ghcr.io/${{ github.repository }}`).
+        - **Triggers Jenkins:** Sends a webhook request to a configured Jenkins instance using `appleboy/jenkins-action`. The specific Jenkins job triggered (`prod-entix-api` or `staging-entix-api`) depends on the branch (`main` or `staging`).
+    - **Purpose:** Automates the process of building, testing, tagging, pushing the Docker image, and notifying the deployment system (Jenkins) upon successful merges to key branches.
+
+**Rationale:**
+
+- **Branch-Specific Workflows:** Separate workflows for PR checks and deployments, and for staging vs. production, allow for tailored processes and environments.
+- **Service Containers:** Using a PostgreSQL service container in CI ensures tests run against a clean, predictable database environment.
+- **Dependency Caching:** Caching npm dependencies speeds up workflow runs.
+- **`npm ci`:** Ensures deterministic builds by installing exact dependency versions from `package-lock.json`.
+- **Multi-stage Docker Builds:** Creates smaller, more secure production images by separating build dependencies from runtime dependencies.
+- **Non-Root Docker User:** Enhances security by running the application as a non-root user inside the container.
+- **GHCR Integration:** Leverages GitHub's native container registry for image storage.
+- **Jenkins Webhook:** Decouples the image build/push from the actual deployment orchestration, allowing Jenkins (or another system managing the `infra`) to handle pulling the new image and updating the running service based on the webhook trigger.
