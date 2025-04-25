@@ -15,7 +15,7 @@ describe('User API - Integration', () => {
   describe('POST /v1/users', () => {
     it('should return 422 for missing name', async () => {
       const userData = { email: faker.internet.email() };
-      const response = await manager.request.post('/v1/users').send(userData);
+      const response = await manager.request.post('/api/v1/users').send(userData);
       expect(response.status).toBe(422);
     });
   });

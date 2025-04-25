@@ -21,8 +21,8 @@ import {
 /**
  * UsersController handles user-related endpoints.
  */
+@JsonController('/api/v1/users')
 @Injectable()
-@JsonController('/v1/users')
 export class UsersController {
   private readonly logger: Logger;
 
