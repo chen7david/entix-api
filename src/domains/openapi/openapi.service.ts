@@ -2,7 +2,7 @@ import { Injectable } from '@shared/utils/ioc.util';
 import { getMetadataArgsStorage } from 'routing-controllers';
 import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { registerSchemas } from '@domains/openapi/openapi.schema';
+import { registerSchemas } from '@domains/openapi/openapi.register-schema';
 
 /**
  * Service responsible for generating the OpenAPI JSON spec.
