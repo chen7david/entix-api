@@ -1,5 +1,5 @@
 import { envSchema, Env } from '@config/env.schema';
-import dotenv from 'dotenv';
+import { loadEnv } from '@shared/utils/env.util';
 import { Injectable } from '@shared/utils/ioc.util';
 import { InternalError } from '@shared/utils/error/error.util';
 
@@ -13,7 +13,7 @@ export class ConfigService {
   private configError?: string;
 
   constructor() {
-    dotenv.config(); // Loads .env, does not throw if missing
+    loadEnv(); // Loads .env, does not throw if missing
     const result = envSchema.safeParse(process.env);
     if (!result.success) {
       this.configError = 'Invalid environment variables: ' + JSON.stringify(result.error.format());

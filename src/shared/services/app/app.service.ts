@@ -1,12 +1,10 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
-import { useContainer, useExpressServer, getMetadataArgsStorage } from 'routing-controllers';
+import { useContainer, useExpressServer } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
-import express, { Express } from 'express';
+import express, { Express, Request, Response } from 'express';
 import { Container } from 'typedi';
 import path from 'path';
-import { routingControllersToSpec } from 'routing-controllers-openapi';
-import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { registerSchemas } from '@openapi/register-schemas';
+import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.
@@ -24,49 +22,24 @@ export class AppService {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
 
+    // Configure routing-controllers with all controllers and middlewares
     useExpressServer(this.app, {
       routePrefix: '/api',
-      controllers: [path.join(__dirname, '../../../domains/**/*.controller.{ts,js}')],
+      controllers: [
+        path.join(__dirname, '../../../domains/**/*.controller.{ts,js}'),
+        path.join(__dirname, '../../../shared/controllers/**/*.controller.{ts,js}'),
+      ],
       validation: false, // Disable class-validator
       classTransformer: false, // Disable class-transformer
-      middlewares: [ErrorHandlerMiddleware],
+      middlewares: [ErrorHandlerMiddleware, NotFoundMiddleware],
       defaultErrorHandler: false,
     });
 
-    /**
-     * Serve the OpenAPI spec at /api/openapi.json
-     */
-    this.app.get('/api/openapi.json', (_req, res) => {
-      const registry = new OpenAPIRegistry();
-      // Register all Zod schemas
-      registerSchemas(registry);
-
-      // Generate OpenAPI schema components from Zod schemas
-      const generator = new OpenApiGeneratorV3(registry.definitions);
-      const zodComponents = generator.generateComponents(); // Generate the components object
-
-      // Generate the base spec from routing-controllers metadata
-      const storage = getMetadataArgsStorage();
-      const spec = routingControllersToSpec(
-        storage,
-        {
-          routePrefix: '/api',
-        },
-        {
-          // Merge generated Zod schema components
-          components: {
-            ...zodComponents.components, // Use the generated components here
-            // You could add/override other components (like securitySchemes) if needed
-          },
-          info: {
-            title: 'Entix API',
-            version: '1.0.0',
-            description: 'OpenAPI documentation for Entix API',
-          },
-        },
-      );
-
-      res.json(spec);
+    // Health check endpoint
+    this.app.get('/health', (req: Request, res: Response) => {
+      res
+        .status(200)
+        .json({ status: 'ok', message: 'API is running', timestamp: new Date().toISOString() });
     });
   }
 
