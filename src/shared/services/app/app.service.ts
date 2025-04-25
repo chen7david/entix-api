@@ -1,7 +1,7 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
 import { useContainer, useExpressServer } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import { Container } from 'typedi';
 import path from 'path';
 import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
@@ -24,22 +24,11 @@ export class AppService {
 
     // Configure routing-controllers with all controllers and middlewares
     useExpressServer(this.app, {
-      routePrefix: '/api',
-      controllers: [
-        path.join(__dirname, '../../../domains/**/*.controller.{ts,js}'),
-        path.join(__dirname, '../../../shared/controllers/**/*.controller.{ts,js}'),
-      ],
+      controllers: [path.join(__dirname, '../../../domains/**/*.controller.{ts,js}')],
       validation: false, // Disable class-validator
       classTransformer: false, // Disable class-transformer
       middlewares: [ErrorHandlerMiddleware, NotFoundMiddleware],
       defaultErrorHandler: false,
-    });
-
-    // Health check endpoint
-    this.app.get('/health', (req: Request, res: Response) => {
-      res
-        .status(200)
-        .json({ status: 'ok', message: 'API is running', timestamp: new Date().toISOString() });
     });
   }
 

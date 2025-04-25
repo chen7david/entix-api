@@ -1,4 +1,4 @@
-import { envSchema, Env } from '@config/env.schema';
+import { envSchema, Env } from '@shared/services/config/config.schema';
 import { loadEnv } from '@shared/utils/env.util';
 import { Injectable } from '@shared/utils/ioc.util';
 import { InternalError } from '@shared/utils/error/error.util';
