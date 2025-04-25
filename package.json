@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_ENV=development nodemon --watch src --ext ts --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "build": "tsc && tsc-alias",
     "start": "NODE_ENV=production node dist/server.js",
     "lint": "eslint . --ext .ts,.js",
@@ -49,6 +49,7 @@
     "prettier": "^3.5.3",
     "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.15",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
