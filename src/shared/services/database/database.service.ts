@@ -2,11 +2,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import { Injectable } from '@shared/utils/ioc.util';
 import { ConfigService } from '@shared/services/config/config.service';
-
-/**
- * Type for the Drizzle Database instance.
- */
-type DrizzleDb = ReturnType<typeof drizzle>;
+import * as schema from '@database/schema';
 
 /**
  * Service for managing the PostgreSQL database connection using Drizzle ORM.
@@ -15,7 +11,7 @@ type DrizzleDb = ReturnType<typeof drizzle>;
 @Injectable()
 export class DatabaseService {
   private pool: Pool;
-  public db: DrizzleDb;
+  public db;
 
   /**
    * Constructs the DatabaseService and initializes the Drizzle instance.
@@ -24,7 +20,7 @@ export class DatabaseService {
   constructor(private readonly configService: ConfigService) {
     const dbUrl = this.configService.get('DATABASE_URL');
     this.pool = new Pool({ connectionString: dbUrl });
-    this.db = drizzle(this.pool);
+    this.db = drizzle(this.pool, { schema });
   }
 
   /**

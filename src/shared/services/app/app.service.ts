@@ -1,10 +1,10 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
+import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
 import { useContainer, useExpressServer } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
 import express, { Express } from 'express';
 import { Container } from 'typedi';
 import path from 'path';
-import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.
