@@ -1,110 +1,211 @@
 # Entix API
 
-## Overview
+[![Node.js](https://img.shields.io/badge/Node.js-18+-43853D?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![TypeDI](https://img.shields.io/badge/TypeDI-0.10+-F16B75?logo=typedi&logoColor=white)](https://github.com/typestack/typedi)
+[![Zod](https://img.shields.io/badge/Zod-3.x-3068b2?logo=zod&logoColor=white)](https://zod.dev/)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle%20ORM-0.29+-C5F74F?logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Pino](https://img.shields.io/badge/Pino-8.x-20A39E?logo=pino&logoColor=white)](https://getpino.io/)
+[![Jest](https://img.shields.io/badge/Jest-29.x-C21325?logo=jest&logoColor=white)](https://jestjs.io/)
+[![ESLint](https://img.shields.io/badge/ESLint-8.x-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
+[![Prettier](https://img.shields.io/badge/Prettier-3.x-F7B93E?logo=prettier&logoColor=black)](https://prettier.io/)
 
-The **Entix API** is a Node.js application designed for monitoring and logging using [New Relic](https://newrelic.com/) and [Pino](https://getpino.io/). This API is built with TypeScript and follows modern development practices to ensure maintainability and scalability.
+Modern, type-safe, and feature-rich REST API boilerplate built with Node.js, Express, TypeScript, TypeDI, Zod, and Drizzle ORM.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [Docker](https://www.docker.com/) & Docker Compose (for Dev Container / PostgreSQL)
+- [VS Code](https://code.visualstudio.com/) + [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+## Getting Started (Local Development)
+
+This project uses **Dev Containers** to provide a consistent and isolated development environment, including a PostgreSQL database service.
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone https://github.com/chen7david/entix-api.git
+    cd entix-api
+    ```
+
+2.  **Open in Dev Container:**
+
+    - Open the cloned folder in VS Code.
+    - VS Code should automatically detect the `.devcontainer/devcontainer.json` file and prompt you to **"Reopen in Container"**. Click it.
+    - If not prompted, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and run **"Dev Containers: Reopen in Container"**.
+    - This will build the Docker image (if not cached) and start the container, which includes Node.js, necessary tools, and a PostgreSQL service.
+
+3.  **Set up Environment Variables:**
+
+    - Inside the Dev Container, create your local environment files by copying the example:
+      ```bash
+      cp .env.example .env
+      cp .env.example .env.test
+      ```
+    - **Review and edit `.env`:** Update `DATABASE_URL` if your Dev Container's PostgreSQL service uses different credentials or port than the default (`postgres://postgres:postgres@localhost:5432/dev-entix-api`). Adjust `PORT` and `LOG_LEVEL` if needed.
+    - **Review and edit `.env.test`:** Ensure `TEST_DATABASE_URL` points to a **separate database** intended _only_ for testing (e.g., `postgres://postgres:postgres@localhost:5432/test-entix-api`). **Do not use the same database as your development `DATABASE_URL`**, as test setup might alter or clear data.
+
+4.  **Install Dependencies:**
+
+    - The Dev Container should run `npm install` automatically upon startup. If not, or if you add new dependencies, run:
+      ```bash
+      npm install
+      ```
+
+5.  **Initialize Databases:**
+
+    - **Development Database:** Sync your schema to the development database specified in `.env`:
+      ```bash
+      npm run db:push
+      ```
+      _(Alternatively, if you prefer versioned migrations for dev: `npm run db:migrate`)_
+    - **Test Database:** Sync your schema to the _separate_ test database specified in `.env.test`:
+      ```bash
+      npm run db:push-test
+      ```
+
+6.  **Run the Development Server:**
+
+    ```bash
+    npm run dev
+    ```
+
+    - This uses `ts-node-dev` for fast hot-reloading.
+    - The API should now be running, typically on `http://localhost:3000` (or the `PORT` specified in `.env`).
+
+7.  **Verify Setup:** \* Access the health check endpoint in your browser or using `curl`: `http://localhost:3000/health` (replace `3000` if needed).
+    You should get a JSON response indicating the API is running.
+
+## Development Workflow
+
+### Branching
+
+1.  Create a new branch for your feature or bugfix, preferably linked to a Jira ticket.
+2.  Use the following format (copyable from Jira ticket if configured):
+    ```
+    <type>/<jira-ticket>-<short-description>
+    ```
+    - **Example:** `feat/ENTIX-123-add-user-profile-endpoint`
+    - **Example:** `fix/ENTIX-456-resolve-login-bug`
+
+### Coding
+
+1.  Implement your feature or fix within the appropriate domain (`src/domains/...`).
+2.  Follow existing patterns for controllers, services, repositories, DTOs, and schemas.
+3.  Write unit and integration tests for your changes.
+4.  Ensure code is well-formatted (`npm run format`) and passes lint checks (`npm run lint`).
+
+### Testing
+
+Run all tests using Jest:
+
+```bash
+npm test
+```
+
+### Documentation
+
+- **API Documentation:** If you add or modify API endpoints, update the OpenAPI documentation using `@OpenAPI` decorators in your controller. See `docs/api-documentation.md` for details.
+- **Code Comments:** Use TSDoc for functions, classes, and complex logic.
+- **Project Documentation:** If you add significant features, new core libraries, or change workflows, update the relevant files in the `docs/` directory.
+
+## Database Management
+
+Drizzle ORM is used for schema definition, migrations, and type-safe database access.
+
+- **Schema Files:** Define tables in `*.schema.ts` files within relevant domains (e.g., `src/domains/user/user.schema.ts`).
+- **Migrations:** Use `npm run db:generate` and `npm run db:migrate` for managing database schema changes.
+- **Test DB Sync:** Use `npm run db:push-test` to quickly update your test database schema.
+
+For a detailed guide, see [Database Migration & Schema Management Guide](./docs/db-migrations.md).
+
+## API Documentation
+
+The API uses OpenAPI 3.0 for documentation, automatically generated from controller annotations.
+
+- **View Spec:** Access the raw OpenAPI JSON spec at `/api/openapi.json` when the server is running.
+- **Documentation Guide:** Learn how to add documentation to your endpoints in [API Documentation Guide](./docs/api-documentation.md).
+
+## Project Structure
+
+The codebase is organized into domains and shared modules. For a detailed explanation of the structure and core services like `AppService`, `ServerService`, and `ConfigService`, see the [Express API Setup Guide](./docs/express-typedi-setup.md).
+
+## Further Documentation
+
+Explore the `docs/` directory for more in-depth guides:
+
+- [API Documentation](./docs/api-documentation.md): How to document endpoints using OpenAPI.
+- [Database Migrations](./docs/db-migrations.md): Managing database schema with Drizzle.
+- [Error Handling](./docs/error-handling.md): Overview of the custom error classes and middleware.
+- [ESLint & Prettier Setup](./docs/eslint-prettier-setup.md): Code linting and formatting configuration.
+- [Express & TypeDI Setup](./docs/express-typedi-setup.md): Core application architecture.
+- [Logger Usage](./docs/logger-usage.md): How to use the Pino-based logger.
+- [Path Aliasing Setup](./docs/path-aliasing-setup.md): Configuration for module path aliases.
+- [Request Validation](./docs/request-validation.md): Using Zod for request validation.
+- [Test Setup](./docs/test-setup.md): Explanation of the Jest, ts-node, and ts-jest setup.
+- [Testing Guide](./docs/testing.md): Best practices for writing tests.
+- [Writing Tests](./docs/writing-tests.md): Specific examples of testing with TypeDI.
 
 ## Technology Stack
 
-- **Node.js**: JavaScript runtime for building server-side applications.
-- **TypeScript**: A superset of JavaScript that adds static types.
-- **New Relic**: A monitoring tool for performance management and observability.
-- **Pino**: A fast logger for Node.js applications.
-- **PostgreSQL**: A relational database used for data storage.
-- **Docker**: Containerization platform for packaging applications.
-- **GitHub Actions**: CI/CD platform for automated builds and deployments.
+- **Runtime:** [Node.js](https://nodejs.org/) (v18+)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Framework:** [Express.js](https://expressjs.com/)
+- **DI Container:** [TypeDI](https://github.com/typestack/typedi)
+- **Validation:** [Zod](https://zod.dev/)
+- **ORM:** [Drizzle ORM](https://orm.drizzle.team/) (PostgreSQL)
+- **Database:** [PostgreSQL](https://www.postgresql.org/) (v14+ recommended)
+- **Logging:** [Pino](https://getpino.io/)
+- **Testing:** [Jest](https://jestjs.io/)
+- **Linting:** [ESLint](https://eslint.org/)
+- **Formatting:** [Prettier](https://prettier.io/)
+- **Development Environment:** [Docker](https://www.docker.com/) / [Dev Containers](https://containers.dev/)
 
-## Scripts
+## CI/CD Pipeline
 
-The following scripts are available for managing the application:
+This project utilizes GitHub Actions for its Continuous Integration (CI) and Continuous Deployment (CD) pipeline, ensuring code quality and automating deployments.
 
-- **`dev`**: Runs the application in development mode with hot reload on save.
-- **`build`**: Compiles the TypeScript code to JavaScript and places it in a `dist` folder.
-- **`format`**: Formats the TypeScript code according to the Prettier configuration defined in the `.prettierrc` file.
-- **`test`**: Runs tests using Jest in a test environment.
-- **`test:watch`**: Runs tests in watch mode.
-- **`test:coverage`**: Runs tests and generates a coverage report.
+**Workflow Overview:**
 
-## Tools
+1.  **Pull Request (PR) Checks (`*-ci.yml`):**
 
-### Development Setup
+    - **Trigger:** When a PR is opened or updated targeting the `main` or `staging` branch.
+    - **Jobs:**
+      - `test`: Runs on `ubuntu-latest`.
+        - Sets up a PostgreSQL service (using `postgres:15-alpine`) for the test database.
+        - Checks out the code.
+        - Sets up Node.js v20 and caches npm dependencies.
+        - Installs dependencies using `npm ci`.
+        - Synchronizes the test database schema using `npm run db:push-test` (which uses `.env.test`).
+        - Runs the full test suite using `npm test` with `NODE_ENV=test` and the correct `DATABASE_URL`.
+    - **Purpose:** Ensures that code changes pass all tests before they can be merged into `staging` or `main`.
 
-- **`tsconfig-paths`**: Maps path aliases to relative paths during runtime.
-- **`tsc-alias`**: Maps path aliases to relative paths during build time.
+2.  **Merge/Push Deployments (`*-deploy.yaml`):**
+    - **Trigger:** When code is pushed (typically after merging a PR) to the `main` or `staging` branch.
+    - **Jobs:**
+      - `CI`: (Runs first) Repeats the same test execution steps as the PR check to provide a final verification gate before deployment.
+      - `CD`: (Runs after `CI` succeeds)
+        - Checks out the code.
+        - Sets up Docker Buildx.
+        - Logs into GitHub Container Registry (GHCR).
+        - Builds the production Docker image using the multi-stage `Dockerfile`.
+        - Tags the image:
+          - `main` branch: `latest` and commit SHA.
+          - `staging` branch: `staging-latest` and commit SHA.
+        - Pushes the tagged image to GHCR (`ghcr.io/${{ github.repository }}`).
+        - **Triggers Jenkins:** Sends a webhook request to a configured Jenkins instance using `appleboy/jenkins-action`. The specific Jenkins job triggered (`prod-entix-api` or `staging-entix-api`) depends on the branch (`main` or `staging`).
+    - **Purpose:** Automates the process of building, testing, tagging, pushing the Docker image, and notifying the deployment system (Jenkins) upon successful merges to key branches.
 
-### Getting Started - Dev Containers
+**Rationale:**
 
-#### Prerequisites
-
-- **Docker**: Ensure Docker is installed on your machine.
-
-Dev containers provide a simple setup for a development environment. This workspace includes a PostgreSQL database with the following default credentials:
-
-- **User**: `postgres`
-- **Password**: `postgres`
-- **Database**: `postgres`
-
-To start the dev container on a Mac, hold down `Shift` + `Command` + `P`, then choose **Dev Containers: Rebuild Container**.
-
-## Coding Conventions
-
-### Enums
-
-We use uppercase for the keys in enums to semantically convey that they are constants and their values cannot be changed.
-
-```typescript
-enum ExampleEnum {
-  SOME_KEY = 'some-value',
-  SOME_OTHER_KEY = 'some-other-value',
-}
-```
-
-### Types
-
-We prefer using types instead of interfaces where possible. Types offer more flexibility, and we generally do not encourage declaration merging for readability and maintainability reasons.
-
-## Deployment
-
-The application is containerized using Docker and automatically built and published to GitHub Container Registry (GHCR) when code is merged into the `main` branch. For more details on the CI/CD pipeline, see the [CI/CD documentation](docs/ci-cd.md).
-
-### Docker Image
-
-You can pull the latest Docker image using:
-
-```bash
-docker pull ghcr.io/chen7david/entix-api:latest
-```
-
-To run the Docker image:
-
-```bash
-docker run -p 3000:3000 --env-file .env.production ghcr.io/chen7david/entix-api:latest
-```
-
-## New Relic Integration
-
-For detailed information on how to integrate and configure New Relic, please refer to the [New Relic Integration Documentation](docs/newrelic.md).
-
-## Additional Documentation
-
-- [New Relic Integration](docs/newrelic.md)
-- [CI/CD Pipeline](docs/ci-cd.md)
-- [Logging with Pino](docs/logging.md) (if applicable)
-- [API Endpoints](docs/api.md) (if applicable)
-
-## Troubleshooting
-
-If you encounter issues, check the following:
-
-1. **Agent Logs**: Look for a `newrelic_agent.log` file in the project root directory.
-2. **License Key**: Ensure your New Relic license key is correct in the environment variables.
-3. **Network Access**: The New Relic agent needs outbound internet access to send data to New Relic.
-4. **Node.js Version**: Ensure you're using a version of Node.js that's supported by the New Relic agent.
-
-## Contributing
-
-If you would like to contribute to this project, please fork the repository and submit a pull request. Ensure that your code adheres to the coding conventions outlined above.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- **Branch-Specific Workflows:** Separate workflows for PR checks and deployments, and for staging vs. production, allow for tailored processes and environments.
+- **Service Containers:** Using a PostgreSQL service container in CI ensures tests run against a clean, predictable database environment.
+- **Dependency Caching:** Caching npm dependencies speeds up workflow runs.
+- **`npm ci`:** Ensures deterministic builds by installing exact dependency versions from `package-lock.json`.
+- **Multi-stage Docker Builds:** Creates smaller, more secure production images by separating build dependencies from runtime dependencies.
+- **Non-Root Docker User:** Enhances security by running the application as a non-root user inside the container.
+- **GHCR Integration:** Leverages GitHub's native container registry for image storage.
+- **Jenkins Webhook:** Decouples the image build/push from the actual deployment orchestration, allowing Jenkins (or another system managing the `infra`) to handle pulling the new image and updating the running service based on the webhook trigger.

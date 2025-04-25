@@ -1,29 +1,26 @@
-import type { Config } from '@jest/types';
+/**
+ * @file Jest configuration for the entix-api project.
+ * Uses ts-jest for TypeScript support and matches all test files with the pattern *.test.ts in the src directory (including nested folders).
+ * Coverage is not generated at this time.
+ * @see https://kulshekhar.github.io/ts-jest/docs/getting-started/installation/
+ */
 
-const config: Config.InitialOptions = {
+import type { Config } from 'jest';
+
+const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
-  moduleNameMapper: {
-    '^@src/(.*)$': '<rootDir>/src/$1',
-    // add other path aliases here mirror the tsconfig.json
-  },
-  transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        tsconfig: 'tsconfig.json',
-      },
-    ],
-  },
-  testRegex: '.*\\.test\\.tsx?$',
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  coverageDirectory: 'coverage',
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  collectCoverage: false,
   detectOpenHandles: true,
   verbose: true,
-  // Setup file to run before tests
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  moduleNameMapper: {
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@domains/(.*)$': '<rootDir>/src/domains/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@openapi/(.*)$': '<rootDir>/src/openapi/$1',
+    '^@database/(.*)$': '<rootDir>/src/database/$1',
+  },
 };
 
 export default config;

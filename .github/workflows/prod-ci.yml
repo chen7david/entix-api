@@ -37,18 +37,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Sync test database schema
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+        run: npm run db:push-test
+
       - name: Run tests
         env:
           NODE_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           PORT: 3000
-          APP_NAME: EntixAPI
-          LOG_LEVEL: info
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: test_db
-          CONNECTION_TIMEOUT_MILLIS: 5000
-          IDLE_TIMEOUT_MILLIS: 30000
-          MAX_POOL_SIZE: 20
+          LOG_LEVEL: debug
         run: npm test
