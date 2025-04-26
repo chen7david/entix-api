@@ -26,6 +26,14 @@ export abstract class BaseRepository<
   constructor(protected readonly dbService: DatabaseService) {}
 
   /**
+   * Helper to retrieve the table's name for error messages.
+   * Falls back to 'Resource' if metadata is missing.
+   */
+  private getEntityName(): string {
+    return (this.table as unknown as { _?: { name: string } })._?.name ?? 'Resource';
+  }
+
+  /**
    * Builds the default WHERE clauses, including soft-delete filter if applicable.
    * @param includeDeleted - Whether to include soft-deleted records.
    * @returns An array of SQLWrapper conditions.
@@ -73,7 +81,7 @@ export abstract class BaseRepository<
 
       const resultsArray = results as unknown as TEntity[];
       if (!resultsArray || resultsArray.length === 0) {
-        throw new NotFoundError(`${this.table._.name} not found`);
+        throw new NotFoundError(`${this.getEntityName()} not found`);
       }
       return resultsArray[0];
     } catch (err) {
@@ -124,7 +132,7 @@ export abstract class BaseRepository<
 
       const resultsArray = results as TEntity[];
       if (!resultsArray || resultsArray.length === 0) {
-        throw new NotFoundError(`${this.table._.name} not found for update`);
+        throw new NotFoundError(`${this.getEntityName()} not found for update`);
       }
       return resultsArray[0];
     } catch (err) {
@@ -154,21 +162,17 @@ export abstract class BaseRepository<
           try {
             await this.findById(id, true);
             console.warn(
-              `Attempted to soft delete already soft-deleted ${this.table._.name} with id: ${id}`,
+              `Attempted to soft delete already soft-deleted ${this.getEntityName()} with id: ${id}`,
             );
           } catch (findErr) {
-            if (findErr instanceof NotFoundError) {
-              throw new NotFoundError(`${this.table._.name} not found for delete`);
-            }
-            throw findErr;
+            throw createAppError(findErr);
           }
         }
       } else {
         // Hard delete
-        await this.dbService.db.delete(this.table).where(eq(this.idColumn, id));
+        await this.dbService.db.delete(this.table).where(eq(this.idColumn, id)).returning();
       }
     } catch (err) {
-      if (err instanceof NotFoundError) throw err;
       throw createAppError(err);
     }
   }

@@ -79,6 +79,19 @@ export const UserDto = z
 export type UserDto = z.infer<typeof UserDto>;
 
 /**
+ * Zod schema for validating user ID path parameter.
+ */
+export const UserIdParamDto = z
+  .object({
+    /** User's unique identifier from path parameters. @example 1 */
+    id: z.coerce.number().int().positive().openapi({ example: 1 }),
+  })
+  .openapi('UserIdParamDto', { description: 'Schema for user ID path parameter.' });
+
+/** Type alias for UserIdParamDto inferred type. */
+export type UserIdParamDto = z.infer<typeof UserIdParamDto>;
+
+/**
  * Registers user-related Zod schemas with the OpenAPI registry.
  * @param registry - The OpenAPIRegistry instance to register schemas on.
  */
@@ -86,4 +99,5 @@ export function registerUserSchemas(registry: OpenAPIRegistry): void {
   registry.register('CreateUserDto', CreateUserDto);
   registry.register('UpdateUserDto', UpdateUserDto);
   registry.register('UserDto', UserDto);
+  registry.register('UserIdParamDto', UserIdParamDto);
 }
