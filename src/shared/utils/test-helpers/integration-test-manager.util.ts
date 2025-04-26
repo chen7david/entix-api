@@ -14,6 +14,20 @@ export class IntegrationTestManager {
   public request: any; // Use any to bypass supertest type issue for now
   public db: DatabaseService;
 
+  /**
+   * Begins a new transaction for the current test.
+   */
+  public async beginTransaction(): Promise<void> {
+    await this.db.beginTransaction();
+  }
+
+  /**
+   * Rolls back the current test transaction.
+   */
+  public async rollbackTransaction(): Promise<void> {
+    await this.db.rollbackTransaction();
+  }
+
   constructor() {
     // Ensure NODE_ENV is set to test
     process.env.NODE_ENV = 'test';
