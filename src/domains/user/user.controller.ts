@@ -97,6 +97,7 @@ export class UsersController {
   })
   @ResponseSchema('UserDto', { statusCode: 201, description: 'The created user' })
   @Post('/')
+  @HttpCode(201)
   @UseBefore(validateBody(CreateUserDto))
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     this.logger.info({ email: createUserDto.email }, 'Creating user');
