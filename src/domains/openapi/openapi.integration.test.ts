@@ -1,10 +1,11 @@
 import { IntegrationTestManager } from '@shared/utils/test-helpers/integration-test-manager.util';
+import { Container } from 'typedi';
 
 describe('GET /api/openapi.json - Integration', () => {
   let manager: IntegrationTestManager;
 
   beforeAll(() => {
-    manager = new IntegrationTestManager();
+    manager = Container.get(IntegrationTestManager);
   });
 
   afterAll(async () => {
