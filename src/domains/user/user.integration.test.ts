@@ -1,11 +1,12 @@
 import { IntegrationTestManager } from '@shared/utils/test-helpers/integration-test-manager.util';
 import { faker } from '@faker-js/faker';
 import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
+import { Container } from 'typedi';
 
 let manager: IntegrationTestManager;
 
 beforeAll(async () => {
-  manager = new IntegrationTestManager();
+  manager = Container.get(IntegrationTestManager);
 });
 
 beforeEach(async () => {

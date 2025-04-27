@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { Container } from 'typedi';
 import { OpenapiController } from '@domains/openapi/openapi.controller';
 import { OpenApiService } from '@domains/openapi/openapi.service';
 import { Response } from 'express';
@@ -9,10 +10,12 @@ describe('OpenapiController', () => {
   let mockResponse: Partial<Response>;
 
   beforeEach(() => {
+    Container.reset();
     mockService = {
       generateSpec: jest.fn().mockReturnValue({ foo: 'bar' }),
     } as unknown as jest.Mocked<OpenApiService>;
-    controller = new OpenapiController(mockService);
+    Container.set(OpenApiService, mockService);
+    controller = Container.get(OpenapiController);
     mockResponse = {
       json: jest.fn().mockReturnThis(),
     };
