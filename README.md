@@ -79,10 +79,10 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 ## API Documentation & Postman
 
 - **OpenAPI Spec:**  
-  The API exposes a live OpenAPI 3.0 spec at [`/api/openapi.json`](http://localhost:3000/api/openapi.json).
+  The API exposes a live OpenAPI 3.0 spec at [`/openapi.json`](http://localhost:3000/openapi.json).
 - **Importing to Postman:**
   1. Open Postman.
-  2. Click "Import" > "Link" and paste your running server's `/api/openapi.json` URL.
+  2. Click "Import" > "Link" and paste your running server's `/openapi.json` URL.
   3. Postman will generate a collection with all current endpoints, request/response schemas, and examples.
 - **API Docs:**  
   See [API Documentation Guide](./docs/api-documentation.md) for details on annotating endpoints.
@@ -212,7 +212,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 ## Additional Tips
 
 - **API Exploration:**  
-  Use Postman or any OpenAPI-compatible tool to explore and test endpoints. Import `/api/openapi.json` for up-to-date routes and schemas.
+  Use Postman or any OpenAPI-compatible tool to explore and test endpoints. Import `/openapi.json` for up-to-date routes and schemas.
 - **Database Browsing:**  
   Use `npm run db:studio` for a GUI to inspect and edit your data.
 - **Security:**  
