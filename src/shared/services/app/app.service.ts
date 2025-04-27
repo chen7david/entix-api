@@ -5,6 +5,8 @@ import { Injectable } from '@shared/utils/ioc.util';
 import express, { Express } from 'express';
 import { Container } from 'typedi';
 import path from 'path';
+import cors from 'cors';
+import helmet from 'helmet';
 
 /**
  * AppService configures the Express app with routing-controllers and DI.
@@ -14,11 +16,18 @@ export class AppService {
   private app: Express;
 
   /**
+   * Constructs and configures the Express app instance.
+   *
+   * @remarks
+   * Adds security middleware (Helmet, CORS) before routing-controllers setup.
+   *
    * @param _deps Dependency injection object (future-proof for logger, etc.)
    */
   constructor(_deps?: Record<string, unknown>) {
     useContainer(Container);
     this.app = express();
+    this.app.use(helmet());
+    this.app.use(cors());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
 

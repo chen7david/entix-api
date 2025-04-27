@@ -1,7 +1,9 @@
 import { DatabaseService } from '@shared/services/database/database.service';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { createAppError, NotFoundError } from '@shared/utils/error/error.util';
 import { and, eq, isNull, SQLWrapper, InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { AnyPgColumn, PgTable, TableConfig } from 'drizzle-orm/pg-core';
+import { Logger } from 'pino';
 
 /**
  * Abstract base class for repositories providing common CRUD operations
@@ -22,8 +24,26 @@ export abstract class BaseRepository<
   protected abstract readonly idColumn: AnyPgColumn;
   /** Optional: The Drizzle column object representing the soft delete timestamp. */
   protected abstract readonly deletedAtColumn?: AnyPgColumn;
+  /** Logger instance for repository operations */
+  protected readonly logger: Logger;
 
-  constructor(protected readonly dbService: DatabaseService) {}
+  constructor(
+    protected readonly dbService: DatabaseService,
+    protected readonly loggerService: LoggerService,
+  ) {
+    // Create a child logger with repository name context
+    this.logger = this.loggerService.child({
+      repository: this.constructor.name,
+    });
+  }
+
+  /**
+   * Helper to retrieve the table's name for error messages.
+   * Falls back to 'Resource' if metadata is missing.
+   */
+  private getEntityName(): string {
+    return (this.table as unknown as { _?: { name: string } })._?.name ?? 'Resource';
+  }
 
   /**
    * Builds the default WHERE clauses, including soft-delete filter if applicable.
@@ -33,6 +53,7 @@ export abstract class BaseRepository<
   protected buildDefaultFilters(includeDeleted = false): SQLWrapper[] {
     const conditions: SQLWrapper[] = [];
     if (this.deletedAtColumn && !includeDeleted) {
+      // Only include records where deletedAt is NULL (not soft-deleted)
       conditions.push(isNull(this.deletedAtColumn));
     }
     return conditions;
@@ -65,15 +86,18 @@ export abstract class BaseRepository<
    */
   async findById(id: TId, includeDeleted = false): Promise<TEntity> {
     const defaultFilters = this.buildDefaultFilters(includeDeleted);
+
     try {
-      const results = await this.dbService.db
+      const query = this.dbService.db
         .select()
         .from(this.table as unknown as PgTable<TableConfig>)
         .where(and(eq(this.idColumn, id), ...defaultFilters));
 
+      const results = await query;
       const resultsArray = results as unknown as TEntity[];
+
       if (!resultsArray || resultsArray.length === 0) {
-        throw new NotFoundError(`${this.table._.name} not found`);
+        throw new NotFoundError(`${this.getEntityName()} not found`);
       }
       return resultsArray[0];
     } catch (err) {
@@ -124,7 +148,7 @@ export abstract class BaseRepository<
 
       const resultsArray = results as TEntity[];
       if (!resultsArray || resultsArray.length === 0) {
-        throw new NotFoundError(`${this.table._.name} not found for update`);
+        throw new NotFoundError(`${this.getEntityName()} not found for update`);
       }
       return resultsArray[0];
     } catch (err) {
@@ -134,42 +158,34 @@ export abstract class BaseRepository<
   }
 
   /**
-   * Deletes an entity by its primary key ID.
-   * Performs a soft delete if `deletedAtColumn` is configured, otherwise hard delete.
-   * @param id - The ID of the entity to delete.
-   * @returns A promise that resolves when the deletion is complete.
+   * Deletes a record by ID. Performs either a hard delete (removes the record)
+   * or a soft delete (updates a deletion timestamp) depending on repository configuration.
+   * @param id - The ID of the record to delete
+   * @returns True if the operation was successful
    */
-  async delete(id: TId): Promise<void> {
+  async delete(id: TId): Promise<boolean> {
     try {
-      if (this.deletedAtColumn) {
-        // Soft delete
-        const results = await this.dbService.db
-          .update(this.table)
-          .set({ [this.deletedAtColumn.name]: new Date() } as unknown as InferInsertModel<TTable>)
-          .where(and(eq(this.idColumn, id), isNull(this.deletedAtColumn)))
-          .returning({ id: this.idColumn });
+      this.logger.debug(`Attempting to delete by ID: ${String(id)}`);
 
-        const resultsArray = results as { id: TId }[];
-        if (!resultsArray || resultsArray.length === 0) {
-          try {
-            await this.findById(id, true);
-            console.warn(
-              `Attempted to soft delete already soft-deleted ${this.table._.name} with id: ${id}`,
-            );
-          } catch (findErr) {
-            if (findErr instanceof NotFoundError) {
-              throw new NotFoundError(`${this.table._.name} not found for delete`);
-            }
-            throw findErr;
-          }
-        }
+      if (this.deletedAtColumn) {
+        // Use the update method for soft delete
+        const updated = await this.update(id, {
+          deletedAt: new Date(),
+        } as Partial<InferInsertModel<TTable>>);
+        this.logger.debug(`Soft delete completed: ${updated ? 'Success' : 'No rows affected'}`);
+        return !!updated;
       } else {
-        // Hard delete
-        await this.dbService.db.delete(this.table).where(eq(this.idColumn, id));
+        // Hard delete: Remove the record from the database
+        const result = await this.dbService.db
+          .delete(this.table)
+          .where(eq(this.idColumn, id))
+          .returning();
+
+        return Array.isArray(result) && result.length > 0;
       }
-    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw createAppError(err);
+    } catch (error) {
+      this.logger.error(`Error deleting record by ID: ${String(id)}`, error as Error);
+      throw createAppError(error);
     }
   }
 }

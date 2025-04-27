@@ -39,7 +39,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci || (cat /home/runner/.npm/_logs/* && exit 1)
 
       - name: Sync test database schema
         env:

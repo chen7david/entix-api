@@ -150,7 +150,7 @@ describe('UserService', () => {
   describe('delete', () => {
     it('should delete user when found', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.delete.mockResolvedValue();
+      userRepository.delete.mockResolvedValue(true);
 
       await userService.delete(1);
 
