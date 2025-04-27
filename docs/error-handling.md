@@ -1,274 +1,202 @@
-# Error Handling System
+# Error Handling Guide
 
-This document explains the error handling system used in the Entix API application.
+This project uses a robust, extensible, and industry-standard error handling system. All errors are handled via a unified `AppError` class hierarchy, with ergonomic constructors and a global error middleware for consistent API responses and logging.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Throwing Errors](#throwing-errors)
+- [Error Classes](#error-classes)
+- [Usage Examples](#usage-examples)
+- [Validation Errors (Zod)](#validation-errors-zod)
+- [Best Practices](#best-practices)
+- [Custom Errors](#custom-errors)
+
+---
 
 ## Overview
 
-The error handling system is designed to:
+- All errors should extend from `AppError` (or its subclasses).
+- You can throw errors with either a message string or an options object for full control.
+- The global error middleware will catch, log, and format all errors for the client.
+- Validation errors (from Zod) are automatically converted to a `ValidationError` with clean details.
 
-1. Provide consistent error responses to clients
-2. Mask sensitive information in server errors
-3. Include error IDs for tracking and debugging
-4. Properly handle and format validation errors
-5. Log all errors with relevant context for troubleshooting
+---
 
-## Error Types
+## Throwing Errors
 
-The system provides several specialized error types that extend the base `AppError` class:
+You can throw errors in your controllers, services, or anywhere in your codebase using the provided error classes.
 
-| Error Type          | Status Code | Purpose                      |
-| ------------------- | ----------- | ---------------------------- |
-| `BadRequestError`   | 400         | Invalid or malformed request |
-| `UnauthorizedError` | 401         | Authentication required      |
-| `ForbiddenError`    | 403         | Permission denied            |
-| `NotFoundError`     | 404         | Resource not found           |
-| `ConflictError`     | 409         | Resource conflict            |
-| `ValidationError`   | 422         | Validation failed            |
-| `ServiceError`      | 503         | Service unavailable          |
-| `InternalError`     | 500         | Internal server error        |
+### With a Message (Ergonomic)
 
-## Creating and Throwing Errors
+```ts
+throw new NotFoundError('User not found');
+throw new BadRequestError('Invalid input');
+throw new UnauthorizedError('You must be logged in');
+throw new ForbiddenError('You do not have permission');
+throw new ConflictError('Resource already exists');
+throw new RateLimitError('Too many requests');
+throw new InternalError('Unexpected server error');
+```
 
-You can create and throw errors from anywhere in your application:
+### With an Options Object
 
-```typescript
-import { NotFoundError } from '@src/utils/error.util';
+```ts
+throw new NotFoundError({
+  message: 'User not found',
+  details: [{ path: 'userId', message: 'No user with this ID' }],
+  logContext: { userId: 123 },
+});
 
-function getUserById(id: string) {
-  const user = userRepository.findById(id);
-  if (!user) {
-    throw new NotFoundError({
-      message: `User with ID ${id} not found`,
-      logContext: { userId: id },
-    });
-  }
+throw new BadRequestError({
+  message: 'Invalid email',
+  details: [{ path: 'email', message: 'Email is not valid' }],
+});
+
+throw new AppError({
+  status: 418,
+  message: "I'm a teapot",
+  expose: true,
+});
+```
+
+### With Only a Message (Base Class)
+
+```ts
+throw new AppError('Something went wrong'); // status defaults to 500
+```
+
+---
+
+## Error Classes
+
+All error classes are available from `@shared/utils/error/error.util`:
+
+- `AppError` (base)
+- `NotFoundError`
+- `BadRequestError`
+- `ValidationError`
+- `UnauthorizedError`
+- `ForbiddenError`
+- `ConflictError`
+- `ServiceError`
+- `InternalError`
+- `RateLimitError`
+
+Each class enforces the correct HTTP status code. You can pass either a message or an options object.
+
+---
+
+## Usage Examples
+
+### Throwing in a Controller
+
+```ts
+import { NotFoundError } from '@shared/utils/error/error.util';
+
+@Get('/users/:id')
+getUser(@Param('id') id: string) {
+  const user = this.userService.findById(id);
+  if (!user) throw new NotFoundError('User not found');
   return user;
 }
 ```
 
-### Error Options
+### Throwing in a Service
 
-When creating errors, you can specify various options:
+```ts
+import { ConflictError } from '@shared/utils/error/error.util';
 
-```typescript
-const error = new BadRequestError({
-  // Custom error message (defaults to standard message for error type)
-  message: 'Invalid user data',
-
-  // Original error that caused this error
-  cause: originalError,
-
-  // Additional context for logging (not exposed to client)
-  logContext: {
-    userId: '123',
-    additionalInfo: 'Useful for debugging',
-  },
-
-  // Validation details for field-level errors
-  details: [
-    { path: 'email', message: 'Must be a valid email address' },
-    { path: 'password', message: 'Must be at least 8 characters long' },
-  ],
-
-  // Control whether error details are exposed to client
-  // Default: true for 4xx errors, false for 5xx errors
-  expose: false,
-});
-```
-
-## Zod Validation Errors
-
-The system seamlessly integrates with Zod for validation:
-
-```typescript
-import { z } from 'zod';
-import { createAppError } from '@src/utils/error.util';
-
-const userSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-try {
-  const userData = userSchema.parse(request.body);
-  // Use validated data
-} catch (error) {
-  // Automatically converts to ValidationError with formatted details
-  throw createAppError(error);
-}
-```
-
-Or you can use the static helper method directly:
-
-```typescript
-try {
-  const userData = userSchema.parse(request.body);
-  // Use validated data
-} catch (error) {
-  if (error instanceof ZodError) {
-    throw AppError.fromZodError(error, 'Invalid user data');
+createUser(email: string) {
+  if (this.emailExists(email)) {
+    throw new ConflictError({
+      message: 'Email already in use',
+      details: [{ path: 'email', message: 'Duplicate email' }],
+    });
   }
-  throw error;
+  // ...
 }
 ```
 
-## Error Responses
+### Throwing a Custom Status Error
 
-The error middleware automatically formats error responses sent to clients:
+```ts
+import { AppError } from '@shared/utils/error/error.util';
 
-```json
-{
-  "status": 400,
-  "type": "badrequest",
-  "message": "Invalid user data",
-  "details": [
-    {
-      "path": "email",
-      "message": "Must be a valid email address",
-      "code": "invalid_string"
-    },
-    {
-      "path": "password",
-      "message": "Must be at least 8 characters long",
-      "code": "too_small"
-    }
-  ]
+throw new AppError({ status: 418, message: "I'm a teapot" });
+```
+
+---
+
+## Validation Errors (Zod)
+
+If you use Zod for validation, you do **not** need to manually wrap Zod errors. The global error middleware will automatically convert any `ZodError` into a `ValidationError` with a clean, user-friendly structure.
+
+**Example:**
+
+```ts
+import { z } from 'zod';
+import { ValidationError } from '@shared/utils/error/error.util';
+
+const schema = z.object({ email: z.string().email() });
+
+try {
+  schema.parse({ email: 'not-an-email' });
+} catch (err) {
+  throw ValidationError.fromZodError(err);
+  // Or just throw err; the middleware will handle it
 }
 ```
 
-For server errors (5xx), sensitive details are masked and an error ID is included:
-
-```json
-{
-  "status": 500,
-  "type": "internal",
-  "message": "Internal Server Error",
-  "errorId": "550e8400-e29b-41d4-a716-446655440000"
-}
-```
-
-This error ID is logged along with the full error details, making it easy to find the relevant log entry when a client reports an issue.
-
-## Error Handling Middleware
-
-The application uses the `ErrorHandlerMiddleware` to automatically catch and process all errors. It's registered in the application setup:
-
-```typescript
-useExpressServer(app, {
-  controllers: [...],
-  middlewares: [ErrorHandlerMiddleware],
-  defaultErrorHandler: false,
-  // other options...
-});
-```
-
-This middleware:
-
-1. Converts any error to an `AppError`
-2. Logs the error with appropriate context
-3. Formats and sends the standardized error response
+---
 
 ## Best Practices
 
-1. **Use specific error types** - Choose the most appropriate error type for the situation
-2. **Provide meaningful messages** - Error messages should be clear and actionable
-3. **Include context for logging** - Add relevant data in `logContext` to aid debugging
-4. **Don't expose sensitive information** - Use `expose: false` for errors containing sensitive data
-5. **Use error IDs for tracking** - When users report errors, ask for the error ID
+- Always throw `AppError` or its subclasses for predictable errors.
+- Use a message string for simple cases, or an options object for advanced cases.
+- Never leak sensitive information in error messages.
+- Use the `details` property for validation or field-specific errors.
+- Use the `logContext` property to add extra context for logs (not sent to the client).
+- For unknown errors, let the middleware handle them (it will wrap them in an `InternalError`).
 
-## Example Usage in Controllers
+---
 
-```typescript
-import { JsonController, Get, Param, Body, Post } from 'routing-controllers';
-import { ZodError, z } from 'zod';
-import { NotFoundError, ValidationError, createAppError } from '@src/utils/error.util';
+## Custom Errors
 
-const userSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-});
+You can create your own custom error classes by extending `AppError`:
 
-@JsonController('/users')
-export class UserController {
-  @Get('/:id')
-  getUser(@Param('id') id: string) {
-    const user = userService.findById(id);
-    if (!user) {
-      throw new NotFoundError({
-        message: `User with ID ${id} not found`,
-      });
-    }
-    return user;
-  }
+```ts
+import { AppError, AppErrorOptions } from '@shared/utils/error/error.util';
 
-  @Post()
-  createUser(@Body() body: unknown) {
-    try {
-      const userData = userSchema.parse(body);
-      return userService.create(userData);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw ValidationError.fromZodError(error, 'Invalid user data');
-      }
-      throw error;
+export class PaymentRequiredError extends AppError {
+  constructor(message?: string);
+  constructor(options?: AppErrorOptions);
+  constructor(arg?: string | AppErrorOptions) {
+    if (typeof arg === 'string') {
+      super({ status: 402, message: arg });
+    } else {
+      super({ status: 402, ...arg });
     }
   }
 }
 ```
 
-## Error Handling in Services
+---
 
-When handling errors in service layers, you can use the `createAppError` utility to convert any error to an appropriate `AppError`:
+## Error Response Format
 
-```typescript
-import { createAppError, ServiceError } from '@src/utils/error.util';
+All errors returned to the client follow this structure:
 
-async function fetchData() {
-  try {
-    const response = await externalApiClient.getData();
-    return response.data;
-  } catch (error) {
-    // If it's a known API error, create a specific error
-    if (error.response?.status === 503) {
-      throw new ServiceError({
-        message: 'External API is currently unavailable',
-        cause: error,
-        logContext: {
-          apiResponse: error.response?.data,
-          statusCode: error.response?.status,
-        },
-      });
-    }
-
-    // Otherwise, let the error handler convert it
-    throw createAppError(error);
-  }
+```json
+{
+  "status": 404,
+  "type": "notfound",
+  "message": "User not found",
+  "errorId": "...", // only for 500+ errors
+  "details": [ ... ] // only for validation errors
 }
 ```
 
-## Testing with Errors
+---
 
-The error system is designed to be easy to test. Here's an example of testing error handling:
-
-```typescript
-import { NotFoundError } from '@src/utils/error.util';
-
-describe('UserService', () => {
-  it('should throw NotFoundError when user does not exist', async () => {
-    // Mock repository to return null
-    userRepositoryMock.findById.mockResolvedValue(null);
-
-    // Expect the function to throw a NotFoundError
-    await expect(userService.getUserById('123')).rejects.toThrow(NotFoundError);
-
-    // Can also check specific properties of the error
-    try {
-      await userService.getUserById('123');
-    } catch (error) {
-      expect(error).toBeInstanceOf(NotFoundError);
-      expect(error.status).toBe(404);
-      expect(error.message).toMatch(/User with ID 123 not found/);
-    }
-  });
-});
-```
+For more details, see the implementation in `@shared/utils/error/error.util.ts`.

@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-postgres
 {
-  "name": "entix-api-codespace",
+  "name": "Node.js & PostgreSQL",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
@@ -12,28 +12,20 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // This can be used to network with other containers or with the host.
   "forwardPorts": [3000, 5432],
-
-  // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "npm install",
   "customizations": {
     "vscode": {
       "extensions": [
+        "usernamehw.errorlens",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "github.vscode-github-actions",
+        "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker"
       ]
-    },
-    "settings": {
-      "editor.formatOnSave": true,
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit"
-      },
-      "eslint.validate": ["javascript", "typescript"]
     }
   }
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "yarn install",
 
   // Configure tool-specific properties.
   // "customizations": {},

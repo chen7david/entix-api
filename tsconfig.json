@@ -1,9 +1,26 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "target": "es2016",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
     "rootDir": "src",
-    "types": ["node", "jest"]
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/shared/*"],
+      "@domains/*": ["src/domains/*"],
+      "@config/*": ["src/config/*"],
+      "@openapi/*": ["src/openapi/*"],
+      "@database/*": ["src/database/*"]
+    },
+    "types": ["node", "jest"],
+    "sourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"]
 }
