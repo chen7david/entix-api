@@ -1,6 +1,6 @@
 import { BaseRepository } from '@shared/repositories/base.repository';
 import { DatabaseService } from '@shared/services/database/database.service';
-import { NotFoundError } from '@shared/utils/error/error.util';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { pgTable, serial, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 
 // Mock the error utility module
@@ -8,7 +8,7 @@ jest.mock('@shared/utils/error/error.util', () => {
   const originalModule = jest.requireActual('@shared/utils/error/error.util');
   return {
     ...originalModule,
-    // Mock the NotFoundError to not require table._.name
+    // Mock the createAppError function to pass through errors
     createAppError: jest.fn((err) => {
       if (err instanceof Error && err.message.includes('not found')) {
         return new originalModule.NotFoundError(err.message);
@@ -35,14 +35,24 @@ Object.defineProperty(mockUsersTable, '_', {
   configurable: true,
 });
 
+// Mock LoggerService
+const mockLoggerService = {
+  child: jest.fn().mockReturnValue({
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  }),
+} as unknown as LoggerService;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 class TestUserRepository extends BaseRepository<typeof mockUsersTable, any, number> {
   protected readonly table = mockUsersTable;
   protected readonly idColumn = mockUsersTable.id;
   protected readonly deletedAtColumn = mockUsersTable.deletedAt;
 
-  constructor(dbService: DatabaseService) {
-    super(dbService);
+  constructor(dbService: DatabaseService, loggerService: LoggerService) {
+    super(dbService, loggerService);
   }
 }
 
@@ -92,7 +102,7 @@ describe('BaseRepository', () => {
     mockSelectFrom.mockClear();
     mockDeleteWhere.mockClear();
 
-    repository = new TestUserRepository(mockDbService);
+    repository = new TestUserRepository(mockDbService, mockLoggerService);
 
     // We'll spy on the repository findById method - need to use any type to get around protected method
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -303,47 +313,27 @@ describe('BaseRepository', () => {
 
   describe('delete (soft delete)', () => {
     const userId = 1;
-    const mockUser = {
-      id: userId,
-      email: 'delete@example.com',
-      name: 'To Delete',
-      isActive: true,
-      createdAt: new Date(),
-      deletedAt: null,
-    };
 
     it('should call update/set/where/returning for soft delete', async () => {
       mockUpdateReturning.mockResolvedValue([{ id: userId }]);
 
-      await repository.delete(userId);
+      const result = await repository.delete(userId);
 
       expect(mockDbService.db.update).toHaveBeenCalled();
-      expect(mockFindById).not.toHaveBeenCalled();
+      expect(result).toBe(true);
     });
 
-    it('should check findById if update returns empty (already deleted)', async () => {
+    it('should return false if no rows were updated', async () => {
       mockUpdateReturning.mockResolvedValue([]);
-      mockFindById.mockResolvedValue(mockUser);
 
-      // Suppress console.warn output during test
-      const originalWarn = console.warn;
-      console.warn = jest.fn();
+      const result = await repository.delete(userId);
 
-      await repository.delete(userId);
-
-      // Restore console.warn
-      console.warn = originalWarn;
-
-      expect(mockFindById).toHaveBeenCalledWith(userId, true);
+      expect(result).toBe(false);
     });
 
-    it('should throw NotFoundError if update returns empty and findById fails', async () => {
-      mockUpdateReturning.mockResolvedValue([]);
+    it('should handle errors during delete operation', async () => {
+      mockUpdateReturning.mockRejectedValue(new Error('Database error'));
 
-      // Mock findById to fail with NotFoundError
-      mockFindById.mockRejectedValue(new NotFoundError('User not found'));
-
-      // Since we've mocked createAppError, we just need to verify that some error is thrown
       await expect(repository.delete(userId)).rejects.toThrow();
     });
   });
@@ -355,19 +345,17 @@ describe('BaseRepository', () => {
       protected readonly idColumn = mockUsersTable.id;
       protected readonly deletedAtColumn = undefined;
 
-      constructor(dbService: DatabaseService) {
-        super(dbService);
+      constructor(dbService: DatabaseService, loggerService: LoggerService) {
+        super(dbService, loggerService);
       }
     }
 
     it('should call db.delete().where() for hard delete', async () => {
-      const hardDeleteRepo = new TestHardDeleteRepo(mockDbService);
+      const hardDeleteRepo = new TestHardDeleteRepo(mockDbService, mockLoggerService);
 
       // Setup delete mock to resolve properly
       mockDeleteWhere.mockReturnValue({
-        then: jest
-          .fn()
-          .mockImplementation((callback) => Promise.resolve(callback({ rowCount: 1 }))),
+        returning: jest.fn().mockResolvedValue([{ id: 1 }]),
       });
 
       await hardDeleteRepo.delete(1);
