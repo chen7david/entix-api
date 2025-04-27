@@ -10,6 +10,8 @@ export const envSchema = z.object({
   NODE_ENV: z.nativeEnum(NodeEnv),
   LOG_LEVEL: z.nativeEnum(LogLevel),
   DATABASE_URL: z.string(),
+  RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).default('900000'), // 15 minutes default
+  RATE_LIMIT_MAX: z.string().regex(/^\d+$/).transform(Number).default('100'), // 100 requests default
   // Add more environment variables as needed
 });
 
