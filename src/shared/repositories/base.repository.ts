@@ -168,16 +168,12 @@ export abstract class BaseRepository<
       this.logger.debug(`Attempting to delete by ID: ${String(id)}`);
 
       if (this.deletedAtColumn) {
-        // For soft delete, use SQL.raw to set the deletedAt column directly
-        const result = await this.dbService.db
-          .update(this.table)
-          .set({ [this.deletedAtColumn.name]: new Date() } as Partial<InferInsertModel<TTable>>)
-          .where(eq(this.idColumn, id))
-          .returning();
-
-        const success = Array.isArray(result) && result.length > 0;
-        this.logger.debug(`Soft delete completed: ${success ? 'Success' : 'No rows affected'}`);
-        return success;
+        // Use the update method for soft delete
+        const updated = await this.update(id, {
+          deletedAt: new Date(),
+        } as Partial<InferInsertModel<TTable>>);
+        this.logger.debug(`Soft delete completed: ${updated ? 'Success' : 'No rows affected'}`);
+        return !!updated;
       } else {
         // Hard delete: Remove the record from the database
         const result = await this.dbService.db

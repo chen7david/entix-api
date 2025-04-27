@@ -2,6 +2,7 @@ import { BaseRepository } from '@shared/repositories/base.repository';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { pgTable, serial, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { NotFoundError } from '@shared/utils/error/error.util';
 
 // Mock the error utility module
 jest.mock('@shared/utils/error/error.util', () => {
@@ -323,12 +324,11 @@ describe('BaseRepository', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false if no rows were updated', async () => {
+    it('should throw NotFoundError if no rows were updated', async () => {
+      // Arrange: mock update to throw NotFoundError
       mockUpdateReturning.mockResolvedValue([]);
-
-      const result = await repository.delete(userId);
-
-      expect(result).toBe(false);
+      // Act & Assert
+      await expect(repository.delete(123)).rejects.toThrow(NotFoundError);
     });
 
     it('should handle errors during delete operation', async () => {
