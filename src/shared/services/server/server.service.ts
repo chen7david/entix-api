@@ -2,6 +2,7 @@ import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { DatabaseService } from '@shared/services/database/database.service';
+import { NewRelicService } from '@shared/services/newrelic/newrelic.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
 import type pino from 'pino';
@@ -21,6 +22,7 @@ export class ServerService {
     private readonly configService: ConfigService,
     private readonly loggerService: LoggerService,
     private readonly databaseService: DatabaseService,
+    private readonly newRelicService: NewRelicService,
   ) {}
 
   /**
@@ -41,6 +43,20 @@ export class ServerService {
     const logger = this.loggerService.child({
       service: 'ServerService',
     });
+
+    // Log New Relic status
+    if (this.newRelicService.isEnabled()) {
+      logger.info('New Relic monitoring is enabled');
+
+      // Add server info to New Relic
+      this.newRelicService.addCustomAttributes({
+        serverPort: port,
+        serverType: 'express',
+      });
+    } else {
+      logger.info('New Relic monitoring is disabled');
+    }
+
     this.server = app.listen(port, () => {
       logger.info(`Server started on http://localhost:${port}`);
     });
@@ -49,6 +65,12 @@ export class ServerService {
     this.cleanup(async (logger) => {
       await this.databaseService.cleanup();
       logger.info('DatabaseService cleaned up');
+    });
+
+    // Register logger cleanup for New Relic log flushing
+    this.cleanup(async (logger) => {
+      await this.loggerService.cleanup();
+      logger.info('LoggerService cleaned up');
     });
 
     // Handle process signals for graceful shutdown
