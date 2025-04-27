@@ -24,7 +24,7 @@ export class OpenApiService {
     // Generate the full OpenAPI spec from routing-controllers metadata
     return routingControllersToSpec(
       getMetadataArgsStorage(),
-      { routePrefix: '/api' },
+      {},
       {
         components: components.components,
         info: {
