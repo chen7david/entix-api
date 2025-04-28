@@ -4,6 +4,7 @@ import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { Container } from '@shared/utils/ioc.util';
 import supertest from 'supertest';
+import { createMockLogger } from '@shared/utils/test-helpers/mock-logger.util';
 
 describe('AppService', () => {
   // Reset container before each test for isolation
@@ -15,18 +16,7 @@ describe('AppService', () => {
     Container.set(ConfigService, configService);
 
     // Create a more complete mock LoggerService
-    const mockLogger = {
-      log: jest.fn(),
-      child: jest.fn().mockImplementation(() => mockLogger),
-      getLogger: jest.fn().mockReturnThis(),
-      cleanup: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      fatal: jest.fn(),
-      trace: jest.fn(),
-    } as unknown as LoggerService;
+    const mockLogger = createMockLogger();
 
     Container.set(LoggerService, mockLogger);
 
@@ -73,18 +63,7 @@ describe('AppService', () => {
     Container.reset();
 
     // Create a more complete mock LoggerService
-    const mockLogger = {
-      log: jest.fn(),
-      child: jest.fn().mockImplementation(() => mockLogger),
-      getLogger: jest.fn().mockReturnThis(),
-      cleanup: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      fatal: jest.fn(),
-      trace: jest.fn(),
-    } as unknown as LoggerService;
+    const mockLogger = createMockLogger();
 
     // Register fresh services that pick up the modified environment variables
     const configService = new ConfigService();
