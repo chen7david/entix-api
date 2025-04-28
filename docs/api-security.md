@@ -63,8 +63,21 @@ If your API is behind a proxy or CDN (like Cloudflare), Express will see the pro
 
 ## Implementation Details
 
-- Rate limiting is implemented using a utility (`createRateLimitMiddleware`) for modularity and testability.
-- The middleware is configured in `AppService` using values from `ConfigService`.
+- Rate limiting is implemented using a middleware function (`useRateLimiting`) for modularity and testability.
+- The middleware is located in `@shared/middleware/rate-limit.middleware` and is configured in `AppService` using values from `ConfigService`:
+
+```ts
+import { useRateLimiting } from '@shared/middleware/rate-limit.middleware';
+// ...
+useRateLimiting(app, {
+  max: configService.get('RATE_LIMIT_MAX'),
+  windowMs: configService.get('RATE_LIMIT_WINDOW_MS'),
+  logger, // Optional logger for recording rate limit events
+});
+```
+
+- The middleware provides consistent error responses using the `RateLimitError` class, ensuring that rate limit errors are formatted in the same way as other application errors (status code 429).
+- When a logger is provided, it will log rate limit events with client IP, path, method, and details, which can help with monitoring and security analysis.
 - `ConfigService` loads environment variables at instantiation. If you change environment variables in tests, create a new `ConfigService` instance to pick up the changes.
 - All dependencies are managed via TypeDI and registered in the container for test isolation and flexibility.
 

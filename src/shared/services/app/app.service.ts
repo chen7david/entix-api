@@ -1,7 +1,8 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
 import { NotFoundMiddleware } from '@shared/middleware/not-found.middleware';
-import { createRateLimitMiddleware } from '@shared/utils/rate-limit.util';
+import { useRateLimiting } from '@shared/middleware/rate-limit.middleware';
 import { ConfigService } from '@shared/services/config/config.service';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { useContainer, useExpressServer } from 'routing-controllers';
 import { Injectable } from '@shared/utils/ioc.util';
 import express, { Express } from 'express';
@@ -9,7 +10,6 @@ import { Container } from 'typedi';
 import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
-
 /**
  * AppService configures the Express app with routing-controllers and DI.
  */
@@ -26,7 +26,10 @@ export class AppService {
    * @param _deps Dependency injection object (future-proof for logger, etc.)
    * @param configService The ConfigService instance for environment configuration
    */
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: LoggerService,
+  ) {
     useContainer(Container);
     this.app = express();
     /**
@@ -42,9 +45,11 @@ export class AppService {
     this.app.use(express.urlencoded({ extended: true }));
 
     // Rate limiting middleware
-    const windowMs = this.configService.get('RATE_LIMIT_WINDOW_MS');
-    const max = this.configService.get('RATE_LIMIT_MAX');
-    this.app.use(createRateLimitMiddleware({ windowMs, max }));
+    useRateLimiting(this.app, {
+      max: this.configService.get('RATE_LIMIT_MAX'),
+      windowMs: this.configService.get('RATE_LIMIT_WINDOW_MS'),
+      logger: this.logger,
+    });
 
     // Configure routing-controllers with all controllers and middlewares
     useExpressServer(this.app, {
