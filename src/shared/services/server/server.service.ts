@@ -1,6 +1,6 @@
 import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
-import { LoggerService } from '@shared/services/logger/logger.service';
+import { Logger, LoggerService } from '@shared/services/logger/logger.service';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
@@ -14,6 +14,7 @@ import type pino from 'pino';
 export class ServerService {
   private server?: http.Server;
   private cleanupTasks: ((logger: pino.Logger) => Promise<void>)[] = [];
+  private readonly logger: Logger;
 
   // eslint-disable-next-line max-params
   constructor(
@@ -21,7 +22,11 @@ export class ServerService {
     private readonly configService: ConfigService,
     private readonly loggerService: LoggerService,
     private readonly databaseService: DatabaseService,
-  ) {}
+  ) {
+    this.logger = this.loggerService.child({
+      service: 'ServerService',
+    });
+  }
 
   /**
    * Register an async cleanup function to be called before shutdown.
@@ -37,30 +42,35 @@ export class ServerService {
    */
   async start(): Promise<void> {
     const port = this.configService.get('PORT');
+    const nodeEnv = this.configService.get('NODE_ENV');
     const app = this.appService.getApp();
-    const logger = this.loggerService.child({
-      service: 'ServerService',
-    });
+
     this.server = app.listen(port, () => {
-      logger.info(`Server started on http://localhost:${port}`);
+      this.logger.info(
+        {
+          url: `http://localhost:${port}`,
+          environment: nodeEnv,
+        },
+        'Server started',
+      );
     });
 
     // Register database cleanup
-    this.cleanup(async (logger) => {
+    this.cleanup(async () => {
       await this.databaseService.cleanup();
-      logger.info('DatabaseService cleaned up');
+      this.logger.info('DatabaseService cleaned up');
     });
 
     // Handle process signals for graceful shutdown
     const shutdown = async () => {
-      logger.info('Shutting down server...');
+      this.logger.info('Shutting down server...');
       if (this.server) {
         await new Promise<void>((resolve, reject) => {
           this.server!.close((err) => (err ? reject(err) : resolve()));
         });
       }
-      await Promise.all(this.cleanupTasks.map((fn) => fn(logger)));
-      logger.info('Cleanup complete. Exiting.');
+      await Promise.all(this.cleanupTasks.map((fn) => fn(this.logger)));
+      this.logger.info('Cleanup complete. Exiting.');
       process.exit(0);
     };
     process.on('SIGINT', shutdown);
