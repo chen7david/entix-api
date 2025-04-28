@@ -47,5 +47,5 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           PORT: 3000
-          LOG_LEVEL: debug
+          LOG_LEVEL: error
         run: npm test

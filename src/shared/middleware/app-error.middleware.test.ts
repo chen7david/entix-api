@@ -3,6 +3,7 @@ import { AppError, NotFoundError, ValidationError } from '@shared/utils/error/er
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { ZodError, z } from '@shared/utils/zod.util';
 import { Request, Response, NextFunction } from 'express';
+import { createMockLogger } from '@shared/utils/test-helpers/mock-logger.util';
 
 const createMockRes = (): Response => {
   const res = {} as Partial<Response>;
@@ -26,7 +27,7 @@ describe('ErrorHandlerMiddleware', () => {
   let next: NextFunction;
 
   beforeEach(() => {
-    logger = { log: jest.fn() } as unknown as LoggerService;
+    logger = createMockLogger();
     middleware = new ErrorHandlerMiddleware(logger);
     req = createMockReq();
     res = createMockRes();
