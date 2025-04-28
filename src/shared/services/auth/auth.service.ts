@@ -21,7 +21,7 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 
 /**
- * Cognito configuration required for AuthenticationService.
+ * Cognito configuration required for AuthService.
  */
 type CognitoConfig = {
   region: string;
@@ -30,7 +30,7 @@ type CognitoConfig = {
 };
 
 /**
- * AuthenticationService provides user registration and account management using AWS Cognito.
+ * AuthService provides user registration and account management using AWS Cognito.
  *
  * @remarks
  * - Uses AWS SDK v3 CognitoIdentityProviderClient.
@@ -43,7 +43,7 @@ export class AuthService {
   private readonly config: CognitoConfig;
 
   /**
-   * Constructs the AuthenticationService.
+   * Constructs the AuthService.
    * @param configService - Injected ConfigService for environment variables.
    */
   constructor(private readonly configService: ConfigService) {

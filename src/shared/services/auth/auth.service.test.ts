@@ -1,4 +1,4 @@
-import { AuthenticationService } from '@shared/services/authentication/authentication.service';
+import { AuthService } from '../auth/auth.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import type {
   SignUpParams,
@@ -20,8 +20,8 @@ jest.mock('@aws-sdk/client-cognito-identity-provider', () => {
   };
 });
 
-describe('AuthenticationService', () => {
-  let service: AuthenticationService;
+describe('AuthService', () => {
+  let service: AuthService;
   let configService: ConfigService;
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('AuthenticationService', () => {
         }
       }),
     } as unknown as ConfigService;
-    service = new AuthenticationService(configService);
+    service = new AuthService(configService);
   });
 
   describe('signUp', () => {
