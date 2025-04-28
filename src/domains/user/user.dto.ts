@@ -92,6 +92,15 @@ export const UserIdParamDto = z
 export type UserIdParamDto = z.infer<typeof UserIdParamDto>;
 
 /**
+ * Generic success response DTO for user endpoints
+ */
+export const UserSuccessResponseDto = z.object({
+  success: z.boolean(),
+  message: z.string().optional(),
+});
+export type UserSuccessResponseDto = z.infer<typeof UserSuccessResponseDto>;
+
+/**
  * Registers user-related Zod schemas with the OpenAPI registry.
  * @param registry - The OpenAPIRegistry instance to register schemas on.
  */
@@ -100,4 +109,5 @@ export function registerUserSchemas(registry: OpenAPIRegistry): void {
   registry.register('UpdateUserDto', UpdateUserDto);
   registry.register('UserDto', UserDto);
   registry.register('UserIdParamDto', UserIdParamDto);
+  registry.register('UserSuccessResponseDto', UserSuccessResponseDto);
 }

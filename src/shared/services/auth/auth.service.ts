@@ -1,10 +1,11 @@
+import { mapCognitoErrorToAppError } from '@shared/utils/error/cognito-error.util';
+import { ConfigService } from '@shared/services/config/config.service';
+import { Service } from 'typedi';
 import type {
   SignUpParams,
   ConfirmForgotPasswordParams,
   ChangePasswordParams,
 } from '@shared/types/authentication.type';
-import { Service } from 'typedi';
-import { ConfigService } from '@shared/services/config/config.service';
 import {
   CognitoIdentityProviderClient,
   SignUpCommand,
@@ -61,20 +62,20 @@ export class AuthService {
    */
   async signUp(params: SignUpParams) {
     try {
-      const { email, password, attributes } = params;
+      const { username, email, password, attributes } = params;
       const userAttributes = [
         { Name: 'email', Value: email },
         ...(attributes ? Object.entries(attributes).map(([Name, Value]) => ({ Name, Value })) : []),
       ];
       const command = new SignUpCommand({
         ClientId: this.config.clientId,
-        Username: email,
+        Username: username,
         Password: password,
         UserAttributes: userAttributes,
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -92,7 +93,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -113,7 +114,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -129,7 +130,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -148,7 +149,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -164,7 +165,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -177,7 +178,7 @@ export class AuthService {
       const command = new GetUserCommand({ AccessToken: accessToken });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -195,7 +196,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -213,7 +214,7 @@ export class AuthService {
       });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
   }
 
@@ -226,21 +227,7 @@ export class AuthService {
       const command = new GlobalSignOutCommand({ AccessToken: accessToken });
       return await this.cognito.send(command);
     } catch (error) {
-      this.handleCognitoError(error);
+      throw mapCognitoErrorToAppError(error);
     }
-  }
-
-  /**
-   * Handles Cognito errors and throws a descriptive error.
-   * @param error - The error thrown by AWS SDK
-   */
-  private handleCognitoError(error: unknown): never {
-    if (typeof error === 'object' && error !== null && 'name' in error && 'message' in error) {
-      // Optionally log error.$metadata.requestId for tracing
-      throw new Error(
-        `[Cognito:${(error as { name: string }).name}] ${(error as { message: string }).message}`,
-      );
-    }
-    throw error;
   }
 }

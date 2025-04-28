@@ -1,4 +1,4 @@
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '@shared/services/auth/auth.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import type {
   SignUpParams,
@@ -58,9 +58,7 @@ describe('AuthService', () => {
     });
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'UsernameExistsException', message: 'User exists' });
-      await expect(service.signUp(params)).rejects.toThrow(
-        '[Cognito:UsernameExistsException] User exists',
-      );
+      await expect(service.signUp(params)).rejects.toThrow('User already exists');
     });
   });
 
@@ -74,7 +72,7 @@ describe('AuthService', () => {
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'CodeMismatchException', message: 'Invalid code' });
       await expect(service.confirmSignUp('test@example.com', '123456')).rejects.toThrow(
-        '[Cognito:CodeMismatchException] Invalid code',
+        'Invalid confirmation code',
       );
     });
   });
@@ -93,7 +91,7 @@ describe('AuthService', () => {
         message: 'Incorrect password',
       });
       await expect(service.signIn('test@example.com', 'Password123!')).rejects.toThrow(
-        '[Cognito:NotAuthorizedException] Incorrect password',
+        'Incorrect username or password',
       );
     });
   });
@@ -107,9 +105,7 @@ describe('AuthService', () => {
     });
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'UserNotFoundException', message: 'User not found' });
-      await expect(service.forgotPassword('test@example.com')).rejects.toThrow(
-        '[Cognito:UserNotFoundException] User not found',
-      );
+      await expect(service.forgotPassword('test@example.com')).rejects.toThrow('User not found');
     });
   });
 
@@ -128,7 +124,7 @@ describe('AuthService', () => {
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'ExpiredCodeException', message: 'Code expired' });
       await expect(service.confirmForgotPassword(params)).rejects.toThrow(
-        '[Cognito:ExpiredCodeException] Code expired',
+        'Confirmation code expired',
       );
     });
   });
@@ -143,7 +139,7 @@ describe('AuthService', () => {
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'LimitExceededException', message: 'Limit exceeded' });
       await expect(service.resendConfirmationCode('test@example.com')).rejects.toThrow(
-        '[Cognito:LimitExceededException] Limit exceeded',
+        'Limit exceeded',
       );
     });
   });
@@ -158,7 +154,7 @@ describe('AuthService', () => {
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'NotAuthorizedException', message: 'Token expired' });
       await expect(service.getUser('access-token')).rejects.toThrow(
-        '[Cognito:NotAuthorizedException] Token expired',
+        'Incorrect username or password',
       );
     });
   });
@@ -177,7 +173,7 @@ describe('AuthService', () => {
       });
       await expect(
         service.updateUserAttributes('access-token', { given_name: 'Test' }),
-      ).rejects.toThrow('[Cognito:InvalidParameterException] Invalid attribute');
+      ).rejects.toThrow('Invalid attribute');
     });
   });
 
@@ -199,7 +195,7 @@ describe('AuthService', () => {
         message: 'Incorrect password',
       });
       await expect(service.changePassword(params)).rejects.toThrow(
-        '[Cognito:NotAuthorizedException] Incorrect password',
+        'Incorrect username or password',
       );
     });
   });
@@ -214,7 +210,7 @@ describe('AuthService', () => {
     it('should throw a formatted error on Cognito error', async () => {
       mockSend.mockRejectedValueOnce({ name: 'NotAuthorizedException', message: 'Token expired' });
       await expect(service.signOut('access-token')).rejects.toThrow(
-        '[Cognito:NotAuthorizedException] Token expired',
+        'Incorrect username or password',
       );
     });
   });

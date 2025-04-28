@@ -1,8 +1,10 @@
-import { JsonController, Post, Body, Put } from 'routing-controllers';
-import { OpenAPI } from 'routing-controllers-openapi';
+import { JsonController, Post, Body, Put, UseBefore } from 'routing-controllers';
+import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Injectable } from '@shared/utils/ioc.util';
 import { AuthService } from '@shared/services/auth/auth.service';
 import { LoggerService, Logger } from '@shared/services/logger/logger.service';
+import { validateBody } from '@shared/middleware/validation.middleware';
+import { z } from 'zod';
 import {
   SignUpDto,
   ConfirmSignUpDto,
@@ -14,6 +16,17 @@ import {
   ChangePasswordDto,
   SignOutDto,
   RefreshTokenDto,
+  type SignUpResponseDto,
+  type SignInResponseDto,
+  type ConfirmSignUpResponseDto,
+  type ForgotPasswordResponseDto,
+  type ConfirmForgotPasswordResponseDto,
+  type ResendConfirmationCodeResponseDto,
+  type GetUserResponseDto,
+  type UpdateUserAttributesResponseDto,
+  type ChangePasswordResponseDto,
+  type SignOutResponseDto,
+  type RefreshTokenResponseDto,
 } from '@domains/auth/auth.dto';
 
 @Injectable()
@@ -34,9 +47,22 @@ export class AuthController {
    */
   @Post('/signup')
   @OpenAPI({ summary: 'Sign up a new user' })
-  async signUp(@Body() body: SignUpDto) {
-    this.logger.info({ email: body.email }, 'Sign up attempt');
-    return this.authService.signUp(body);
+  @UseBefore(validateBody(SignUpDto))
+  @ResponseSchema('SignUpResponseDto')
+  async signUp(@Body() body: SignUpDto): Promise<SignUpResponseDto> {
+    this.logger.info({ username: body.username, email: body.email }, 'Sign up attempt');
+    const result = await this.authService.signUp(body);
+    return {
+      userId: result.UserSub || '',
+      confirmed: !!result.UserConfirmed,
+      codeDelivery: result.CodeDeliveryDetails
+        ? {
+            attribute: result.CodeDeliveryDetails.AttributeName || '',
+            medium: result.CodeDeliveryDetails.DeliveryMedium || '',
+            destination: result.CodeDeliveryDetails.Destination || '',
+          }
+        : null,
+    };
   }
 
   /**
@@ -44,9 +70,12 @@ export class AuthController {
    */
   @Post('/confirm-signup')
   @OpenAPI({ summary: 'Confirm user sign up' })
-  async confirmSignUp(@Body() body: ConfirmSignUpDto) {
+  @UseBefore(validateBody(ConfirmSignUpDto))
+  @ResponseSchema('ConfirmSignUpResponseDto')
+  async confirmSignUp(@Body() body: ConfirmSignUpDto): Promise<ConfirmSignUpResponseDto> {
     this.logger.info({ email: body.email }, 'Confirm sign up');
-    return this.authService.confirmSignUp(body.email, body.code);
+    await this.authService.confirmSignUp(body.email, body.code);
+    return { success: true, message: 'User confirmed' };
   }
 
   /**
@@ -54,9 +83,19 @@ export class AuthController {
    */
   @Post('/signin')
   @OpenAPI({ summary: 'Sign in a user' })
-  async signIn(@Body() body: SignInDto) {
+  @UseBefore(validateBody(SignInDto))
+  @ResponseSchema('SignInResponseDto')
+  async signIn(@Body() body: SignInDto): Promise<SignInResponseDto> {
     this.logger.info({ email: body.email }, 'Sign in attempt');
-    return this.authService.signIn(body.email, body.password);
+    const result = await this.authService.signIn(body.email, body.password);
+    const auth = result.AuthenticationResult || {};
+    return {
+      accessToken: auth.AccessToken || '',
+      refreshToken: auth.RefreshToken,
+      idToken: auth.IdToken,
+      expiresIn: auth.ExpiresIn,
+      tokenType: auth.TokenType,
+    };
   }
 
   /**
@@ -64,9 +103,20 @@ export class AuthController {
    */
   @Post('/forgot-password')
   @OpenAPI({ summary: 'Forgot password' })
-  async forgotPassword(@Body() body: ForgotPasswordDto) {
+  @UseBefore(validateBody(ForgotPasswordDto))
+  @ResponseSchema('ForgotPasswordResponseDto')
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
     this.logger.info({ email: body.email }, 'Forgot password');
-    return this.authService.forgotPassword(body.email);
+    const result = await this.authService.forgotPassword(body.email);
+    return {
+      codeDelivery: result.CodeDeliveryDetails
+        ? {
+            attribute: result.CodeDeliveryDetails.AttributeName || '',
+            medium: result.CodeDeliveryDetails.DeliveryMedium || '',
+            destination: result.CodeDeliveryDetails.Destination || '',
+          }
+        : null,
+    };
   }
 
   /**
@@ -74,9 +124,14 @@ export class AuthController {
    */
   @Post('/confirm-forgot-password')
   @OpenAPI({ summary: 'Confirm forgot password' })
-  async confirmForgotPassword(@Body() body: ConfirmForgotPasswordDto) {
+  @UseBefore(validateBody(ConfirmForgotPasswordDto))
+  @ResponseSchema('ConfirmForgotPasswordResponseDto')
+  async confirmForgotPassword(
+    @Body() body: ConfirmForgotPasswordDto,
+  ): Promise<ConfirmForgotPasswordResponseDto> {
     this.logger.info({ email: body.email }, 'Confirm forgot password');
-    return this.authService.confirmForgotPassword(body);
+    await this.authService.confirmForgotPassword(body);
+    return { success: true, message: 'Password changed' };
   }
 
   /**
@@ -84,9 +139,22 @@ export class AuthController {
    */
   @Post('/resend-confirmation-code')
   @OpenAPI({ summary: 'Resend confirmation code' })
-  async resendConfirmationCode(@Body() body: ResendConfirmationCodeDto) {
+  @UseBefore(validateBody(ResendConfirmationCodeDto))
+  @ResponseSchema('ResendConfirmationCodeResponseDto')
+  async resendConfirmationCode(
+    @Body() body: ResendConfirmationCodeDto,
+  ): Promise<ResendConfirmationCodeResponseDto> {
     this.logger.info({ email: body.email }, 'Resend confirmation code');
-    return this.authService.resendConfirmationCode(body.email);
+    const result = await this.authService.resendConfirmationCode(body.email);
+    return {
+      codeDelivery: result.CodeDeliveryDetails
+        ? {
+            attribute: result.CodeDeliveryDetails.AttributeName || '',
+            medium: result.CodeDeliveryDetails.DeliveryMedium || '',
+            destination: result.CodeDeliveryDetails.Destination || '',
+          }
+        : null,
+    };
   }
 
   /**
@@ -94,9 +162,21 @@ export class AuthController {
    */
   @Post('/get-user')
   @OpenAPI({ summary: 'Get user attributes' })
-  async getUser(@Body() body: { accessToken: string }) {
+  @UseBefore(validateBody(z.object({ accessToken: z.string() })))
+  @ResponseSchema('GetUserResponseDto')
+  async getUser(@Body() body: { accessToken: string }): Promise<GetUserResponseDto> {
     this.logger.info({ accessToken: body.accessToken }, 'Get user');
-    return this.authService.getUser(body.accessToken);
+    const result = await this.authService.getUser(body.accessToken);
+    return {
+      username: result.Username || '',
+      attributes: (result.UserAttributes || []).reduce(
+        (acc, attr) => {
+          if (attr.Name && attr.Value) acc[attr.Name] = attr.Value;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    };
   }
 
   /**
@@ -104,9 +184,14 @@ export class AuthController {
    */
   @Put('/update-user-attributes')
   @OpenAPI({ summary: 'Update user attributes' })
-  async updateUserAttributes(@Body() body: UpdateUserAttributesDto) {
+  @UseBefore(validateBody(UpdateUserAttributesDto))
+  @ResponseSchema('UpdateUserAttributesResponseDto')
+  async updateUserAttributes(
+    @Body() body: UpdateUserAttributesDto,
+  ): Promise<UpdateUserAttributesResponseDto> {
     this.logger.info({ accessToken: body.accessToken }, 'Update user attributes');
-    return this.authService.updateUserAttributes(body.accessToken, body.attributes);
+    await this.authService.updateUserAttributes(body.accessToken, body.attributes);
+    return { success: true, message: 'User attributes updated' };
   }
 
   /**
@@ -114,9 +199,12 @@ export class AuthController {
    */
   @Put('/change-password')
   @OpenAPI({ summary: 'Change password' })
-  async changePassword(@Body() body: ChangePasswordDto) {
+  @UseBefore(validateBody(ChangePasswordDto))
+  @ResponseSchema('ChangePasswordResponseDto')
+  async changePassword(@Body() body: ChangePasswordDto): Promise<ChangePasswordResponseDto> {
     this.logger.info({ accessToken: body.accessToken }, 'Change password');
-    return this.authService.changePassword(body);
+    await this.authService.changePassword(body);
+    return { success: true, message: 'Password changed' };
   }
 
   /**
@@ -124,9 +212,12 @@ export class AuthController {
    */
   @Post('/signout')
   @OpenAPI({ summary: 'Sign out' })
-  async signOut(@Body() body: SignOutDto) {
+  @UseBefore(validateBody(SignOutDto))
+  @ResponseSchema('SignOutResponseDto')
+  async signOut(@Body() body: SignOutDto): Promise<SignOutResponseDto> {
     this.logger.info({ accessToken: body.accessToken }, 'Sign out');
-    return this.authService.signOut(body.accessToken);
+    await this.authService.signOut(body.accessToken);
+    return { success: true, message: 'Signed out' };
   }
 
   /**
@@ -134,7 +225,9 @@ export class AuthController {
    */
   @Post('/refresh-token')
   @OpenAPI({ summary: 'Refresh token (handled by Cognito client SDK, not server)' })
-  async refreshToken(@Body() body: RefreshTokenDto) {
+  @UseBefore(validateBody(RefreshTokenDto))
+  @ResponseSchema('RefreshTokenResponseDto')
+  async refreshToken(@Body() body: RefreshTokenDto): Promise<RefreshTokenResponseDto> {
     this.logger.info({ refreshToken: body.refreshToken }, 'Refresh token');
     // In Cognito, refresh is handled on the client side. This is a placeholder for completeness.
     return { message: 'Token refresh is handled by Cognito client SDK.' };

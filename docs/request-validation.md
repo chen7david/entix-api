@@ -95,6 +95,22 @@ When used in middleware, your `req.body`, `req.query`, etc. will be automaticall
 
 If validation fails, the middleware will call `next()` with a `ValidationError`, which you can handle in your error middleware. The error includes details about which fields failed and why.
 
+## Validating Authentication Endpoints
+
+All authentication endpoints (see `AuthController`) are protected by Zod-based request validation using the `validateBody` middleware and DTOs defined in `auth.dto.ts`. This ensures that every request to endpoints such as sign up, sign in, password reset, and others is type-safe and robustly validated before reaching business logic.
+
+**Example:**
+
+```ts
+@Post('/signin')
+@UseBefore(validateBody(SignInDto))
+async signIn(@Body() body: SignInDto) {
+  // body is fully validated and typed
+}
+```
+
+This pattern is applied to all routes in the authentication domain, mirroring the approach used for user endpoints. See `src/domains/auth/auth.controller.ts` for full details.
+
 ---
 
 ## Summary

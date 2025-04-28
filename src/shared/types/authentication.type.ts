@@ -2,6 +2,7 @@
  * Parameters for signUp method.
  */
 export type SignUpParams = {
+  username: string;
   email: string;
   password: string;
   attributes?: Record<string, string>;

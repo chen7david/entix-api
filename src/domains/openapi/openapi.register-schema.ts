@@ -1,5 +1,6 @@
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { registerUserSchemas } from '@domains/user/user.dto';
+import { registerAuthSchemas } from '@domains/auth/auth.dto';
 
 /**
  * Registers all domain Zod schemas with OpenAPI registry.
@@ -9,4 +10,5 @@ import { registerUserSchemas } from '@domains/user/user.dto';
  */
 export function registerSchemas(registry: OpenAPIRegistry): void {
   registerUserSchemas(registry);
+  registerAuthSchemas(registry);
 }
