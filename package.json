@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "NODE_ENV=production node dist/server.js",
+    "start": "NODE_ENV=production node -r newrelic dist/server.js",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@newrelic/pino-enricher": "^1.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.0",
@@ -68,6 +69,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^7.0.0",
     "multer": "^1.4.5-lts.2",
+    "newrelic": "^12.18.0",
     "pg": "^8.14.1",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
