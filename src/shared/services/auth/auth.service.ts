@@ -5,7 +5,7 @@ import type {
   SignUpParams,
   ConfirmForgotPasswordParams,
   ChangePasswordParams,
-} from '@shared/types/authentication.type';
+} from '@shared/types/auth.type';
 import {
   CognitoIdentityProviderClient,
   SignUpCommand,
