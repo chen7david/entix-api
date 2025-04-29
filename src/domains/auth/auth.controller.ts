@@ -21,6 +21,20 @@ import {
   ResendConfirmationCodeBody,
   AdminUpdateUserAttributesBody,
   ChangePasswordBody,
+  confirmSignUpBodySchema,
+  signOutBodySchema,
+  refreshTokenBodySchema,
+  ConfirmSignUpBody,
+  SignOutBody,
+  RefreshTokenBody,
+  loginBodySchema,
+  getMeHeadersSchema,
+  updateMeBodySchema,
+  deleteMeHeadersSchema,
+  LoginBody,
+  GetMeHeaders,
+  UpdateMeBody,
+  DeleteMeHeaders,
 } from '@domains/auth/auth.dto';
 import { validateBody, validateParams } from '@shared/middleware/validation.middleware';
 import {
@@ -33,12 +47,20 @@ import {
   AdminGetUserResult,
   AdminUpdateUserAttributesResult,
   ChangePasswordResult,
+  ConfirmSignUpResult,
+  SignOutResult,
+  RefreshTokenResult,
+  LoginResult,
+  GetUserResult,
+  UpdateUserAttributesResult,
+  DeleteUserResult,
 } from '@shared/types/cognito.type';
-
+import { Injectable } from '@shared/utils/ioc.util';
 /**
  * Controller for authentication and user management endpoints.
  */
-@JsonController('/auth')
+@Injectable()
+@JsonController('/api/v1/auth')
 @OpenAPI({ summary: 'Authentication and user management endpoints' })
 export class AuthController {
   private readonly logger: Logger;
@@ -197,6 +219,122 @@ export class AuthController {
       return await this.authService.changePassword(body);
     } catch (err) {
       this.logger.error('Error in changePassword', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Confirms user signup with confirmation code.
+   */
+  @Post('/confirm-signup')
+  @UseBefore(validateBody(confirmSignUpBodySchema))
+  @OpenAPI({ summary: 'Confirm user signup' })
+  async confirmSignUp(@Body() body: ConfirmSignUpBody): Promise<ConfirmSignUpResult> {
+    this.logger.info('POST /auth/confirm-signup', { username: body.username });
+    try {
+      return await this.authService.confirmSignUp(body);
+    } catch (err) {
+      this.logger.error('Error in confirmSignUp', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Signs out a user globally (invalidates all tokens).
+   */
+  @Post('/signout')
+  @UseBefore(validateBody(signOutBodySchema))
+  @OpenAPI({ summary: 'Sign out user globally' })
+  async signOut(@Body() body: SignOutBody): Promise<SignOutResult> {
+    this.logger.info('POST /auth/signout');
+    try {
+      return await this.authService.signOut(body);
+    } catch (err) {
+      this.logger.error('Error in signOut', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Refreshes tokens using a refresh token.
+   */
+  @Post('/refresh-token')
+  @UseBefore(validateBody(refreshTokenBodySchema))
+  @OpenAPI({ summary: 'Refresh tokens using a refresh token' })
+  async refreshToken(@Body() body: RefreshTokenBody): Promise<RefreshTokenResult> {
+    this.logger.info('POST /auth/refresh-token');
+    try {
+      return await this.authService.refreshToken(body);
+    } catch (err) {
+      this.logger.error('Error in refreshToken', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Regular user login (USER_PASSWORD_AUTH).
+   */
+  @Post('/login')
+  @UseBefore(validateBody(loginBodySchema))
+  @OpenAPI({ summary: 'User login (USER_PASSWORD_AUTH)' })
+  async login(@Body() body: LoginBody): Promise<LoginResult> {
+    this.logger.info('POST /auth/login', { username: body.username });
+    try {
+      return await this.authService.login(body);
+    } catch (err) {
+      this.logger.error('Error in login', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Get current user info (self-service, by access token).
+   */
+  @Get('/me')
+  @UseBefore(validateBody(getMeHeadersSchema))
+  @OpenAPI({ summary: 'Get current user info (requires Authorization header)' })
+  async getMe(@Body() headers: GetMeHeaders): Promise<GetUserResult> {
+    this.logger.info('GET /auth/me');
+    try {
+      return await this.authService.getMe(headers);
+    } catch (err) {
+      this.logger.error('Error in getMe', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Update current user attributes (self-service).
+   */
+  @Post('/me')
+  @UseBefore(validateBody(getMeHeadersSchema))
+  @UseBefore(validateBody(updateMeBodySchema))
+  @OpenAPI({ summary: 'Update current user attributes (requires Authorization header)' })
+  async updateMe(
+    @Body() headers: GetMeHeaders,
+    @Body() body: UpdateMeBody,
+  ): Promise<UpdateUserAttributesResult> {
+    this.logger.info('PUT /auth/me');
+    try {
+      return await this.authService.updateMe(headers, body);
+    } catch (err) {
+      this.logger.error('Error in updateMe', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * Delete current user (self-service).
+   */
+  @Post('/me/delete')
+  @UseBefore(validateBody(deleteMeHeadersSchema))
+  @OpenAPI({ summary: 'Delete current user (requires Authorization header)' })
+  async deleteMe(@Body() headers: DeleteMeHeaders): Promise<DeleteUserResult> {
+    this.logger.info('DELETE /auth/me');
+    try {
+      return await this.authService.deleteMe(headers);
+    } catch (err) {
+      this.logger.error('Error in deleteMe', { err });
       throw err;
     }
   }

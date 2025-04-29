@@ -14,6 +14,12 @@ import {
   AdminGetUserCommand,
   AdminUpdateUserAttributesCommand,
   ChangePasswordCommand,
+  ConfirmSignUpCommand,
+  GlobalSignOutCommand,
+  InitiateAuthCommand,
+  GetUserCommand,
+  UpdateUserAttributesCommand,
+  DeleteUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
   AdminCreateUserParams,
@@ -32,6 +38,20 @@ import {
   AdminUpdateUserAttributesResult,
   ChangePasswordParams,
   ChangePasswordResult,
+  ConfirmSignUpParams,
+  ConfirmSignUpResult,
+  SignOutParams,
+  SignOutResult,
+  RefreshTokenParams,
+  RefreshTokenResult,
+  LoginParams,
+  LoginResult,
+  GetUserParams,
+  GetUserResult,
+  UpdateUserAttributesParams,
+  UpdateUserAttributesResult,
+  DeleteUserParams,
+  DeleteUserResult,
 } from '@shared/types/cognito.type';
 
 /**
@@ -284,6 +304,158 @@ export class CognitoService {
         AccessToken: params.accessToken,
         PreviousPassword: params.previousPassword,
         ProposedPassword: params.proposedPassword,
+      });
+      await this.cognito.send(command);
+      return { success: true };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Confirms user signup with confirmation code.
+   * @param params - ConfirmSignUp parameters
+   */
+  async confirmSignUp(params: ConfirmSignUpParams): Promise<ConfirmSignUpResult> {
+    try {
+      const command = new ConfirmSignUpCommand({
+        ClientId: this.config.clientId,
+        Username: params.username,
+        ConfirmationCode: params.code,
+      });
+      await this.cognito.send(command);
+      return { success: true };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Signs out a user globally (invalidates all tokens).
+   * @param params - SignOut parameters
+   */
+  async signOut(params: SignOutParams): Promise<SignOutResult> {
+    try {
+      const command = new GlobalSignOutCommand({
+        AccessToken: params.accessToken,
+      });
+      await this.cognito.send(command);
+      return { success: true };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Refreshes tokens using a refresh token.
+   * @param params - RefreshToken parameters
+   */
+  async refreshToken(params: RefreshTokenParams): Promise<RefreshTokenResult> {
+    try {
+      const command = new InitiateAuthCommand({
+        AuthFlow: 'REFRESH_TOKEN_AUTH',
+        ClientId: params.clientId,
+        AuthParameters: {
+          REFRESH_TOKEN: params.refreshToken,
+        },
+      });
+      const result = await this.cognito.send(command);
+      return {
+        accessToken: result.AuthenticationResult?.AccessToken || '',
+        idToken: result.AuthenticationResult?.IdToken,
+        expiresIn: result.AuthenticationResult?.ExpiresIn,
+        tokenType: result.AuthenticationResult?.TokenType,
+      };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Regular user login (USER_PASSWORD_AUTH).
+   * @param params - Login parameters
+   */
+  async login(params: LoginParams): Promise<LoginResult> {
+    try {
+      const command = new InitiateAuthCommand({
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: this.config.clientId,
+        AuthParameters: {
+          USERNAME: params.username,
+          PASSWORD: params.password,
+        },
+      });
+      const result = await this.cognito.send(command);
+      return {
+        accessToken: result.AuthenticationResult?.AccessToken || '',
+        refreshToken: result.AuthenticationResult?.RefreshToken,
+        idToken: result.AuthenticationResult?.IdToken,
+        expiresIn: result.AuthenticationResult?.ExpiresIn,
+        tokenType: result.AuthenticationResult?.TokenType,
+      };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Get current user info (self-service, by access token).
+   * @param params - GetUser parameters
+   */
+  async getUser(params: GetUserParams): Promise<GetUserResult> {
+    try {
+      const command = new GetUserCommand({
+        AccessToken: params.accessToken,
+      });
+      const result = await this.cognito.send(command);
+      const attributes: Record<string, string> = {};
+      result.UserAttributes?.forEach((attr) => {
+        if (attr.Name && attr.Value) attributes[attr.Name] = attr.Value;
+      });
+      return {
+        username: result.Username || '',
+        userStatus: undefined,
+        enabled: undefined,
+        userCreateDate: undefined,
+        userLastModifiedDate: undefined,
+        attributes,
+      };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Update current user attributes (self-service).
+   * @param params - UpdateUserAttributes parameters
+   */
+  async updateUserAttributes(
+    params: UpdateUserAttributesParams,
+  ): Promise<UpdateUserAttributesResult> {
+    try {
+      const userAttributes = Object.entries(params.attributes).map(([Name, Value]) => ({
+        Name,
+        Value,
+      }));
+      const command = new UpdateUserAttributesCommand({
+        AccessToken: params.accessToken,
+        UserAttributes: userAttributes,
+      });
+      await this.cognito.send(command);
+      return { success: true };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Delete current user (self-service).
+   * @param params - DeleteUser parameters
+   */
+  async deleteUser(params: DeleteUserParams): Promise<DeleteUserResult> {
+    try {
+      const command = new DeleteUserCommand({
+        AccessToken: params.accessToken,
       });
       await this.cognito.send(command);
       return { success: true };

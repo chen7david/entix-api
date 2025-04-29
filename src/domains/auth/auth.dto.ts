@@ -1,4 +1,5 @@
 import { z } from '@shared/utils/zod.util';
+import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 /**
  * Zod schema for signUp request body.
@@ -119,3 +120,113 @@ export const changePasswordBodySchema = z.object({
  * Type for changePassword request body.
  */
 export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;
+
+/**
+ * Zod schema for confirmSignUp request body.
+ */
+export const confirmSignUpBodySchema = z.object({
+  username: z.string().min(3),
+  code: z.string().min(1),
+});
+
+/**
+ * Type for confirmSignUp request body.
+ */
+export type ConfirmSignUpBody = z.infer<typeof confirmSignUpBodySchema>;
+
+/**
+ * Zod schema for signOut request body.
+ */
+export const signOutBodySchema = z.object({
+  accessToken: z.string().min(1),
+});
+
+/**
+ * Type for signOut request body.
+ */
+export type SignOutBody = z.infer<typeof signOutBodySchema>;
+
+/**
+ * Zod schema for refreshToken request body.
+ */
+export const refreshTokenBodySchema = z.object({
+  refreshToken: z.string().min(1),
+  clientId: z.string().min(1),
+});
+
+/**
+ * Type for refreshToken request body.
+ */
+export type RefreshTokenBody = z.infer<typeof refreshTokenBodySchema>;
+
+/**
+ * Zod schema for login request body.
+ */
+export const loginBodySchema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(8),
+});
+
+/**
+ * Type for login request body.
+ */
+export type LoginBody = z.infer<typeof loginBodySchema>;
+
+/**
+ * Zod schema for getMe request headers (access token required).
+ */
+export const getMeHeadersSchema = z.object({
+  authorization: z.string().min(1),
+});
+
+/**
+ * Type for getMe request headers.
+ */
+export type GetMeHeaders = z.infer<typeof getMeHeadersSchema>;
+
+/**
+ * Zod schema for updateMe request body.
+ */
+export const updateMeBodySchema = z.object({
+  attributes: z.record(z.string()),
+});
+
+/**
+ * Type for updateMe request body.
+ */
+export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;
+
+/**
+ * Zod schema for deleteMe request headers (access token required).
+ */
+export const deleteMeHeadersSchema = z.object({
+  authorization: z.string().min(1),
+});
+
+/**
+ * Type for deleteMe request headers.
+ */
+export type DeleteMeHeaders = z.infer<typeof deleteMeHeadersSchema>;
+
+/**
+ * Registers all auth Zod schemas with OpenAPI registry.
+ * @param registry - The OpenAPIRegistry to add schemas to
+ */
+export function registerAuthSchemas(registry: OpenAPIRegistry): void {
+  registry.register('SignUpBody', signUpBodySchema);
+  registry.register('AdminCreateUserBody', adminCreateUserBodySchema);
+  registry.register('AdminInitiateAuthBody', adminInitiateAuthBodySchema);
+  registry.register('ForgotPasswordBody', forgotPasswordBodySchema);
+  registry.register('ConfirmForgotPasswordBody', confirmForgotPasswordBodySchema);
+  registry.register('ResendConfirmationCodeBody', resendConfirmationCodeBodySchema);
+  registry.register('AdminGetUserParams', adminGetUserParamsSchema);
+  registry.register('AdminUpdateUserAttributesBody', adminUpdateUserAttributesBodySchema);
+  registry.register('ChangePasswordBody', changePasswordBodySchema);
+  registry.register('ConfirmSignUpBody', confirmSignUpBodySchema);
+  registry.register('SignOutBody', signOutBodySchema);
+  registry.register('RefreshTokenBody', refreshTokenBodySchema);
+  registry.register('LoginBody', loginBodySchema);
+  registry.register('GetMeHeaders', getMeHeadersSchema);
+  registry.register('UpdateMeBody', updateMeBodySchema);
+  registry.register('DeleteMeHeaders', deleteMeHeadersSchema);
+}

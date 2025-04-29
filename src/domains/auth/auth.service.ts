@@ -11,6 +11,13 @@ import {
   AdminGetUserParams,
   AdminUpdateUserAttributesBody,
   ChangePasswordBody,
+  ConfirmSignUpBody,
+  SignOutBody,
+  RefreshTokenBody,
+  LoginBody,
+  GetMeHeaders,
+  UpdateMeBody,
+  DeleteMeHeaders,
 } from '@domains/auth/auth.dto';
 import {
   SignUpResult,
@@ -22,6 +29,13 @@ import {
   AdminGetUserResult,
   AdminUpdateUserAttributesResult,
   ChangePasswordResult,
+  ConfirmSignUpResult,
+  SignOutResult,
+  RefreshTokenResult,
+  LoginResult,
+  GetUserResult,
+  UpdateUserAttributesResult,
+  DeleteUserResult,
 } from '@shared/types/cognito.type';
 
 /**
@@ -113,4 +127,70 @@ export class AuthService {
     this.logger.info('changePassword called', { accessToken: body.accessToken });
     return this.cognitoService.changePassword(body);
   }
+
+  /**
+   * Confirms user signup with confirmation code.
+   */
+  async confirmSignUp(body: ConfirmSignUpBody): Promise<ConfirmSignUpResult> {
+    this.logger.info('confirmSignUp called', { username: body.username });
+    return this.cognitoService.confirmSignUp(body);
+  }
+
+  /**
+   * Signs out a user globally (invalidates all tokens).
+   */
+  async signOut(body: SignOutBody): Promise<SignOutResult> {
+    this.logger.info('signOut called');
+    return this.cognitoService.signOut(body);
+  }
+
+  /**
+   * Refreshes tokens using a refresh token.
+   */
+  async refreshToken(body: RefreshTokenBody): Promise<RefreshTokenResult> {
+    this.logger.info('refreshToken called');
+    return this.cognitoService.refreshToken(body);
+  }
+
+  /**
+   * Regular user login (USER_PASSWORD_AUTH).
+   */
+  async login(body: LoginBody): Promise<LoginResult> {
+    this.logger.info('login called', { username: body.username });
+    return this.cognitoService.login(body);
+  }
+
+  /**
+   * Get current user info (self-service, by access token).
+   */
+  async getMe(headers: GetMeHeaders): Promise<GetUserResult> {
+    this.logger.info('getMe called');
+    const accessToken = extractAccessToken(headers.authorization);
+    return this.cognitoService.getUser({ accessToken });
+  }
+
+  /**
+   * Update current user attributes (self-service).
+   */
+  async updateMe(headers: GetMeHeaders, body: UpdateMeBody): Promise<UpdateUserAttributesResult> {
+    this.logger.info('updateMe called');
+    const accessToken = extractAccessToken(headers.authorization);
+    return this.cognitoService.updateUserAttributes({ accessToken, attributes: body.attributes });
+  }
+
+  /**
+   * Delete current user (self-service).
+   */
+  async deleteMe(headers: DeleteMeHeaders): Promise<DeleteUserResult> {
+    this.logger.info('deleteMe called');
+    const accessToken = extractAccessToken(headers.authorization);
+    return this.cognitoService.deleteUser({ accessToken });
+  }
+}
+
+// Helper to extract Bearer token
+function extractAccessToken(authHeader: string): string {
+  if (!authHeader) return '';
+  if (authHeader.startsWith('Bearer ')) return authHeader.slice(7);
+  return authHeader;
 }
