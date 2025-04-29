@@ -1,5 +1,5 @@
 import { z } from '@shared/utils/zod.util';
-import { LogLevel } from '@shared/constants/logger.constants';
+import { LOG_LEVELS } from '@shared/constants/logger.constants';
 import { NodeEnv } from '@shared/constants/app.constants';
 
 /**
@@ -9,7 +9,7 @@ export const envSchema = z.object({
   PORT: z.coerce.number(),
   NODE_ENV: z.nativeEnum(NodeEnv),
 
-  LOG_LEVEL: z.nativeEnum(LogLevel),
+  LOG_LEVEL: z.enum(LOG_LEVELS),
   NEW_RELIC_APP_NAME: z.string().optional(),
   NEW_RELIC_LICENSE_KEY: z.string().optional(),
   NEW_RELIC_ENABLED: z.coerce.boolean().default(false),

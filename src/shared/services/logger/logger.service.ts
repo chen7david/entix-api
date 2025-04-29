@@ -3,7 +3,8 @@ import { Injectable } from '@shared/utils/ioc.util';
 import pino, { Logger as PinoLogger } from 'pino';
 import { ConfigService } from '@shared/services/config/config.service';
 import { NodeEnv } from '@shared/constants/app.constants';
-import type { Logger, LogLevel } from '@shared/types/logger.type';
+import { LogLevel } from '@shared/constants/logger.constants';
+import type { Logger } from '@shared/types/logger.type';
 
 export * from 'pino';
 
