@@ -3,9 +3,11 @@ import { Injectable } from '@shared/utils/ioc.util';
 import pino, { Logger as PinoLogger } from 'pino';
 import { ConfigService } from '@shared/services/config/config.service';
 import { NodeEnv } from '@shared/constants/app.constants';
-import type { LogLevel } from '@shared/types/logger.type';
+import { LogLevel } from '@shared/constants/logger.constants';
+import type { Logger } from '@shared/types/logger.type';
 
 export * from 'pino';
+
 /**
  * LoggerService provides a singleton, environment-aware logger using Pino.
  * It supports pretty-printing in development and structured JSON in production.
@@ -16,7 +18,7 @@ export * from 'pino';
  * - All logs are written to stdout by default.
  */
 @Injectable()
-export class LoggerService {
+export class LoggerService implements Logger {
   private readonly logger: PinoLogger;
 
   /**
@@ -25,11 +27,20 @@ export class LoggerService {
    * and pretty-printing in development. Follows latest best practices for Pino and New Relic integration.
    * @param configService - The configuration service instance
    * @param newRelicService - The New Relic enrichment service instance
+   * @param pinoLogger - (optional) A Pino logger instance, for child loggers
+   * @remarks
+   * @eslint-disable-next-line max-params Justified for DI and child logger injection.
    */
+  // eslint-disable-next-line max-params
   constructor(
     private readonly configService: ConfigService,
     private readonly newRelicService: NewRelicService,
+    pinoLogger?: PinoLogger,
   ) {
+    if (pinoLogger) {
+      this.logger = pinoLogger;
+      return;
+    }
     const nodeEnv = this.configService.get('NODE_ENV');
     const logLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'info';
     const enableNewRelic =
@@ -56,19 +67,15 @@ export class LoggerService {
   }
 
   /**
-   * Get the underlying Pino logger instance.
-   * @returns The Pino logger instance
+   * Log a message at the specified level. Private, use level-specific methods instead.
+   * @param level - Log level
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   * @remarks
+   * @eslint-disable-next-line max-params Justified for internal utility.
    */
-  getLogger(): PinoLogger {
-    return this.logger;
-  }
-
-  /**
-   * Log a message at the specified level.
-   * @param options - Log options: level, msg, and optional meta
-   */
-  log(options: { level: LogLevel; msg: string; meta?: unknown }): void {
-    const { level, msg, meta } = options;
+  // eslint-disable-next-line max-params
+  private log(level: LogLevel, msg: string, meta?: unknown): void {
     if (meta !== undefined) {
       this.logger[level](meta, msg);
     } else {
@@ -77,12 +84,78 @@ export class LoggerService {
   }
 
   /**
-   * Create a child logger with additional bindings.
-   * @param bindings - Key-value pairs to add to every log line
-   * @returns A Pino child logger with the specified bindings
+   * Log a fatal message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
    */
-  child(bindings: Record<string, unknown>): PinoLogger {
-    return this.logger.child(bindings);
+  fatal(msg: string, meta?: unknown): void {
+    this.log('fatal', msg, meta);
+  }
+
+  /**
+   * Log an error message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   */
+  error(msg: string, meta?: unknown): void {
+    this.log('error', msg, meta);
+  }
+
+  /**
+   * Log a warning message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   */
+  warn(msg: string, meta?: unknown): void {
+    this.log('warn', msg, meta);
+  }
+
+  /**
+   * Log an info message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   */
+  info(msg: string, meta?: unknown): void {
+    this.log('info', msg, meta);
+  }
+
+  /**
+   * Log a debug message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   */
+  debug(msg: string, meta?: unknown): void {
+    this.log('debug', msg, meta);
+  }
+
+  /**
+   * Log a trace message.
+   * @param msg - Log message
+   * @param meta - Optional metadata
+   */
+  trace(msg: string, meta?: unknown): void {
+    this.log('trace', msg, meta);
+  }
+
+  /**
+   * Create a child logger with additional bindings.
+   * Returns a new LoggerService instance with the child logger.
+   * @param bindings - Key-value pairs to add to every log line
+   * @returns A Logger instance with the specified bindings
+   */
+  child(bindings: Record<string, unknown>): Logger {
+    const childLogger = this.logger.child(bindings);
+    return new LoggerService(this.configService, this.newRelicService, childLogger);
+  }
+
+  /**
+   * Create a child logger with a component binding.
+   * Returns a new LoggerService instance with the component set.
+   * @param component - The component name (e.g., 'UserService')
+   * @returns A Logger instance with the component binding
+   */
+  component(component: string): Logger {
+    return this.child({ component });
   }
 
   /**

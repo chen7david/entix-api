@@ -2,7 +2,8 @@ import 'reflect-metadata';
 import { Container } from 'typedi';
 import { UsersController } from '@domains/user/user.controller';
 import { UserService } from '@domains/user/user.service';
-import { LoggerService, Logger } from '@shared/services/logger/logger.service';
+import { LoggerService } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
@@ -45,6 +46,7 @@ describe('UsersController', () => {
     // Create mock services
     loggerService = {
       child: jest.fn().mockReturnValue(mockLogger),
+      component: jest.fn().mockReturnValue(mockLogger),
     } as unknown as jest.Mocked<LoggerService>;
 
     userService = {
@@ -102,7 +104,7 @@ describe('UsersController', () => {
       // Assert
       expect(result).toEqual(mockUser);
       expect(userService.findById).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith({ id: 1 }, 'Fetching user by ID');
+      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', { id: 1 });
     });
 
     it('should propagate error when user not found', async () => {
@@ -139,7 +141,7 @@ describe('UsersController', () => {
       // Assert
       expect(result).toEqual(newUser);
       expect(userService.create).toHaveBeenCalledWith(createDto);
-      expect(mockLogger.info).toHaveBeenCalledWith({ email: createDto.email }, 'Creating user');
+      expect(mockLogger.info).toHaveBeenCalledWith('Creating user', { email: createDto.email });
     });
   });
 
@@ -163,7 +165,7 @@ describe('UsersController', () => {
       // Assert
       expect(result).toEqual(updatedUser);
       expect(userService.update).toHaveBeenCalledWith(1, updateDto);
-      expect(mockLogger.info).toHaveBeenCalledWith({ id: 1 }, 'Updating user');
+      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', { id: 1 });
     });
 
     it('should propagate error when user not found', async () => {
@@ -190,7 +192,7 @@ describe('UsersController', () => {
 
       // Assert
       expect(userService.delete).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith({ id: 1 }, 'Deleting user');
+      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', { id: 1 });
     });
 
     it('should propagate error when user not found', async () => {

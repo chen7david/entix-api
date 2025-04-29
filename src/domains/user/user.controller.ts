@@ -1,5 +1,6 @@
 import { Injectable } from '@shared/utils/ioc.util';
-import { LoggerService, Logger } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { validateBody, validateParams } from '@shared/middleware/validation.middleware';
 import { CreateUserDto, UpdateUserDto, UserIdParamDto } from '@domains/user/user.dto';
 import { User } from '@domains/user/user.model';
@@ -30,7 +31,7 @@ export class UsersController {
     private readonly loggerService: LoggerService,
     private readonly userService: UserService,
   ) {
-    this.logger = this.loggerService.child({ controller: 'UsersController' });
+    this.logger = this.loggerService.component('UsersController');
   }
 
   /**
@@ -72,7 +73,7 @@ export class UsersController {
   @Get('/:id')
   @UseBefore(validateParams(UserIdParamDto))
   async getById(@Param('id') id: number): Promise<User> {
-    this.logger.info({ id }, 'Fetching user by ID');
+    this.logger.info('Fetching user by ID', { id });
     return this.userService.findById(id);
   }
 
@@ -100,7 +101,7 @@ export class UsersController {
   @HttpCode(201)
   @UseBefore(validateBody(CreateUserDto))
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    this.logger.info({ email: createUserDto.email }, 'Creating user');
+    this.logger.info('Creating user', { email: createUserDto.email });
     return this.userService.create(createUserDto);
   }
 
@@ -138,7 +139,7 @@ export class UsersController {
   @UseBefore(validateParams(UserIdParamDto))
   @UseBefore(validateBody(UpdateUserDto))
   async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
-    this.logger.info({ id }, 'Updating user');
+    this.logger.info('Updating user', { id });
     return this.userService.update(id, data);
   }
 
@@ -167,7 +168,7 @@ export class UsersController {
   @UseBefore(validateParams(UserIdParamDto))
   @OnUndefined(204)
   async delete(@Param('id') id: number): Promise<void> {
-    this.logger.info({ id }, 'Deleting user');
+    this.logger.info('Deleting user', { id });
     await this.userService.delete(id);
   }
 }

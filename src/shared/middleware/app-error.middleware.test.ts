@@ -45,9 +45,7 @@ describe('ErrorHandlerMiddleware', () => {
         message: 'not found',
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.objectContaining({ level: 'warn', msg: 'not found' }),
-    );
+    expect(logger.warn).toHaveBeenCalledWith('not found', expect.any(Object));
   });
 
   it('handles ValidationError and sends correct response', () => {
@@ -65,7 +63,7 @@ describe('ErrorHandlerMiddleware', () => {
         details: [{ path: ['foo'], message: 'bad' }],
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(expect.objectContaining({ level: 'warn', msg: 'bad' }));
+    expect(logger.warn).toHaveBeenCalledWith('bad', expect.any(Object));
   });
 
   it('handles ZodError and sends validation error response', () => {
@@ -86,9 +84,7 @@ describe('ErrorHandlerMiddleware', () => {
         details: expect.any(Array),
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.objectContaining({ level: 'warn', msg: 'Validation failed' }),
-    );
+    expect(logger.warn).toHaveBeenCalledWith('Validation failed', expect.any(Object));
   });
 
   it('handles unknown error and sends 500', () => {
@@ -103,9 +99,7 @@ describe('ErrorHandlerMiddleware', () => {
         errorId: expect.any(String),
       }),
     );
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.objectContaining({ level: 'error', msg: 'An unexpected error occurred' }),
-    );
+    expect(logger.error).toHaveBeenCalledWith('An unexpected error occurred', expect.any(Object));
   });
 
   it('logs stack trace in non-prod', () => {
@@ -114,12 +108,9 @@ describe('ErrorHandlerMiddleware', () => {
     const orig = process.env.NODE_ENV;
     process.env.NODE_ENV = 'development';
     middleware.error(err, req, res, next);
-    expect(logger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        level: 'debug',
-        msg: 'Stack trace',
-        meta: expect.objectContaining({ stack: 'stacktrace' }),
-      }),
+    expect(logger.error).toHaveBeenCalledWith(
+      'Stack trace',
+      expect.objectContaining({ stack: 'stacktrace' }),
     );
     process.env.NODE_ENV = orig;
   });
