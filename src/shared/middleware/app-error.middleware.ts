@@ -67,8 +67,8 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
     } else {
       this.logger.info(error.message, context);
     }
-    if (process.env.NODE_ENV !== 'prod' && error.stack) {
-      this.logger.debug('Stack trace', { stack: error.stack, ...context });
+    if (error.stack) {
+      this.logger.error('Stack trace', { stack: error.stack, ...context });
     }
   }
 }

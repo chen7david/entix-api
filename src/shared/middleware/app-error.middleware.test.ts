@@ -108,7 +108,7 @@ describe('ErrorHandlerMiddleware', () => {
     const orig = process.env.NODE_ENV;
     process.env.NODE_ENV = 'development';
     middleware.error(err, req, res, next);
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'Stack trace',
       expect.objectContaining({ stack: 'stacktrace' }),
     );
