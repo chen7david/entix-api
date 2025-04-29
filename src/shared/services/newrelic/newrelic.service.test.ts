@@ -1,4 +1,7 @@
-import { NewRelicService, EnrichLoggerOptionsParams } from './newrelic.service';
+import {
+  NewRelicService,
+  EnrichLoggerOptionsParams,
+} from '@shared/services/newrelic/newrelic.service';
 
 describe('NewRelicService', () => {
   let service: NewRelicService;
