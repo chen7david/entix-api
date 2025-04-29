@@ -81,14 +81,14 @@ export class AuthService {
 
   /**
    * Confirms a user's sign up with a confirmation code.
-   * @param email - User's email address
+   * @param username - User's username
    * @param code - Confirmation code sent to the user
    */
-  async confirmSignUp(email: string, code: string) {
+  async confirmSignUp(username: string, code: string) {
     try {
       const command = new ConfirmSignUpCommand({
         ClientId: this.config.clientId,
-        Username: email,
+        Username: username,
         ConfirmationCode: code,
       });
       return await this.cognito.send(command);

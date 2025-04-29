@@ -8,8 +8,16 @@ export const SignUpDto = z.object({
 });
 export type SignUpDto = z.infer<typeof SignUpDto>;
 
+/**
+ * DTO for confirming user sign up.
+ * @property username - The user's username (alphanumeric only)
+ * @property code - The confirmation code sent to the user
+ */
 export const ConfirmSignUpDto = z.object({
-  email: z.string().email(),
+  username: z
+    .string()
+    .min(3)
+    .regex(/^[a-zA-Z0-9]+$/, 'Username must be alphanumeric'),
   code: z.string(),
 });
 export type ConfirmSignUpDto = z.infer<typeof ConfirmSignUpDto>;

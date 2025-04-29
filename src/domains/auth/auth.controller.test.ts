@@ -236,13 +236,13 @@ describe('AuthController', () => {
    */
   it('POST /api/v1/auth/confirm-signup', async () => {
     authService.confirmSignUp.mockResolvedValue({ $metadata: {} } as ConfirmSignUpCommandOutput);
-    const body: ConfirmSignUpDto = { email: 'test@example.com', code: '123456' };
+    const body: ConfirmSignUpDto = { username: 'testuser123', code: '123456' };
     const res = await request(app).post('/api/v1/auth/confirm-signup').send(body);
 
     // Accept 404 or 500 for now until the route issue is fixed
     expect([200, 404, 500]).toContain(res.status);
     if (res.status === 200) {
-      expect(authService.confirmSignUp).toHaveBeenCalledWith(body.email, body.code);
+      expect(authService.confirmSignUp).toHaveBeenCalledWith(body.username, body.code);
 
       const expectedResponse: ConfirmSignUpResponseDto = {
         success: true,
@@ -250,6 +250,17 @@ describe('AuthController', () => {
       };
       expect(res.body).toEqual(expectedResponse);
     }
+  });
+
+  /**
+   * Tests validation for non-alphanumeric username in confirm signup.
+   */
+  it('POST /api/v1/auth/confirm-signup - invalid username', async () => {
+    const body = { username: 'invalid*user!', code: '123456' };
+    const res = await request(app).post('/api/v1/auth/confirm-signup').send(body);
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('errors');
+    expect(JSON.stringify(res.body)).toMatch(/alphanumeric/);
   });
 
   /**

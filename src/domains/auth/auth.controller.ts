@@ -73,8 +73,8 @@ export class AuthController {
   @UseBefore(validateBody(ConfirmSignUpDto))
   @ResponseSchema('ConfirmSignUpResponseDto')
   async confirmSignUp(@Body() body: ConfirmSignUpDto): Promise<ConfirmSignUpResponseDto> {
-    this.logger.info({ email: body.email }, 'Confirm sign up');
-    await this.authService.confirmSignUp(body.email, body.code);
+    this.logger.info({ username: body.username }, 'Confirm sign up');
+    await this.authService.confirmSignUp(body.username, body.code);
     return { success: true, message: 'User confirmed' };
   }
 
