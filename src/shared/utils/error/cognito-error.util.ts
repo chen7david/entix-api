@@ -29,6 +29,16 @@ export function mapCognitoErrorToAppError(error: unknown): AppError {
       return new ValidationError('Confirmation code expired');
     case 'InvalidPasswordException':
       return new ValidationError('Password does not meet requirements');
+    case 'InvalidParameterException':
+      return new ValidationError('Invalid parameter provided');
+    case 'UserNotConfirmedException':
+      return new ValidationError('User is not confirmed');
+    case 'LimitExceededException':
+      return new AppError({ message: 'Limit exceeded, please try again later', status: 429 });
+    case 'TooManyRequestsException':
+      return new AppError({ message: 'Too many requests, please try again later', status: 429 });
+    case 'InvalidUserPoolConfigurationException':
+      return new AppError({ message: 'Invalid user pool configuration', status: 500 });
     // Add more Cognito error mappings as needed
     default:
       return new AppError({ message: error?.message || 'Unknown Cognito error', status: 422 });
@@ -44,9 +54,9 @@ function isErrorLike(value: unknown): value is { name: string; message: string }
   return (
     typeof value === 'object' &&
     value !== null &&
-    'name' in value &&
-    typeof (value as any).name === 'string' &&
-    'message' in value &&
-    typeof (value as any).message === 'string'
+    'name' in (value as Record<string, unknown>) &&
+    typeof (value as Record<string, unknown>)['name'] === 'string' &&
+    'message' in (value as Record<string, unknown>) &&
+    typeof (value as Record<string, unknown>)['message'] === 'string'
   );
 }

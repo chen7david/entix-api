@@ -60,6 +60,44 @@ describe('mapCognitoErrorToAppError', () => {
     expect(result.message).toBe('Password does not meet requirements');
   });
 
+  it('maps InvalidParameterException to ValidationError', () => {
+    const err = baseError('InvalidParameterException');
+    const result = mapCognitoErrorToAppError(err);
+    expect(result).toBeInstanceOf(ValidationError);
+    expect(result.message).toBe('Invalid parameter provided');
+  });
+
+  it('maps UserNotConfirmedException to ValidationError', () => {
+    const err = baseError('UserNotConfirmedException');
+    const result = mapCognitoErrorToAppError(err);
+    expect(result).toBeInstanceOf(ValidationError);
+    expect(result.message).toBe('User is not confirmed');
+  });
+
+  it('maps LimitExceededException to AppError', () => {
+    const err = baseError('LimitExceededException');
+    const result = mapCognitoErrorToAppError(err);
+    expect(result).toBeInstanceOf(AppError);
+    expect(result.message).toBe('Limit exceeded, please try again later');
+    expect(result.status).toBe(429);
+  });
+
+  it('maps TooManyRequestsException to AppError', () => {
+    const err = baseError('TooManyRequestsException');
+    const result = mapCognitoErrorToAppError(err);
+    expect(result).toBeInstanceOf(AppError);
+    expect(result.message).toBe('Too many requests, please try again later');
+    expect(result.status).toBe(429);
+  });
+
+  it('maps InvalidUserPoolConfigurationException to AppError', () => {
+    const err = baseError('InvalidUserPoolConfigurationException');
+    const result = mapCognitoErrorToAppError(err);
+    expect(result).toBeInstanceOf(AppError);
+    expect(result.message).toBe('Invalid user pool configuration');
+    expect(result.status).toBe(500);
+  });
+
   it('returns AppError for unknown error name', () => {
     const err = baseError('SomeOtherException', 'custom message');
     const result = mapCognitoErrorToAppError(err);
