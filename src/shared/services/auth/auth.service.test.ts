@@ -6,8 +6,6 @@ import type {
   ChangePasswordParams,
 } from '@shared/types/authentication.type';
 
-jest.mock('@aws-sdk/client-cognito-identity-provider');
-
 const mockSend = jest.fn();
 
 jest.mock('@aws-sdk/client-cognito-identity-provider', () => {
