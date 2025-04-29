@@ -3,34 +3,9 @@ import { Injectable } from '@shared/utils/ioc.util';
 import pino, { Logger as PinoLogger } from 'pino';
 import { ConfigService } from '@shared/services/config/config.service';
 import { NodeEnv } from '@shared/constants/app.constants';
-import type { LogLevel } from '@shared/types/logger.type';
+import type { Logger, LogLevel } from '@shared/types/logger.type';
 
 export * from 'pino';
-
-/**
- * Logger defines the public logging interface for LoggerService and its children.
- * Only exposes level-specific methods, child, and cleanup.
- */
-export type Logger = {
-  /** Log a fatal message */
-  fatal(msg: string, meta?: unknown): void;
-  /** Log an error message */
-  error(msg: string, meta?: unknown): void;
-  /** Log a warning message */
-  warn(msg: string, meta?: unknown): void;
-  /** Log an info message */
-  info(msg: string, meta?: unknown): void;
-  /** Log a debug message */
-  debug(msg: string, meta?: unknown): void;
-  /** Log a trace message */
-  trace(msg: string, meta?: unknown): void;
-  /** Create a child logger with additional bindings */
-  child(bindings: Record<string, unknown>): Logger;
-  /** Create a child logger with a component binding */
-  component(component: string): Logger;
-  /** Cleanup method for flushing logs, etc. */
-  cleanup(): Promise<void>;
-};
 
 /**
  * LoggerService provides a singleton, environment-aware logger using Pino.
