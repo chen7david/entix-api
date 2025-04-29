@@ -1,10 +1,10 @@
 import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
-import { Logger, LoggerService } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
-import type pino from 'pino';
 
 /**
  * ServerService manages the server lifecycle, including startup and graceful shutdown.
@@ -13,7 +13,7 @@ import type pino from 'pino';
 @Injectable()
 export class ServerService {
   private server?: http.Server;
-  private cleanupTasks: ((logger: pino.Logger) => Promise<void>)[] = [];
+  private cleanupTasks: ((logger: Logger) => Promise<void>)[] = [];
   private readonly logger: Logger;
 
   // eslint-disable-next-line max-params
@@ -23,9 +23,7 @@ export class ServerService {
     private readonly loggerService: LoggerService,
     private readonly databaseService: DatabaseService,
   ) {
-    this.logger = this.loggerService.child({
-      service: 'ServerService',
-    });
+    this.logger = this.loggerService.component('ServerService');
   }
 
   /**
@@ -33,7 +31,7 @@ export class ServerService {
    * The function receives the logger instance for structured logging during cleanup.
    * @param fn Cleanup function accepting a logger
    */
-  cleanup(fn: (logger: pino.Logger) => Promise<void>): void {
+  cleanup(fn: (logger: Logger) => Promise<void>): void {
     this.cleanupTasks.push(fn);
   }
 
@@ -46,13 +44,10 @@ export class ServerService {
     const app = this.appService.getApp();
 
     this.server = app.listen(port, () => {
-      this.logger.info(
-        {
-          url: `http://localhost:${port}`,
-          environment: nodeEnv,
-        },
-        'Server started',
-      );
+      this.logger.info('Server started', {
+        url: `http://localhost:${port}`,
+        environment: nodeEnv,
+      });
     });
 
     // Register database cleanup

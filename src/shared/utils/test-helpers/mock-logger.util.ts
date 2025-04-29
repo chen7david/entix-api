@@ -6,9 +6,14 @@ import type { LoggerService } from '@shared/services/logger/logger.service';
  */
 export function createMockLogger(): LoggerService {
   const mockLogger: Partial<LoggerService> = {
-    log: jest.fn(),
+    fatal: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+    trace: jest.fn(),
     child: jest.fn().mockImplementation(() => mockLogger),
-    getLogger: jest.fn().mockReturnThis(),
+    component: jest.fn().mockImplementation(() => mockLogger),
     cleanup: jest.fn(),
   };
   return mockLogger as LoggerService;

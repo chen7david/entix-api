@@ -61,18 +61,14 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
       ...error.logContext,
     };
     if (error.status >= 500) {
-      this.logger.log({ level: 'error', msg: error.message, meta: context });
+      this.logger.error(error.message, context);
     } else if (error.status >= 400) {
-      this.logger.log({ level: 'warn', msg: error.message, meta: context });
+      this.logger.warn(error.message, context);
     } else {
-      this.logger.log({ level: 'info', msg: error.message, meta: context });
+      this.logger.info(error.message, context);
     }
-    if (process.env.NODE_ENV !== 'prod' && error.stack) {
-      this.logger.log({
-        level: 'debug',
-        msg: 'Stack trace',
-        meta: { stack: error.stack, ...context },
-      });
+    if (error.stack) {
+      this.logger.error('Stack trace', { stack: error.stack, ...context });
     }
   }
 }

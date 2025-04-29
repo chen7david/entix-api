@@ -17,7 +17,7 @@ export class MyService {
   constructor(private readonly logger: LoggerService) {}
 
   doSomething() {
-    this.logger.log({ level: 'info', msg: 'Doing something' });
+    this.logger.info('Doing something');
   }
 }
 ```
@@ -29,7 +29,7 @@ import { Container } from 'typedi';
 import { LoggerService } from '@shared/services/logger.service';
 
 const logger = Container.get(LoggerService);
-logger.log({ level: 'info', msg: 'App started' });
+logger.info('App started');
 ```
 
 ## Logging at Different Levels
@@ -46,8 +46,8 @@ The available log levels are:
 Example:
 
 ```ts
-logger.log({ level: 'error', msg: 'Something went wrong' });
-logger.log({ level: 'debug', msg: 'Debugging details' });
+logger.error('Something went wrong');
+logger.debug('Debugging details');
 ```
 
 ## Adding Metadata
@@ -55,17 +55,19 @@ logger.log({ level: 'debug', msg: 'Debugging details' });
 You can attach metadata to any log message:
 
 ```ts
-logger.log({ level: 'info', msg: 'User created', meta: { userId: 123 } });
+logger.info('User created', { userId: 123 });
 ```
 
-## Creating Child Loggers
+## Scoping Loggers with Components
 
-Child loggers add context to every log message:
+The recommended way to scope loggers is to use the `component()` method, which adds a `component` field to every log message:
 
 ```ts
-const childLogger = logger.child({ service: 'UserService' });
-childLogger.info('User service started');
+const userLogger = logger.component('UserService');
+userLogger.info('User service started');
 ```
+
+This is industry standard and aligns with best practices at Google, AWS, Microsoft, and OpenTelemetry. Use `component` to indicate the logical part of your system (service, controller, repository, etc.).
 
 ## Configuration
 
@@ -79,6 +81,18 @@ childLogger.info('User service started');
 - Attach relevant metadata for structured logs.
 - Use child loggers for per-service or per-request context.
 - Avoid logging sensitive information.
+
+## Logger API Changes
+
+The logger now exposes level-specific methods: `fatal`, `error`, `warn`, `info`, `debug`, and `trace`. Each method accepts a message and optional metadata:
+
+```ts
+logger.info('User created', { userId: 123 });
+logger.error('Something went wrong', { error });
+logger.trace('Trace details', { details });
+```
+
+The `child` method returns a new logger instance with the specified bindings, and the logger implements the `Logger` type interface for type safety and autocompletion.
 
 ---
 

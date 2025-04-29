@@ -61,15 +61,11 @@ export function useRateLimiting(app: Express, options: RateLimitOptions = {}): v
 
         // Log rate limit events if logger is provided
         if (logger) {
-          logger.log({
-            level: 'warn',
-            msg: 'Rate limit exceeded',
-            meta: {
-              ip: req.ip,
-              path: req.originalUrl,
-              method: req.method,
-              error: error.toResponse(),
-            },
+          logger.warn('Rate limit exceeded', {
+            ip: req.ip,
+            path: req.originalUrl,
+            method: req.method,
+            error: error.toResponse(),
           });
         }
 

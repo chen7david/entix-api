@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import { UserService } from '@domains/user/user.service';
 import { UserRepository } from '@domains/user/user.repository';
-import { LoggerService, Logger } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { User } from '@domains/user/user.model';
@@ -37,6 +38,7 @@ describe('UserService', () => {
     // Create mock services
     loggerService = {
       child: jest.fn().mockReturnValue(mockLogger),
+      component: jest.fn().mockReturnValue(mockLogger),
     } as unknown as jest.Mocked<LoggerService>;
 
     userRepository = {
