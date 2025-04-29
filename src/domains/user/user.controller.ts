@@ -1,5 +1,6 @@
 import { Injectable } from '@shared/utils/ioc.util';
-import { LoggerService, Logger } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { validateBody, validateParams } from '@shared/middleware/validation.middleware';
 import { CreateUserDto, UpdateUserDto, UserIdParamDto } from '@domains/user/user.dto';
 import { User } from '@domains/user/user.model';

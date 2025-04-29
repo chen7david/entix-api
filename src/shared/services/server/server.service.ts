@@ -1,6 +1,7 @@
 import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
-import { Logger, LoggerService } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { LoggerService } from '@shared/services/logger/logger.service';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { Injectable } from '@shared/utils/ioc.util';
 import http from 'http';
