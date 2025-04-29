@@ -37,6 +37,7 @@ describe('UserService', () => {
     // Create mock services
     loggerService = {
       child: jest.fn().mockReturnValue(mockLogger),
+      component: jest.fn().mockReturnValue(mockLogger),
     } as unknown as jest.Mocked<LoggerService>;
 
     userRepository = {

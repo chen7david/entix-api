@@ -37,13 +37,15 @@ Object.defineProperty(mockUsersTable, '_', {
 });
 
 // Mock LoggerService
+const mockLogger = {
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};
 const mockLoggerService = {
-  child: jest.fn().mockReturnValue({
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  }),
+  child: jest.fn().mockReturnValue(mockLogger),
+  component: jest.fn().mockReturnValue(mockLogger),
 } as unknown as LoggerService;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

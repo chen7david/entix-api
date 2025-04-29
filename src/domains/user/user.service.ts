@@ -22,7 +22,7 @@ export class UserService {
     private readonly loggerService: LoggerService,
     private readonly userRepository: UserRepository,
   ) {
-    this.logger = this.loggerService.child({ service: 'UserService' });
+    this.logger = this.loggerService.component('UserService');
   }
 
   /**
@@ -41,7 +41,7 @@ export class UserService {
    * @throws NotFoundError if user doesn't exist
    */
   async findById(id: UserId): Promise<User> {
-    this.logger.info({ id }, 'Finding user by ID');
+    this.logger.info('Finding user by ID', { id });
     const user = await this.userRepository.findById(id);
 
     if (!user) {
@@ -57,7 +57,7 @@ export class UserService {
    * @returns Promise resolving to the created User object
    */
   async create(data: CreateUserDto): Promise<User> {
-    this.logger.info({ email: data.email }, 'Creating user');
+    this.logger.info('Creating user', { email: data.email });
     return this.userRepository.create(data);
   }
 
@@ -69,7 +69,7 @@ export class UserService {
    * @throws NotFoundError if user doesn't exist
    */
   async update(id: UserId, data: UpdateUserDto): Promise<User> {
-    this.logger.info({ id }, 'Updating user');
+    this.logger.info('Updating user', { id });
 
     // Verify user exists before update
     await this.findById(id);
@@ -83,7 +83,7 @@ export class UserService {
    * @throws NotFoundError if user doesn't exist
    */
   async delete(id: UserId): Promise<void> {
-    this.logger.info({ id }, 'Deleting user');
+    this.logger.info('Deleting user', { id });
 
     // Verify user exists before deletion
     await this.findById(id);

@@ -3,7 +3,7 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { createAppError, NotFoundError } from '@shared/utils/error/error.util';
 import { and, eq, isNull, SQLWrapper, InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { AnyPgColumn, PgTable, TableConfig } from 'drizzle-orm/pg-core';
-import { Logger } from 'pino';
+import type { Logger } from '@shared/services/logger/logger.service';
 
 /**
  * Abstract base class for repositories providing common CRUD operations
@@ -32,9 +32,7 @@ export abstract class BaseRepository<
     protected readonly loggerService: LoggerService,
   ) {
     // Create a child logger with repository name context
-    this.logger = this.loggerService.child({
-      repository: this.constructor.name,
-    });
+    this.logger = this.loggerService.component(this.constructor.name);
   }
 
   /**

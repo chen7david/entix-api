@@ -62,28 +62,39 @@ describe('LoggerService', () => {
    * Should log messages at all levels.
    */
   it('should log messages at all levels', () => {
-    const levels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'] as const;
-    for (const level of levels) {
-      loggerService.log({ level, msg: `${level} message` });
-      expect(mockLogger[level]).toHaveBeenCalledWith(`${level} message`);
-    }
+    loggerService.fatal('fatal message');
+    expect(mockLogger.fatal).toHaveBeenCalledWith('fatal message');
+    loggerService.error('error message');
+    expect(mockLogger.error).toHaveBeenCalledWith('error message');
+    loggerService.warn('warn message');
+    expect(mockLogger.warn).toHaveBeenCalledWith('warn message');
+    loggerService.info('info message');
+    expect(mockLogger.info).toHaveBeenCalledWith('info message');
+    loggerService.debug('debug message');
+    expect(mockLogger.debug).toHaveBeenCalledWith('debug message');
+    loggerService.trace('trace message');
+    expect(mockLogger.trace).toHaveBeenCalledWith('trace message');
   });
 
   /**
    * Should log messages with meta data.
    */
   it('should log messages with meta data', () => {
-    loggerService.log({ level: 'info', msg: 'test', meta: { foo: 'bar' } });
+    loggerService.info('test', { foo: 'bar' });
     expect(mockLogger.info).toHaveBeenCalledWith({ foo: 'bar' }, 'test');
+    loggerService.error('err', { err: 1 });
+    expect(mockLogger.error).toHaveBeenCalledWith({ err: 1 }, 'err');
+    loggerService.trace('trace', { t: true });
+    expect(mockLogger.trace).toHaveBeenCalledWith({ t: true }, 'trace');
   });
 
   /**
    * Should create a child logger with bindings.
    */
   it('should create a child logger with bindings', () => {
-    const child = loggerService.child({ service: 'test' });
-    expect(mockLogger.child).toHaveBeenCalledWith({ service: 'test' });
-    expect(child).toBe(mockLogger);
+    const child = loggerService.component('test');
+    expect(mockLogger.child).toHaveBeenCalledWith({ component: 'test' });
+    expect(child).toBeInstanceOf(LoggerService);
   });
 
   /**
