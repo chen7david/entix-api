@@ -45,6 +45,7 @@ describe('AuthService', () => {
 
   describe('signUp', () => {
     const params: SignUpParams = {
+      username: 'testuser',
       email: 'test@example.com',
       password: 'Password123!',
       attributes: { given_name: 'Test' },
