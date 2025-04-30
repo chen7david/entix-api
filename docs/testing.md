@@ -16,9 +16,21 @@ Our tests follow these core principles:
 - **Unit Tests (`.spec.ts`)**
   - Test a single function, class, or module in isolation (with dependencies mocked or stubbed).
   - Suffix: `.spec.ts`
+  - **Example:** `user.service.spec.ts`, `user.controller.spec.ts`, `user.repository.spec.ts`
 - **Integration Tests (`.test.ts`)**
-  - Test how multiple modules or layers work together (e.g., controller + service + database).
+  - Test how multiple modules or layers work together (e.g., controller + service + database, or actual HTTP endpoints).
   - Suffix: `.test.ts`
+  - **Naming convention:**
+    - For controller-level integration tests (e.g., HTTP endpoint tests), use: `user.controller.test.ts`, `auth.controller.test.ts`, etc.
+    - For broader feature or API integration, use: `user.integration.test.ts`, `auth.integration.test.ts`, etc.
+    - The general pattern is: `type.serviceType.testType.ts` where:
+      - `type` = domain/feature (e.g., `user`, `auth`)
+      - `serviceType` = main class/layer under test (e.g., `controller`, `service`)
+      - `testType` = `spec` for unit, `test` for integration
+  - **Examples:**
+    - `user.controller.test.ts` (integration test for user controller endpoints)
+    - `user.integration.test.ts` (integration test for the user feature as a whole)
+    - `auth.controller.test.ts` (integration test for auth controller endpoints)
 - **End-to-End (E2E) Tests (`.e2e.ts`)**
   - Test the entire application workflow, often involving real HTTP requests, databases, and possibly other services.
   - Suffix: `.e2e.ts` (not required at this stage; may live outside this repo)
