@@ -1,59 +1,48 @@
-import { JsonController, Post, Body, Get, Param, UseBefore, HttpCode } from 'routing-controllers';
+import { JsonController, Post, Body, Get, UseBefore, HttpCode } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { AuthService } from '@domains/auth/auth.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { Logger } from '@shared/types/logger.type';
 import {
   signUpBodySchema,
-  adminCreateUserBodySchema,
-  adminInitiateAuthBodySchema,
   forgotPasswordBodySchema,
   confirmForgotPasswordBodySchema,
   resendConfirmationCodeBodySchema,
-  adminGetUserParamsSchema,
-  adminUpdateUserAttributesBodySchema,
   changePasswordBodySchema,
-  SignUpBody,
-  AdminCreateUserBody,
-  AdminInitiateAuthBody,
-  ForgotPasswordBody,
-  ConfirmForgotPasswordBody,
-  ResendConfirmationCodeBody,
-  AdminUpdateUserAttributesBody,
-  ChangePasswordBody,
-  confirmSignUpBodySchema,
   signOutBodySchema,
   refreshTokenBodySchema,
-  ConfirmSignUpBody,
-  SignOutBody,
-  RefreshTokenBody,
   loginBodySchema,
   getMeHeadersSchema,
   updateMeBodySchema,
   deleteMeHeadersSchema,
+  SignUpBody,
+  ForgotPasswordBody,
+  ConfirmForgotPasswordBody,
+  ResendConfirmationCodeBody,
+  SignOutBody,
+  RefreshTokenBody,
   LoginBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
+  ChangePasswordBody,
+  confirmSignUpBodySchema,
+  ConfirmSignUpBody,
 } from '@domains/auth/auth.dto';
-import { validateBody, validateParams } from '@shared/middleware/validation.middleware';
+import { validateBody } from '@shared/middleware/validation.middleware';
 import {
   SignUpResult,
-  AdminCreateUserResult,
-  AdminInitiateAuthResult,
   ForgotPasswordResult,
   ConfirmForgotPasswordResult,
   ResendConfirmationCodeResult,
-  AdminGetUserResult,
-  AdminUpdateUserAttributesResult,
   ChangePasswordResult,
-  ConfirmSignUpResult,
   SignOutResult,
   RefreshTokenResult,
   LoginResult,
   GetUserResult,
   UpdateUserAttributesResult,
   DeleteUserResult,
+  ConfirmSignUpResult,
 } from '@shared/types/cognito.type';
 import { Injectable } from '@shared/utils/ioc.util';
 /**
@@ -90,33 +79,17 @@ export class AuthController {
   }
 
   /**
-   * Creates a new user as admin.
+   * Confirms user signup with confirmation code.
    */
-  @Post('/admin/create-user')
-  @UseBefore(validateBody(adminCreateUserBodySchema))
-  @OpenAPI({ summary: 'Admin creates a new user' })
-  async adminCreateUser(@Body() body: AdminCreateUserBody): Promise<AdminCreateUserResult> {
-    this.logger.info('POST /auth/admin/create-user', { username: body.username });
+  @Post('/confirm-signup')
+  @UseBefore(validateBody(confirmSignUpBodySchema))
+  @OpenAPI({ summary: 'Confirm user signup with code' })
+  async confirmSignUp(@Body() body: ConfirmSignUpBody): Promise<ConfirmSignUpResult> {
+    this.logger.info('POST /auth/confirm-signup', { username: body.username });
     try {
-      return await this.authService.adminCreateUser(body);
+      return await this.authService.confirmSignUp(body);
     } catch (err) {
-      this.logger.error('Error in adminCreateUser', { err });
-      throw err;
-    }
-  }
-
-  /**
-   * Initiates authentication as admin (login).
-   */
-  @Post('/admin/login')
-  @UseBefore(validateBody(adminInitiateAuthBodySchema))
-  @OpenAPI({ summary: 'Admin login' })
-  async adminInitiateAuth(@Body() body: AdminInitiateAuthBody): Promise<AdminInitiateAuthResult> {
-    this.logger.info('POST /auth/admin/login', { username: body.username });
-    try {
-      return await this.authService.adminInitiateAuth(body);
-    } catch (err) {
-      this.logger.error('Error in adminInitiateAuth', { err });
+      this.logger.error('Error in confirmSignUp', { err });
       throw err;
     }
   }
@@ -174,40 +147,6 @@ export class AuthController {
   }
 
   /**
-   * Gets user details as admin.
-   */
-  @Get('/admin/user/:username')
-  @UseBefore(validateParams(adminGetUserParamsSchema))
-  @OpenAPI({ summary: 'Admin get user details' })
-  async adminGetUser(@Param('username') username: string): Promise<AdminGetUserResult> {
-    this.logger.info('GET /auth/admin/user/:username', { username });
-    try {
-      return await this.authService.adminGetUser({ username });
-    } catch (err) {
-      this.logger.error('Error in adminGetUser', { err });
-      throw err;
-    }
-  }
-
-  /**
-   * Updates user attributes as admin.
-   */
-  @Post('/admin/update-user-attributes')
-  @UseBefore(validateBody(adminUpdateUserAttributesBodySchema))
-  @OpenAPI({ summary: 'Admin update user attributes' })
-  async adminUpdateUserAttributes(
-    @Body() body: AdminUpdateUserAttributesBody,
-  ): Promise<AdminUpdateUserAttributesResult> {
-    this.logger.info('POST /auth/admin/update-user-attributes', { username: body.username });
-    try {
-      return await this.authService.adminUpdateUserAttributes(body);
-    } catch (err) {
-      this.logger.error('Error in adminUpdateUserAttributes', { err });
-      throw err;
-    }
-  }
-
-  /**
    * Changes the password for the currently authenticated user.
    */
   @Post('/change-password')
@@ -219,22 +158,6 @@ export class AuthController {
       return await this.authService.changePassword(body);
     } catch (err) {
       this.logger.error('Error in changePassword', { err });
-      throw err;
-    }
-  }
-
-  /**
-   * Confirms user signup with confirmation code.
-   */
-  @Post('/confirm-signup')
-  @UseBefore(validateBody(confirmSignUpBodySchema))
-  @OpenAPI({ summary: 'Confirm user signup' })
-  async confirmSignUp(@Body() body: ConfirmSignUpBody): Promise<ConfirmSignUpResult> {
-    this.logger.info('POST /auth/confirm-signup', { username: body.username });
-    try {
-      return await this.authService.confirmSignUp(body);
-    } catch (err) {
-      this.logger.error('Error in confirmSignUp', { err });
       throw err;
     }
   }

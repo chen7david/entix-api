@@ -7,26 +7,20 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import {
   SignUpParams,
-  AdminCreateUserParams,
-  AdminInitiateAuthParams,
   ForgotPasswordParams,
   ConfirmForgotPasswordParams,
   ResendConfirmationCodeParams,
-  AdminGetUserParams,
-  AdminUpdateUserAttributesParams,
   ChangePasswordParams,
+  ConfirmSignUpParams,
 } from '@shared/types/cognito.type';
 import {
   CognitoIdentityProviderClient,
   SignUpCommand,
-  AdminCreateUserCommand,
-  AdminInitiateAuthCommand,
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand,
   ResendConfirmationCodeCommand,
-  AdminGetUserCommand,
-  AdminUpdateUserAttributesCommand,
   ChangePasswordCommand,
+  ConfirmSignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
 jest.mock('@aws-sdk/client-cognito-identity-provider');
@@ -61,7 +55,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test signUp method.
+   * @test
+   * @description Should sign up a user and return confirmation and sub.
    */
   it('should sign up a user and return confirmation and sub', async () => {
     const params: SignUpParams = {
@@ -76,49 +71,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test adminCreateUser method.
-   */
-  it('should create a user as admin and return sub and status', async () => {
-    const params: AdminCreateUserParams = {
-      username: 'adminuser',
-      email: 'admin@example.com',
-      temporaryPassword: 'TempPass123!',
-    };
-    mockSend.mockResolvedValueOnce({
-      User: { Username: 'sub-456', UserStatus: 'FORCE_CHANGE_PASSWORD' },
-    });
-    const result = await service.adminCreateUser(params);
-    expect(result).toEqual({ sub: 'sub-456', userStatus: 'FORCE_CHANGE_PASSWORD' });
-    expect(mockSend).toHaveBeenCalledWith(expect.any(AdminCreateUserCommand));
-  });
-
-  /**
-   * Test adminInitiateAuth method.
-   */
-  it('should initiate admin auth and return tokens', async () => {
-    const params: AdminInitiateAuthParams = { username: 'user', password: 'pass' };
-    mockSend.mockResolvedValueOnce({
-      AuthenticationResult: {
-        AccessToken: 'access',
-        RefreshToken: 'refresh',
-        IdToken: 'id',
-        ExpiresIn: 3600,
-        TokenType: 'Bearer',
-      },
-    });
-    const result = await service.adminInitiateAuth(params);
-    expect(result).toEqual({
-      accessToken: 'access',
-      refreshToken: 'refresh',
-      idToken: 'id',
-      expiresIn: 3600,
-      tokenType: 'Bearer',
-    });
-    expect(mockSend).toHaveBeenCalledWith(expect.any(AdminInitiateAuthCommand));
-  });
-
-  /**
-   * Test forgotPassword method.
+   * @test
+   * @description Should initiate forgot password and return code delivery details.
    */
   it('should initiate forgot password and return code delivery details', async () => {
     const params: ForgotPasswordParams = { username: 'user' };
@@ -141,7 +95,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test confirmForgotPassword method.
+   * @test
+   * @description Should confirm forgot password and return success.
    */
   it('should confirm forgot password and return success', async () => {
     const params: ConfirmForgotPasswordParams = {
@@ -156,7 +111,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test resendConfirmationCode method.
+   * @test
+   * @description Should resend confirmation code and return code delivery details.
    */
   it('should resend confirmation code and return code delivery details', async () => {
     const params: ResendConfirmationCodeParams = { username: 'user' };
@@ -179,52 +135,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test adminGetUser method.
-   */
-  it('should get user details as admin', async () => {
-    const params: AdminGetUserParams = { username: 'user' };
-    mockSend.mockResolvedValueOnce({
-      Username: 'user',
-      UserStatus: 'CONFIRMED',
-      Enabled: true,
-      UserCreateDate: new Date('2023-01-01'),
-      UserLastModifiedDate: new Date('2023-01-02'),
-      UserAttributes: [
-        { Name: 'email', Value: 'user@example.com' },
-        { Name: 'custom:role', Value: 'admin' },
-      ],
-    });
-    const result = await service.adminGetUser(params);
-    expect(result).toEqual({
-      username: 'user',
-      userStatus: 'CONFIRMED',
-      enabled: true,
-      userCreateDate: new Date('2023-01-01'),
-      userLastModifiedDate: new Date('2023-01-02'),
-      attributes: {
-        email: 'user@example.com',
-        'custom:role': 'admin',
-      },
-    });
-    expect(mockSend).toHaveBeenCalledWith(expect.any(AdminGetUserCommand));
-  });
-
-  /**
-   * Test adminUpdateUserAttributes method.
-   */
-  it('should update user attributes as admin and return success', async () => {
-    const params: AdminUpdateUserAttributesParams = {
-      username: 'user',
-      attributes: { email: 'new@example.com' },
-    };
-    mockSend.mockResolvedValueOnce({});
-    const result = await service.adminUpdateUserAttributes(params);
-    expect(result).toEqual({ success: true });
-    expect(mockSend).toHaveBeenCalledWith(expect.any(AdminUpdateUserAttributesCommand));
-  });
-
-  /**
-   * Test changePassword method.
+   * @test
+   * @description Should change password and return success.
    */
   it('should change password and return success', async () => {
     const params: ChangePasswordParams = {
@@ -239,7 +151,8 @@ describe('CognitoService', () => {
   });
 
   /**
-   * Test error mapping for signUp method.
+   * @test
+   * @description Should map errors using mapCognitoErrorToAppError for signUp method.
    */
   it('should map errors using mapCognitoErrorToAppError', async () => {
     const error = new Error('Cognito error');
@@ -247,5 +160,30 @@ describe('CognitoService', () => {
     await expect(
       service.signUp({ username: 'u', email: 'e', password: 'p' }),
     ).rejects.toBeDefined();
+  });
+
+  /**
+   * @test
+   * @description Should confirm user signup and return success.
+   */
+  it('should confirm user signup and return success', async () => {
+    const params: ConfirmSignUpParams = {
+      username: 'testuser',
+      code: '123456',
+    };
+    mockSend.mockResolvedValueOnce({});
+    const result = await service.confirmSignUp(params);
+    expect(result).toEqual({ success: true });
+    expect(mockSend).toHaveBeenCalledWith(expect.any(ConfirmSignUpCommand));
+  });
+
+  /**
+   * @test
+   * @description Should map errors using mapCognitoErrorToAppError for confirmSignUp method.
+   */
+  it('should map errors using mapCognitoErrorToAppError for confirmSignUp', async () => {
+    const error = new Error('Cognito error');
+    mockSend.mockRejectedValueOnce(error);
+    await expect(service.confirmSignUp({ username: 'u', code: 'c' })).rejects.toBeDefined();
   });
 });

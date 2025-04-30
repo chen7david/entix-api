@@ -17,34 +17,6 @@ export const signUpBodySchema = z.object({
 export type SignUpBody = z.infer<typeof signUpBodySchema>;
 
 /**
- * Zod schema for adminCreateUser request body.
- */
-export const adminCreateUserBodySchema = z.object({
-  username: z.string().min(3),
-  email: z.string().email(),
-  temporaryPassword: z.string().min(8).optional(),
-  attributes: z.record(z.string()).optional(),
-});
-
-/**
- * Type for adminCreateUser request body.
- */
-export type AdminCreateUserBody = z.infer<typeof adminCreateUserBodySchema>;
-
-/**
- * Zod schema for adminInitiateAuth request body.
- */
-export const adminInitiateAuthBodySchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(8),
-});
-
-/**
- * Type for adminInitiateAuth request body.
- */
-export type AdminInitiateAuthBody = z.infer<typeof adminInitiateAuthBodySchema>;
-
-/**
  * Zod schema for forgotPassword request body.
  */
 export const forgotPasswordBodySchema = z.object({
@@ -81,31 +53,6 @@ export const resendConfirmationCodeBodySchema = z.object({
  * Type for resendConfirmationCode request body.
  */
 export type ResendConfirmationCodeBody = z.infer<typeof resendConfirmationCodeBodySchema>;
-
-/**
- * Zod schema for adminGetUser request params.
- */
-export const adminGetUserParamsSchema = z.object({
-  username: z.string().min(3),
-});
-
-/**
- * Type for adminGetUser request params.
- */
-export type AdminGetUserParams = z.infer<typeof adminGetUserParamsSchema>;
-
-/**
- * Zod schema for adminUpdateUserAttributes request body.
- */
-export const adminUpdateUserAttributesBodySchema = z.object({
-  username: z.string().min(3),
-  attributes: z.record(z.string()),
-});
-
-/**
- * Type for adminUpdateUserAttributes request body.
- */
-export type AdminUpdateUserAttributesBody = z.infer<typeof adminUpdateUserAttributesBodySchema>;
 
 /**
  * Zod schema for changePassword request body.
@@ -214,13 +161,9 @@ export type DeleteMeHeaders = z.infer<typeof deleteMeHeadersSchema>;
  */
 export function registerAuthSchemas(registry: OpenAPIRegistry): void {
   registry.register('SignUpBody', signUpBodySchema);
-  registry.register('AdminCreateUserBody', adminCreateUserBodySchema);
-  registry.register('AdminInitiateAuthBody', adminInitiateAuthBodySchema);
   registry.register('ForgotPasswordBody', forgotPasswordBodySchema);
   registry.register('ConfirmForgotPasswordBody', confirmForgotPasswordBodySchema);
   registry.register('ResendConfirmationCodeBody', resendConfirmationCodeBodySchema);
-  registry.register('AdminGetUserParams', adminGetUserParamsSchema);
-  registry.register('AdminUpdateUserAttributesBody', adminUpdateUserAttributesBodySchema);
   registry.register('ChangePasswordBody', changePasswordBodySchema);
   registry.register('ConfirmSignUpBody', confirmSignUpBodySchema);
   registry.register('SignOutBody', signOutBodySchema);

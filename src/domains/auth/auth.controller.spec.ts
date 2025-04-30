@@ -21,6 +21,13 @@ const mockAuthService = {
   changePassword: jest.fn(),
 };
 
+// Add this type for controller test
+/**
+ * Extends the mockAuthService with confirmSignUp for testing confirm-signup route.
+ */
+type MockAuthService = typeof mockAuthService & { confirmSignUp?: jest.Mock };
+(mockAuthService as MockAuthService).confirmSignUp = jest.fn();
+
 // Mock LoggerService
 const mockLogger = {
   component: jest.fn(),
@@ -268,6 +275,40 @@ describe('AuthController (integration)', () => {
       const res = await request
         .post('/auth/change-password')
         .send({ accessToken: 'token', previousPassword: 'old', proposedPassword: 'new' });
+      expect(res.status).toBe(500);
+    });
+  });
+
+  describe('POST /auth/confirm-signup', () => {
+    /**
+     * @test
+     * @description Should return 200 and result on success.
+     */
+    it('should return 200 and result on success', async () => {
+      (mockAuthService as MockAuthService).confirmSignUp!.mockResolvedValue({ success: true });
+      const res = await request
+        .post('/auth/confirm-signup')
+        .send({ username: 'user', code: '123456' });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ success: true });
+    });
+    /**
+     * @test
+     * @description Should return 422 for invalid input.
+     */
+    it('should return 422 for invalid input', async () => {
+      const res = await request.post('/auth/confirm-signup').send({ username: '', code: '' });
+      expect(res.status).toBe(422);
+    });
+    /**
+     * @test
+     * @description Should return error for service failure.
+     */
+    it('should return error for service failure', async () => {
+      (mockAuthService as MockAuthService).confirmSignUp!.mockRejectedValue(new AppError('fail'));
+      const res = await request
+        .post('/auth/confirm-signup')
+        .send({ username: 'user', code: '123456' });
       expect(res.status).toBe(500);
     });
   });

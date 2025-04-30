@@ -20,46 +20,6 @@ export type SignUpResult = {
 };
 
 /**
- * Parameters for adminCreateUser method.
- */
-export type AdminCreateUserParams = {
-  username: string;
-  email: string;
-  temporaryPassword?: string;
-  attributes?: Record<string, string>;
-};
-
-/**
- * Result type for adminCreateUser method.
- */
-export type AdminCreateUserResult = {
-  /**
-   * Cognito sub (unique identifier) for the user.
-   */
-  sub: string | undefined;
-  userStatus: string | undefined;
-};
-
-/**
- * Parameters for adminInitiateAuth method.
- */
-export type AdminInitiateAuthParams = {
-  username: string;
-  password: string;
-};
-
-/**
- * Result type for adminInitiateAuth method.
- */
-export type AdminInitiateAuthResult = {
-  accessToken: string;
-  refreshToken?: string;
-  idToken?: string;
-  expiresIn?: number;
-  tokenType?: string;
-};
-
-/**
  * Parameters for forgotPassword method.
  */
 export type ForgotPasswordParams = {
@@ -109,40 +69,6 @@ export type ResendConfirmationCodeResult = {
     deliveryMedium?: string;
     attributeName?: string;
   };
-};
-
-/**
- * Parameters for adminGetUser method.
- */
-export type AdminGetUserParams = {
-  username: string;
-};
-
-/**
- * Result type for adminGetUser method.
- */
-export type AdminGetUserResult = {
-  username: string;
-  userStatus: string;
-  enabled: boolean;
-  userCreateDate?: Date;
-  userLastModifiedDate?: Date;
-  attributes: Record<string, string>;
-};
-
-/**
- * Parameters for adminUpdateUserAttributes method.
- */
-export type AdminUpdateUserAttributesParams = {
-  username: string;
-  attributes: Record<string, string>;
-};
-
-/**
- * Result type for adminUpdateUserAttributes method.
- */
-export type AdminUpdateUserAttributesResult = {
-  success: boolean;
 };
 
 /**

@@ -3,13 +3,9 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { CognitoService } from '@shared/services/cognito/cognito.service';
 import {
   SignUpBody,
-  AdminCreateUserBody,
-  AdminInitiateAuthBody,
   ForgotPasswordBody,
   ConfirmForgotPasswordBody,
   ResendConfirmationCodeBody,
-  AdminGetUserParams,
-  AdminUpdateUserAttributesBody,
   ChangePasswordBody,
   ConfirmSignUpBody,
   SignOutBody,
@@ -21,13 +17,9 @@ import {
 } from '@domains/auth/auth.dto';
 import {
   SignUpResult,
-  AdminCreateUserResult,
-  AdminInitiateAuthResult,
   ForgotPasswordResult,
   ConfirmForgotPasswordResult,
   ResendConfirmationCodeResult,
-  AdminGetUserResult,
-  AdminUpdateUserAttributesResult,
   ChangePasswordResult,
   ConfirmSignUpResult,
   SignOutResult,
@@ -59,22 +51,6 @@ export class AuthService {
   }
 
   /**
-   * Creates a new user as admin.
-   */
-  async adminCreateUser(body: AdminCreateUserBody): Promise<AdminCreateUserResult> {
-    this.logger.info('adminCreateUser called', { username: body.username });
-    return this.cognitoService.adminCreateUser(body);
-  }
-
-  /**
-   * Initiates authentication as admin (login).
-   */
-  async adminInitiateAuth(body: AdminInitiateAuthBody): Promise<AdminInitiateAuthResult> {
-    this.logger.info('adminInitiateAuth called', { username: body.username });
-    return this.cognitoService.adminInitiateAuth(body);
-  }
-
-  /**
    * Initiates forgot password flow.
    */
   async forgotPassword(body: ForgotPasswordBody): Promise<ForgotPasswordResult> {
@@ -100,24 +76,6 @@ export class AuthService {
   ): Promise<ResendConfirmationCodeResult> {
     this.logger.info('resendConfirmationCode called', { username: body.username });
     return this.cognitoService.resendConfirmationCode(body);
-  }
-
-  /**
-   * Gets user details as admin.
-   */
-  async adminGetUser(params: AdminGetUserParams): Promise<AdminGetUserResult> {
-    this.logger.info('adminGetUser called', { username: params.username });
-    return this.cognitoService.adminGetUser(params);
-  }
-
-  /**
-   * Updates user attributes as admin.
-   */
-  async adminUpdateUserAttributes(
-    body: AdminUpdateUserAttributesBody,
-  ): Promise<AdminUpdateUserAttributesResult> {
-    this.logger.info('adminUpdateUserAttributes called', { username: body.username });
-    return this.cognitoService.adminUpdateUserAttributes(body);
   }
 
   /**
