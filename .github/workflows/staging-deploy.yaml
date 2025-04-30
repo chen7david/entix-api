@@ -44,6 +44,9 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+      - name: Check Prettier formatting
+        run: npx prettier --check .
+
       - name: Sync test database schema
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
