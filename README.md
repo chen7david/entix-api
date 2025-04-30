@@ -222,9 +222,18 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
 ---
 
-## CI/CD Pipeline (Detailed)
+## 📚 Additional Documentation
 
-(See original for full details, or keep as is if already present.)
+- [CI/CD Guide](./docs/ci-cd.md)
+- [Logger Usage](./docs/logger-usage.md)
+- [Request Validation](./docs/request-validation.md)
+- [Test Setup](./docs/test-setup.md)
+- [Path Aliasing Setup](./docs/path-aliasing-setup.md)
+- [ESLint & Prettier Setup](./docs/eslint-prettier-setup.md)
+- [Express + TypeDI Setup](./docs/express-typedi-setup.md)
+- [Error Handling](./docs/error-handling.md)
+- [Database Migrations](./docs/db-migrations.md)
+- [Project Rules](./docs/rules.mdc)
 
 ---
 
