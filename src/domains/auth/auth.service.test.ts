@@ -3,22 +3,15 @@ import { CognitoService } from '@shared/services/cognito/cognito.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import * as cognitoTypes from '@shared/types/cognito.type';
 import * as dto from '@domains/auth/auth.dto';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
-const mockLogger = {
-  component: jest.fn(),
-  info: jest.fn(),
-  error: jest.fn(),
-};
+const mockLogger = createMockLogger();
 
 const mockCognitoService = {
   signUp: jest.fn(),
-  adminCreateUser: jest.fn(),
-  adminInitiateAuth: jest.fn(),
   forgotPassword: jest.fn(),
   confirmForgotPassword: jest.fn(),
   resendConfirmationCode: jest.fn(),
-  adminGetUser: jest.fn(),
-  adminUpdateUserAttributes: jest.fn(),
   changePassword: jest.fn(),
 };
 
@@ -50,47 +43,6 @@ describe('AuthService', () => {
     await expect(
       service.signUp({ username: 'u', email: 'e@e.com', password: 'pw' }),
     ).rejects.toThrow(error);
-  });
-
-  /**
-   * Test adminCreateUser
-   */
-  it('adminCreateUser: should call cognitoService.adminCreateUser and return result', async () => {
-    const body: dto.AdminCreateUserBody = { username: 'admin', email: 'admin@b.com' };
-    const result: cognitoTypes.AdminCreateUserResult = {
-      sub: 'sub',
-      userStatus: 'FORCE_CHANGE_PASSWORD',
-    };
-    mockCognitoService.adminCreateUser.mockResolvedValue(result);
-    await expect(service.adminCreateUser(body)).resolves.toEqual(result);
-    expect(mockCognitoService.adminCreateUser).toHaveBeenCalledWith(body);
-  });
-
-  it('adminCreateUser: should propagate errors', async () => {
-    const error = new Error('fail');
-    mockCognitoService.adminCreateUser.mockRejectedValue(error);
-    await expect(service.adminCreateUser({ username: 'a', email: 'a@a.com' })).rejects.toThrow(
-      error,
-    );
-  });
-
-  /**
-   * Test adminInitiateAuth
-   */
-  it('adminInitiateAuth: should call cognitoService.adminInitiateAuth and return result', async () => {
-    const body: dto.AdminInitiateAuthBody = { username: 'admin', password: 'pw' };
-    const result: cognitoTypes.AdminInitiateAuthResult = { accessToken: 'token' };
-    mockCognitoService.adminInitiateAuth.mockResolvedValue(result);
-    await expect(service.adminInitiateAuth(body)).resolves.toEqual(result);
-    expect(mockCognitoService.adminInitiateAuth).toHaveBeenCalledWith(body);
-  });
-
-  it('adminInitiateAuth: should propagate errors', async () => {
-    const error = new Error('fail');
-    mockCognitoService.adminInitiateAuth.mockRejectedValue(error);
-    await expect(service.adminInitiateAuth({ username: 'a', password: 'pw' })).rejects.toThrow(
-      error,
-    );
   });
 
   /**
@@ -152,47 +104,6 @@ describe('AuthService', () => {
     const error = new Error('fail');
     mockCognitoService.resendConfirmationCode.mockRejectedValue(error);
     await expect(service.resendConfirmationCode({ username: 'u' })).rejects.toThrow(error);
-  });
-
-  /**
-   * Test adminGetUser
-   */
-  it('adminGetUser: should call cognitoService.adminGetUser and return result', async () => {
-    const params: dto.AdminGetUserParams = { username: 'user' };
-    const result: cognitoTypes.AdminGetUserResult = {
-      username: 'user',
-      userStatus: 'CONFIRMED',
-      enabled: true,
-      attributes: {},
-    };
-    mockCognitoService.adminGetUser.mockResolvedValue(result);
-    await expect(service.adminGetUser(params)).resolves.toEqual(result);
-    expect(mockCognitoService.adminGetUser).toHaveBeenCalledWith(params);
-  });
-
-  it('adminGetUser: should propagate errors', async () => {
-    const error = new Error('fail');
-    mockCognitoService.adminGetUser.mockRejectedValue(error);
-    await expect(service.adminGetUser({ username: 'u' })).rejects.toThrow(error);
-  });
-
-  /**
-   * Test adminUpdateUserAttributes
-   */
-  it('adminUpdateUserAttributes: should call cognitoService.adminUpdateUserAttributes and return result', async () => {
-    const body: dto.AdminUpdateUserAttributesBody = { username: 'user', attributes: { a: 'b' } };
-    const result: cognitoTypes.AdminUpdateUserAttributesResult = { success: true };
-    mockCognitoService.adminUpdateUserAttributes.mockResolvedValue(result);
-    await expect(service.adminUpdateUserAttributes(body)).resolves.toEqual(result);
-    expect(mockCognitoService.adminUpdateUserAttributes).toHaveBeenCalledWith(body);
-  });
-
-  it('adminUpdateUserAttributes: should propagate errors', async () => {
-    const error = new Error('fail');
-    mockCognitoService.adminUpdateUserAttributes.mockRejectedValue(error);
-    await expect(
-      service.adminUpdateUserAttributes({ username: 'u', attributes: {} }),
-    ).rejects.toThrow(error);
   });
 
   /**

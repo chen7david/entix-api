@@ -4,6 +4,7 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { AuthService } from '@domains/auth/auth.service';
 import { Container } from 'typedi';
 import { AppError } from '@shared/utils/error/error.util';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
 // Mock AuthService
 const mockAuthService = {
@@ -22,16 +23,7 @@ const mockAuthService = {
 };
 
 // Mock LoggerService
-const mockLogger = {
-  component: jest.fn().mockReturnValue({
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-  }),
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-};
+const mockLogger = createMockLogger();
 
 describe('AuthController', () => {
   let controller: AuthController;

@@ -3,6 +3,7 @@ import { DatabaseService } from '@shared/services/database/database.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { pgTable, serial, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 import { NotFoundError } from '@shared/utils/error/error.util';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
 // Mock the error utility module
 jest.mock('@shared/utils/error/error.util', () => {
@@ -36,13 +37,8 @@ Object.defineProperty(mockUsersTable, '_', {
   configurable: true,
 });
 
-// Mock LoggerService
-const mockLogger = {
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
+// Replace the inline mockLogger and mockLoggerService definitions with:
+const mockLogger = createMockLogger();
 const mockLoggerService = {
   child: jest.fn().mockReturnValue(mockLogger),
   component: jest.fn().mockReturnValue(mockLogger),

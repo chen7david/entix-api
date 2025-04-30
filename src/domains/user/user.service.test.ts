@@ -1,18 +1,18 @@
 import 'reflect-metadata';
 import { UserService } from '@domains/user/user.service';
 import { UserRepository } from '@domains/user/user.repository';
-import { Logger } from '@shared/types/logger.type';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { User } from '@domains/user/user.model';
 import { Container } from 'typedi';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: jest.Mocked<UserRepository>;
-  let loggerService: jest.Mocked<LoggerService>;
-  let mockLogger: jest.Mocked<Logger>;
+  let loggerService: LoggerService;
+  let mockLogger: LoggerService;
 
   const mockUser = {
     id: 1,
@@ -28,18 +28,13 @@ describe('UserService', () => {
     Container.reset();
 
     // Create mock logger
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+    mockLogger = createMockLogger();
 
     // Create mock services
     loggerService = {
       child: jest.fn().mockReturnValue(mockLogger),
       component: jest.fn().mockReturnValue(mockLogger),
-    } as unknown as jest.Mocked<LoggerService>;
+    } as unknown as LoggerService;
 
     userRepository = {
       findAll: jest.fn(),
