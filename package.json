@@ -6,6 +6,8 @@
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
     "build": "tsc && tsc-alias",
     "start": "NODE_ENV=production node -r newrelic dist/server.js",
+    "format:precommit": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "prepare": "husky install",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
@@ -17,9 +19,7 @@
     "db:push": "drizzle-kit push",
     "db:push-test": "NODE_ENV=test drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "ts-node src/database/seed.ts",
-    "format:precommit": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
-    "prepare": "husky install"
+    "db:seed": "ts-node src/database/seed.ts"
   },
   "repository": {
     "type": "git",
