@@ -47,13 +47,13 @@ jobs:
       - name: Check Prettier formatting
         run: npm run format:check
 
+      - name: Build project
+        run: npm run build
+
       - name: Sync test database schema
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
         run: npm run db:push-test
-
-      - name: Build project
-        run: npm run build
 
       - name: Run tests
         env:
