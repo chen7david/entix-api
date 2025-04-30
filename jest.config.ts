@@ -11,6 +11,7 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/build/', '/coverage/'],
   collectCoverage: false,
   detectOpenHandles: true,
   verbose: true,
