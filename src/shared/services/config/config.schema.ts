@@ -17,6 +17,10 @@ export const envSchema = z.object({
   DATABASE_URL: z.string(),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(900000), // 15 minutes default
   RATE_LIMIT_MAX: z.coerce.number().default(100), // 100 requests default
+
+  COGNITO_REGION: z.string(),
+  COGNITO_USER_POOL_ID: z.string(),
+  COGNITO_CLIENT_ID: z.string(),
   // Add more environment variables as needed
 });
 

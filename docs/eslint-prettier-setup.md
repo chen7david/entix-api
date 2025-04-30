@@ -1,6 +1,7 @@
 # ESLint + Prettier Setup for entix-api
 
 ## Overview
+
 This project uses [ESLint v8](https://eslint.org/docs/v8.x/) and [Prettier](https://prettier.io/) to ensure code quality, consistency, and maintainability. The configuration is designed for a TypeScript codebase using CommonJS modules, and integrates Prettier with ESLint for a seamless developer experience.
 
 ---
@@ -8,6 +9,7 @@ This project uses [ESLint v8](https://eslint.org/docs/v8.x/) and [Prettier](http
 ## Installation Steps
 
 1. **Install dependencies:**
+
    ```sh
    npm install --save-dev eslint@^8 @typescript-eslint/parser @typescript-eslint/eslint-plugin prettier eslint-config-prettier eslint-plugin-prettier
    ```
@@ -21,8 +23,8 @@ This project uses [ESLint v8](https://eslint.org/docs/v8.x/) and [Prettier](http
      - Custom rules:
        - `max-params`: No more than 2 parameters per function.
        - `@typescript-eslint/no-unused-vars`: Disallows unused variables and imports (with underscore exceptions for intentionally unused).
-   
 3. **Create Prettier config:**
+
    - File: `.prettierrc`
    - Recommended options for modern TypeScript projects.
 
@@ -88,6 +90,7 @@ This project uses [ESLint v8](https://eslint.org/docs/v8.x/) and [Prettier](http
 ---
 
 ## References
+
 - [ESLint v8.x Documentation](https://eslint.org/docs/v8.x/)
 - [typescript-eslint Getting Started](https://typescript-eslint.io/getting-started/)
 - [Prettier Documentation](https://prettier.io/docs/en/index.html)

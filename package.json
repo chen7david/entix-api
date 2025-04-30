@@ -8,8 +8,8 @@
     "start": "NODE_ENV=production node -r newrelic dist/server.js",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\"",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
     "db:generate": "drizzle-kit generate",
@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.798.0",
     "@newrelic/pino-enricher": "^1.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",

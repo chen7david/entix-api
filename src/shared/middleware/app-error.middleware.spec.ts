@@ -3,7 +3,7 @@ import { AppError, NotFoundError, ValidationError } from '@shared/utils/error/er
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { ZodError, z } from '@shared/utils/zod.util';
 import { Request, Response, NextFunction } from 'express';
-import { createMockLogger } from '@shared/utils/test-helpers/mock-logger.util';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
 const createMockRes = (): Response => {
   const res = {} as Partial<Response>;
