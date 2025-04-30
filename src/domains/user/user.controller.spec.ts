@@ -204,19 +204,4 @@ describe('UsersController', () => {
       expect(userService.delete).toHaveBeenCalledWith(999);
     });
   });
-
-  // API endpoint integration tests (optional, if you want to verify the actual HTTP responses)
-  // These tests check that the controller correctly maps HTTP requests to service methods
-  describe('Endpoint: GET /v1/users', () => {
-    it('should return 200 and all users', async () => {
-      // Using method-level test is usually sufficient, but this shows how to test the HTTP layer
-      const users = [mockUser];
-      userService.findAll.mockResolvedValue(users);
-
-      // We would use supertest here if testing actual HTTP endpoints
-      // const response = await request.get('/v1/users');
-      // expect(response.status).toBe(200);
-      // expect(response.body).toEqual(users);
-    });
-  });
 });
