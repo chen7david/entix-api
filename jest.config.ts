@@ -10,7 +10,7 @@ import type { Config } from 'jest';
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
   collectCoverage: false,
   detectOpenHandles: true,
   verbose: true,
