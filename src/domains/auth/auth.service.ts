@@ -29,17 +29,20 @@ import {
   UpdateUserAttributesResult,
   DeleteUserResult,
 } from '@shared/types/cognito.type';
+import { Logger } from '@shared/types/logger.type';
 
 /**
  * Service for authentication and user management using AWS Cognito.
  */
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger;
+
   constructor(
     private readonly cognitoService: CognitoService,
-    private readonly logger: LoggerService,
+    private readonly loggerService: LoggerService,
   ) {
-    this.logger.component('AuthService');
+    this.logger = this.loggerService.component('AuthService');
   }
 
   /**
