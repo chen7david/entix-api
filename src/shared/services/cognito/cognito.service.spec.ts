@@ -14,7 +14,6 @@ import {
   ConfirmSignUpParams,
 } from '@shared/types/cognito.type';
 import {
-  CognitoIdentityProviderClient,
   SignUpCommand,
   ForgotPasswordCommand,
   ConfirmForgotPasswordCommand,
@@ -22,13 +21,10 @@ import {
   ChangePasswordCommand,
   ConfirmSignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-
-jest.mock('@aws-sdk/client-cognito-identity-provider');
+import { createMockCognitoClient } from '@shared/utils/test-helpers/mocks/mock-cognito-client.util';
 
 const mockSend = jest.fn();
-(CognitoIdentityProviderClient as jest.Mock).mockImplementation(() => ({
-  send: mockSend,
-}));
+const mockCognitoClient = createMockCognitoClient(mockSend);
 
 const mockLogger = { component: jest.fn(), log: jest.fn() } as unknown as LoggerService;
 const mockConfigService = {
@@ -51,7 +47,7 @@ describe('CognitoService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CognitoService(mockConfigService, mockLogger);
+    service = new CognitoService(mockConfigService, mockLogger, mockCognitoClient);
   });
 
   /**

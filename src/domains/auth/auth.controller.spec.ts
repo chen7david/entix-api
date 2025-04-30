@@ -5,22 +5,10 @@ import { AuthService } from '@domains/auth/auth.service';
 import { Container } from 'typedi';
 import { AppError } from '@shared/utils/error/error.util';
 import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
+import { createMockAuthService } from '@shared/utils/test-helpers/mocks/mock-auth-service.util';
 
 // Mock AuthService
-const mockAuthService = {
-  signUp: jest.fn(),
-  confirmSignUp: jest.fn(),
-  forgotPassword: jest.fn(),
-  confirmForgotPassword: jest.fn(),
-  resendConfirmationCode: jest.fn(),
-  changePassword: jest.fn(),
-  signOut: jest.fn(),
-  refreshToken: jest.fn(),
-  login: jest.fn(),
-  getMe: jest.fn(),
-  updateMe: jest.fn(),
-  deleteMe: jest.fn(),
-};
+const mockAuthService = createMockAuthService();
 
 // Mock LoggerService
 const mockLogger = createMockLogger();
