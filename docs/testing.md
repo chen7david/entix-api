@@ -1,6 +1,6 @@
 # Testing Guide
 
-This guide covers best practices for testing within the Entix API project, with a focus on dependency injection using TypeDI.
+This guide covers best practices for testing within the Entix API project, with a focus on dependency injection using TypeDI and our test file conventions.
 
 ## Testing Philosophy
 
@@ -10,6 +10,27 @@ Our tests follow these core principles:
 2. **Repeatability**: Tests should produce the same results when run multiple times.
 3. **Speed**: Tests should run quickly to encourage frequent testing.
 4. **Clarity**: Tests should clearly indicate what they're testing and what went wrong when they fail.
+
+## Test Types and Naming Conventions
+
+- **Unit Tests (`.spec.ts`)**
+  - Test a single function, class, or module in isolation (with dependencies mocked or stubbed).
+  - Suffix: `.spec.ts`
+- **Integration Tests (`.test.ts`)**
+  - Test how multiple modules or layers work together (e.g., controller + service + database).
+  - Suffix: `.test.ts`
+- **End-to-End (E2E) Tests (`.e2e.ts`)**
+  - Test the entire application workflow, often involving real HTTP requests, databases, and possibly other services.
+  - Suffix: `.e2e.ts` (not required at this stage; may live outside this repo)
+
+### Jest Configuration
+
+- Both `.spec.ts` and `.test.ts` files are included in the test run. Update `jest.config.js` if needed:
+  ```js
+  testMatch: [
+    '**/?(*.)+(spec|test).[jt]s?(x)',
+  ],
+  ```
 
 ## Using TypeDI Container in Tests
 
@@ -121,6 +142,6 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
-## Continuous Integration
+## Continuous Integration and Testing
 
-Our CI pipeline runs all tests automatically on pull requests and merges to main branches. Tests must pass before code can be merged.
+Our CI pipeline runs all tests automatically on pull requests and merges to main branches. Tests must pass before code can be merged. See `docs/ci-cd.md` for full CI/CD details.
