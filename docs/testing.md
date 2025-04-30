@@ -157,3 +157,50 @@ npm test -- --watch
 ## Continuous Integration and Testing
 
 Our CI pipeline runs all tests automatically on pull requests and merges to main branches. Tests must pass before code can be merged. See `docs/ci-cd.md` for full CI/CD details.
+
+## Linting and Preventing Accidental .only/.skip in Tests
+
+To ensure the full test suite always runs in CI and production, we use [eslint-plugin-jest](https://github.com/jest-community/eslint-plugin-jest) to prevent accidental commits of focused or skipped tests (e.g., `describe.only`, `test.only`, `it.only`, `describe.skip`, etc.).
+
+- **You are free to use `.only` or `.skip` during local development** to focus or skip tests as needed.
+- **However, these will be flagged as errors during linting** (e.g., when running `npm run lint` or as part of a pre-commit hook with Husky).
+- **Commits with `.only` or `.skip` in tests will be blocked** if you have Husky set up to run linting on pre-commit.
+
+This ensures that no focused or skipped tests are ever merged to main branches, following industry best practices for test reliability.
+
+**Example error:**
+
+```
+error  Unexpected focused test.  jest/no-focused-tests
+```
+
+See `.eslintrc.cjs` for configuration details.
+
+## Pre-commit Linting with Husky
+
+This project uses [Husky](https://typicode.github.io/husky/) to enforce code formatting and linting before every commit. This ensures that code (including tests) is always formatted with Prettier and adheres to all linting rules, including the prevention of accidental `.only`/`.skip` in tests.
+
+### How it works
+
+On every `git commit`, Husky runs `npm run format:precommit` (Prettier) and then `npm run lint` via a pre-commit hook.
+
+If any formatting or lint errors are found (including `.only`/`.skip` in tests), the commit is **blocked** and you will see the error messages in your terminal.
+
+This helps ensure that only well-formatted, high-quality, production-ready code is committed and pushed.
+
+### Why is `"prepare": "husky install"` in package.json?
+
+> **Note:**
+> The `"prepare": "husky install"` script in your `package.json` ensures that Husky sets up Git hooks automatically every time someone installs dependencies (e.g., via `npm install` or `yarn install`). This is necessary because Git hooks are not stored in your repository's `.git` directory (which is not versioned). Without this, contributors who freshly clone the repo or install dependencies would not have the pre-commit hooks set up, and code quality checks could be bypassed. By following this industry best practice, you ensure that all contributors always have the correct hooks installed, maintaining consistent code quality across the team. See the [Husky documentation](https://typicode.github.io/husky/#/?id=automatic-recommended) for more details.
+
+### Common pitfalls and workarounds
+
+- **Skipping hooks:** If you need to bypass the hook (not recommended), you can use `git commit -n` or set `HUSKY=0` for the command (see [Husky docs](https://typicode.github.io/husky/how-to.html#skipping-git-hooks)).
+- **CI environments:** Husky is automatically disabled in CI by setting `HUSKY=0` in your CI config.
+- **Node version managers:** If you use a Node version manager (like `nvm`), see the Husky docs for [PATH issues](https://typicode.github.io/husky/how-to.html#node-version-managers-and-guis).
+
+### Why do we do this?
+
+This is an industry best practice to prevent accidental commits of code that would break the build, skip tests, or otherwise reduce code quality.
+
+See `.husky/pre-commit` and `.eslintrc.cjs` for configuration details.
