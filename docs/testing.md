@@ -157,3 +157,21 @@ npm test -- --watch
 ## Continuous Integration and Testing
 
 Our CI pipeline runs all tests automatically on pull requests and merges to main branches. Tests must pass before code can be merged. See `docs/ci-cd.md` for full CI/CD details.
+
+## Linting and Preventing Accidental .only/.skip in Tests
+
+To ensure the full test suite always runs in CI and production, we use [eslint-plugin-jest](https://github.com/jest-community/eslint-plugin-jest) to prevent accidental commits of focused or skipped tests (e.g., `describe.only`, `test.only`, `it.only`, `describe.skip`, etc.).
+
+- **You are free to use `.only` or `.skip` during local development** to focus or skip tests as needed.
+- **However, these will be flagged as errors during linting** (e.g., when running `npm run lint` or as part of a pre-commit hook with Husky).
+- **Commits with `.only` or `.skip` in tests will be blocked** if you have Husky set up to run linting on pre-commit.
+
+This ensures that no focused or skipped tests are ever merged to main branches, following industry best practices for test reliability.
+
+**Example error:**
+
+```
+error  Unexpected focused test.  jest/no-focused-tests
+```
+
+See `.eslintrc.cjs` for configuration details.

@@ -1,11 +1,12 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier', 'jest'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
+    'plugin:jest/recommended',
   ],
   env: {
     node: true,
@@ -36,6 +37,8 @@ module.exports = {
         ],
       },
     ],
+    'jest/no-focused-tests': 'error',
+    'jest/no-disabled-tests': 'error',
   },
   ignorePatterns: ['dist', 'node_modules'],
 };

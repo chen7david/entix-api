@@ -17,7 +17,8 @@
     "db:push": "drizzle-kit push",
     "db:push-test": "NODE_ENV=test drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "ts-node src/database/seed.ts"
+    "db:seed": "ts-node src/database/seed.ts",
+    "check-test-only": "grep -rE --include='*.test.ts' --include='*.spec.ts' '\\.(only|skip)\\s*\\(' src/ && exit 1 || exit 0"
   },
   "repository": {
     "type": "git",
@@ -46,6 +47,7 @@
     "@typescript-eslint/parser": "^8.30.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-prettier": "^5.2.6",
     "node-mocks-http": "^1.16.2",
     "nodemon": "^3.1.9",
