@@ -48,4 +48,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           PORT: 3000
           LOG_LEVEL: error
+          COGNITO_REGION: us-east-1
+          COGNITO_USER_POOL_ID: us-east-1_1234567890
+          COGNITO_CLIENT_ID: 1234567890
         run: npm test
