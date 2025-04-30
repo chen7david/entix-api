@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm ci || (cat /home/runner/.npm/_logs/* && exit 1)
 
+      - name: Lint code
+        run: npm run lint
+
       - name: Sync test database schema
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
