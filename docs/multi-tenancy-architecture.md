@@ -38,3 +38,5 @@ In a multi-tenant architecture, multiple customers (tenants) use the same applic
 ## 🧩 Entity Relationship Diagram (ERD)
 
 Here's the ERD in **Mermaid syntax**. GitHub and other Markdown tools that support Mermaid will render this as a diagram.
+
+![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/3f691f8ec4fb5889946f5630190a5222f875a433/docs/assets/erd-multi-tenancy-rbac.svg)
