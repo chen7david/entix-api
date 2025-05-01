@@ -192,6 +192,8 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 - **Jenkins** integration for production/staging deploys.
 - See the end of this file for a detailed workflow overview.
 
+> **Note:** In all CI/CD environments, Husky is automatically disabled by setting the environment variable `HUSKY=0` before running `npm ci` or `npm install`. This prevents issues with Git hooks in CI and follows [Husky best practices](https://typicode.github.io/husky/#/?id=ci-server-and-docker). For details, see [CI/CD Guide](./docs/ci-cd.md).
+
 ---
 
 ## Technology Stack

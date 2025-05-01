@@ -38,6 +38,8 @@ Each workflow consists of two main jobs:
    - Installs Node.js (v20) and sets up npm caching.
 3. **Install dependencies**
    - Runs `npm ci` for a clean, reproducible install.
+   - **Husky is disabled in CI** by setting the environment variable `HUSKY=0` before running `npm ci` or `npm install`. This prevents issues with Git hooks in CI environments where the .git directory may be missing or read-only. This is the [recommended best practice](https://typicode.github.io/husky/#/?id=ci-server-and-docker) for Husky. See the [README](../README.md#ci/cd-pipeline) for more details.
+   - **In Docker production builds**, use `npm ci --omit=dev --ignore-scripts` (see [Dockerfile](../Dockerfile)) to prevent the Husky `prepare` script from running, since devDependencies (including Husky) are not installed. This avoids build errors and is the industry standard for Node.js production images.
 4. **Lint code**
    - Runs `npm run lint` to check code style and catch errors early.
 5. **Check Prettier formatting**
@@ -76,7 +78,7 @@ If any of these steps fail, the workflow stops and the code is not merged or dep
     cache-dependency-path: package-lock.json
 
 - name: Install dependencies
-  run: npm ci || (cat /home/runner/.npm/_logs/* && exit 1)
+  run: HUSKY=0 npm ci || (cat /home/runner/.npm/_logs/* && exit 1)
 
 - name: Lint code
   run: npm run lint
