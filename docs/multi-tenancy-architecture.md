@@ -76,7 +76,7 @@ Multi-tenancy is enforced through the following mechanisms:
 
 The following ERD illustrates the schema for the multi-tenant RBAC system:
 
-![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/3f691f8ec4fb5889946f5630190a5222f875a433/docs/assets/erd-multi-tenancy-rbac.svg)
+![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/757799c823c1270d8a5b13b07247db35b14efcfc/docs/assets/erd-multi-tenancy-rbac.svg)
 
 ---
 
