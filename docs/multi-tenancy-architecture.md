@@ -76,43 +76,7 @@ Multi-tenancy is enforced through the following mechanisms:
 
 The following ERD illustrates the schema for the multi-tenant RBAC system:
 
-![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/757799c823c1270d8a5b13b07247db35b14efcfc/docs/assets/erd-multi-tenancy-rbac.svg)
-
----
-
-## 🚀 Implementation Plan
-
-Based on the current codebase and best practices, here is a step-by-step implementation plan:
-
-1. **Schema Validation:**
-
-   - Ensure all tables (`USERS`, `TENANTS`, `ROLES`, `PERMISSIONS`, `USER_ROLES`, `ROLE_PERMISSIONS`, `USER_TENANTS`) exist and have the correct fields and relationships as per the ERD.
-   - Add database constraints to enforce tenant scoping and referential integrity.
-
-2. **Backend Logic:**
-
-   - Update authentication logic to require and validate `tenant_id` on login/session creation.
-   - Refactor all role and permission queries to include tenant scoping (e.g., always filter by `tenant_id` where relevant).
-   - Implement caching for user permissions per tenant (e.g., using Redis), invalidating cache on role/permission changes.
-
-3. **API Design:**
-
-   - All endpoints that mutate or read tenant-scoped data must require a valid `tenant_id` in the request context.
-   - Add middleware to enforce tenant context and permission checks for all protected routes.
-
-4. **Testing:**
-
-   - Write unit and integration tests to verify tenant isolation, correct permission assignment, and access control enforcement.
-   - Test edge cases, such as users belonging to multiple tenants with different roles.
-
-5. **Documentation:**
-
-   - Keep this documentation up to date with any schema or logic changes.
-   - Document API endpoints and expected tenant context requirements for consumers.
-
-6. **Operational Best Practices:**
-   - Standardize permission naming conventions globally to avoid ambiguity.
-   - Monitor logs for role/permission mismatches and potential cross-tenant access attempts.
+![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/be10ca326be50b091e9e23cf445d96bf381214d8/docs/assets/erd-multi-tenancy-rbac.svg)
 
 ---
 
