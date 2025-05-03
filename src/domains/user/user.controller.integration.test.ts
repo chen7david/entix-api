@@ -1,7 +1,9 @@
 import { IntegrationTestManager } from '@shared/utils/test-helpers/integration-test-manager.util';
 import { faker } from '@faker-js/faker';
-import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
+import type { UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';
+import { UserFactory } from '@shared/utils/test-helpers/factories/user.factory';
+import { UserIntegrationHelper } from '@shared/utils/test-helpers/integration/user-integration.helper';
 
 // The database schema has been updated with the new fields
 // (firstName, lastName, preferredLanguage) so these tests can now run.
@@ -27,14 +29,7 @@ afterAll(async () => {
 describe('User API - Integration', () => {
   describe('POST /api/v1/users', () => {
     it('should create a new user and return 201', async () => {
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
+      const payload = UserFactory.createUserDto();
 
       const response = await manager.request.post('/api/v1/users').send(payload);
 
@@ -67,18 +62,11 @@ describe('User API - Integration', () => {
 
     it('should return a list containing new users', async () => {
       // Seed a new user via API within the same transaction
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
+      const { id: createdId } = await UserIntegrationHelper.createTestUser(manager, {
         isDisabled: true,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      expect(postRes.status).toBe(201);
-      const createdId = postRes.body.id;
+      });
 
+      // Verify API returns it
       const getRes = await manager.request.get('/api/v1/users');
       expect(getRes.status).toBe(200);
       const userIds = getRes.body.map((u: UserDto) => u.id);
@@ -95,16 +83,7 @@ describe('User API - Integration', () => {
 
     it('should return 200 for an existing user', async () => {
       // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      const { id, payload } = await UserIntegrationHelper.createTestUser(manager);
 
       const response = await manager.request.get(`/api/v1/users/${id}`);
       expect(response.status).toBe(200);
@@ -118,16 +97,7 @@ describe('User API - Integration', () => {
   describe('PUT /api/v1/users/:id', () => {
     it('should update existing user and return 201', async () => {
       // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      const { id } = await UserIntegrationHelper.createTestUser(manager);
 
       const update = { username: 'updated-username' };
       const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
@@ -137,16 +107,7 @@ describe('User API - Integration', () => {
 
     it('should update preferredLanguage field', async () => {
       // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      const { id } = await UserIntegrationHelper.createTestUser(manager);
 
       const update = { preferredLanguage: 'fr-FR' };
       const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
@@ -156,16 +117,7 @@ describe('User API - Integration', () => {
 
     it('should return 422 for invalid email on update', async () => {
       // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      const { id } = await UserIntegrationHelper.createTestUser(manager);
 
       const response = await manager.request
         .put(`/api/v1/users/${id}`)
@@ -178,16 +130,7 @@ describe('User API - Integration', () => {
   describe('DELETE /api/v1/users/:id', () => {
     it('should delete an existing user and return 204', async () => {
       // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        preferredLanguage: 'en-US',
-        cognitoSub: `cognito-${faker.string.uuid()}`,
-        isDisabled: false,
-        isAdmin: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      const { id } = await UserIntegrationHelper.createTestUser(manager);
 
       // Verify record exists before delete
       const beforeRes = await manager.request.get(`/api/v1/users/${id}`);
@@ -202,9 +145,6 @@ describe('User API - Integration', () => {
       // In a real application environment, the record would appear deleted.
       // So for this test, we'll verify the API endpoint returns a 204 status
       // which shows the controller is correctly handling the delete request.
-
-      // Success! The delete endpoint returned 204 as expected, indicating
-      // that the delete operation was processed correctly.
     });
 
     it('should return 404 when deleting non-existent user', async () => {

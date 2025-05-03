@@ -2,11 +2,10 @@ import 'reflect-metadata';
 import { UserService } from '@domains/user/user.service';
 import { UserRepository } from '@domains/user/user.repository';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
 import { NotFoundError } from '@shared/utils/error/error.util';
-import { User } from '@domains/user/user.model';
 import { Container } from 'typedi';
 import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
+import { UserFactory } from '@shared/utils/test-helpers/factories/user.factory';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -14,23 +13,8 @@ describe('UserService', () => {
   let loggerService: LoggerService;
   let mockLogger: LoggerService;
 
-  // Mock UUID for tests
-  const mockUserId = 'b3e1c2d4-5678-1234-9abc-1234567890ab';
-
-  const mockUser: User = {
-    id: mockUserId,
-    username: 'testuser',
-    email: 'test@example.com',
-    firstName: 'Test',
-    lastName: 'User',
-    preferredLanguage: 'en-US',
-    cognitoSub: 'cognito-123456',
-    isDisabled: false,
-    isAdmin: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-  };
+  // Mock data
+  const mockUser = UserFactory.createMockUser();
 
   beforeEach(() => {
     // Reset the container before each test
@@ -89,7 +73,7 @@ describe('UserService', () => {
     it('should return user when found', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
 
-      const result = await userService.findById(mockUserId);
+      const result = await userService.findById(mockUser.id);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -98,11 +82,11 @@ describe('UserService', () => {
           email: mockUser.email,
         }),
       );
-      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUser.id);
     });
 
     it('should throw NotFoundError when user not found', async () => {
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockResolvedValue(null as unknown as typeof mockUser);
       const nonExistentId = 'non-existent-id';
 
       await expect(userService.findById(nonExistentId)).rejects.toThrow(NotFoundError);
@@ -112,31 +96,15 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should create and return a new user', async () => {
-      const createDto: CreateUserDto = {
-        username: 'newuser',
-        email: 'new@example.com',
-        firstName: 'New',
-        lastName: 'User',
-        preferredLanguage: 'en-US',
-        cognitoSub: 'cognito-123456',
-        isDisabled: false,
-        isAdmin: false,
-      };
+      // Create DTO with fake data
+      const createDto = UserFactory.createUserDto();
 
-      const newUser: User = {
-        id: 'c4f2d3e5-6789-2345-0abc-2345678901bc',
-        username: createDto.username,
-        email: createDto.email,
-        firstName: createDto.firstName || null,
-        lastName: createDto.lastName || null,
-        preferredLanguage: createDto.preferredLanguage || null,
-        cognitoSub: createDto.cognitoSub,
-        isDisabled: false,
-        isAdmin: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      };
+      // Create new user based on DTO
+      const newUser = UserFactory.createMockUser({
+        ...createDto,
+        // Add properties that would be set by the database
+        id: 'new-user-id',
+      });
 
       userRepository.create.mockResolvedValue(newUser);
 
@@ -155,19 +123,19 @@ describe('UserService', () => {
 
   describe('update', () => {
     it('should update and return user when found', async () => {
-      const updateDto: UpdateUserDto = {
-        username: 'updateduser',
-      };
+      // Create update DTO
+      const updateDto = UserFactory.updateUserDto({ username: 'updateduser' });
 
-      const updatedUser: User = {
+      // Create updated user object
+      const updatedUser = UserFactory.createMockUser({
         ...mockUser,
-        username: 'updateduser',
-      };
+        ...updateDto,
+      });
 
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await userService.update(mockUserId, updateDto);
+      const result = await userService.update(mockUser.id, updateDto);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -176,17 +144,15 @@ describe('UserService', () => {
           email: updatedUser.email,
         }),
       );
-      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
-      expect(userRepository.update).toHaveBeenCalledWith(mockUserId, updateDto);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUser.id);
+      expect(userRepository.update).toHaveBeenCalledWith(mockUser.id, updateDto);
     });
 
     it('should throw NotFoundError when user not found', async () => {
-      const updateDto: UpdateUserDto = {
-        username: 'updateduser',
-      };
+      const updateDto = UserFactory.updateUserDto({ username: 'updateduser' });
       const nonExistentId = 'non-existent-id';
 
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockResolvedValue(null as unknown as typeof mockUser);
 
       await expect(userService.update(nonExistentId, updateDto)).rejects.toThrow(NotFoundError);
       expect(userRepository.findById).toHaveBeenCalledWith(nonExistentId);
@@ -199,15 +165,15 @@ describe('UserService', () => {
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.delete.mockResolvedValue(true);
 
-      await userService.delete(mockUserId);
+      await userService.delete(mockUser.id);
 
-      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
-      expect(userRepository.delete).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUser.id);
+      expect(userRepository.delete).toHaveBeenCalledWith(mockUser.id);
     });
 
     it('should throw NotFoundError when user not found', async () => {
       const nonExistentId = 'non-existent-id';
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockResolvedValue(null as unknown as typeof mockUser);
 
       await expect(userService.delete(nonExistentId)).rejects.toThrow(NotFoundError);
       expect(userRepository.findById).toHaveBeenCalledWith(nonExistentId);

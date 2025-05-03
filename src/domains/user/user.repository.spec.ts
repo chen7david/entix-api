@@ -1,10 +1,12 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
 import { UserRepository } from '@domains/user/user.repository';
-import { DatabaseService } from '@shared/services/database/database.service';
 import { users } from '@domains/user/user.schema';
-import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
+import { setupMockDb } from '@shared/utils/test-helpers/setup/mock-db.setup';
+import { UserFactory } from '@shared/utils/test-helpers/factories/user.factory';
+import { LoggerService } from '@shared/services/logger/logger.service';
+import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 
 /**
  * Tests for the UserRepository class, verifying proper interaction with the database
@@ -13,49 +15,22 @@ import { NotFoundError } from '@shared/utils/error/error.util';
 describe('UserRepository', () => {
   let userRepository: UserRepository;
   let mockDb: Record<string, jest.Mock>;
+  let mockLogger: LoggerService;
 
   // Mock user data
-  const mockUser: User = {
-    id: 'b3e1c2d4-5678-1234-9abc-1234567890ab',
-    username: 'testuser',
-    email: 'test@example.com',
-    firstName: 'Test',
-    lastName: 'User',
-    preferredLanguage: 'en-US',
-    cognitoSub: 'cognito-123456',
-    isDisabled: false,
-    isAdmin: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-  };
+  const mockUser = UserFactory.createMockUser();
 
   // Setup before each test
   beforeEach(() => {
     // Reset TypeDI container
     Container.reset();
 
-    // Create mock DB operations that can be chained
-    mockDb = {
-      insert: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      delete: jest.fn().mockReturnThis(),
-      from: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      values: jest.fn().mockReturnThis(),
-      set: jest.fn().mockReturnThis(),
-      returning: jest.fn(),
-      $dynamic: jest.fn().mockReturnThis(),
-    };
+    // Setup mock logger
+    mockLogger = createMockLogger();
+    Container.set(LoggerService, { component: jest.fn().mockReturnValue(mockLogger) });
 
-    // Create mock DB service with the mockDb
-    const mockDbService = {
-      db: mockDb,
-    } as unknown as DatabaseService;
-
-    // Register mock with TypeDI
-    Container.set(DatabaseService, mockDbService);
+    // Setup mock database
+    mockDb = setupMockDb();
 
     // Get repository instance from container
     userRepository = Container.get(UserRepository);
@@ -68,24 +43,11 @@ describe('UserRepository', () => {
   describe('create', () => {
     it('should create a new user and return the created user', async () => {
       // Arrange
-      const userData = {
-        username: 'newuser',
-        email: 'new@example.com',
-        firstName: 'New',
-        lastName: 'User',
-        preferredLanguage: 'en-US',
-        cognitoSub: 'cognito-123456',
-        isDisabled: false,
-        isAdmin: false,
-      };
-
-      const createdUser = {
+      const userData = UserFactory.createUserDto();
+      const createdUser = UserFactory.createMockUser({
         ...userData,
-        id: 'b3e1c2d4-5678-1234-9abc-1234567890ab',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-      };
+        id: mockUser.id,
+      });
 
       mockDb.returning.mockResolvedValue([createdUser]);
 
@@ -101,17 +63,7 @@ describe('UserRepository', () => {
 
     it('should throw an error if creation fails', async () => {
       // Arrange
-      const userData = {
-        username: 'erroruser',
-        email: 'error@example.com',
-        firstName: 'Error',
-        lastName: 'User',
-        preferredLanguage: 'en-US',
-        cognitoSub: 'cognito-123456',
-        isDisabled: false,
-        isAdmin: false,
-      };
-
+      const userData = UserFactory.createUserDto();
       mockDb.returning.mockResolvedValue([]);
 
       // Act & Assert
@@ -125,7 +77,7 @@ describe('UserRepository', () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(mockUser);
 
       // Act
-      const result = await userRepository.findById('b3e1c2d4-5678-1234-9abc-1234567890ab');
+      const result = await userRepository.findById(mockUser.id);
 
       // Assert
       expect(result).toEqual(mockUser);
@@ -145,15 +97,7 @@ describe('UserRepository', () => {
   describe('findAll', () => {
     it('should return all users', async () => {
       // Arrange
-      const usersArray = [
-        mockUser,
-        {
-          ...mockUser,
-          id: 'c4f2d3e5-6789-2345-0abc-2345678901bc',
-          username: 'user2',
-          email: 'user2@example.com',
-        },
-      ];
+      const usersArray = UserFactory.createMockUsers(2);
 
       // Direct mocking of the repository method
       jest.spyOn(userRepository, 'findAll').mockResolvedValue(usersArray);
@@ -169,16 +113,13 @@ describe('UserRepository', () => {
   describe('update', () => {
     it('should update user and return updated user', async () => {
       // Arrange
-      const updateData = { username: 'updatedname' };
+      const updateData = UserFactory.updateUserDto({ username: 'updatedname' });
       const updatedUser = { ...mockUser, ...updateData };
 
       mockDb.returning.mockResolvedValue([updatedUser]);
 
       // Act
-      const result = await userRepository.update(
-        'b3e1c2d4-5678-1234-9abc-1234567890ab',
-        updateData,
-      );
+      const result = await userRepository.update(mockUser.id, updateData);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -205,10 +146,10 @@ describe('UserRepository', () => {
   describe('delete', () => {
     it('should soft delete user by setting deletedAt', async () => {
       // Arrange
-      mockDb.returning.mockResolvedValue([{ id: 'b3e1c2d4-5678-1234-9abc-1234567890ab' }]);
+      mockDb.returning.mockResolvedValue([{ id: mockUser.id }]);
 
       // Act
-      await userRepository.delete('b3e1c2d4-5678-1234-9abc-1234567890ab');
+      await userRepository.delete(mockUser.id);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
