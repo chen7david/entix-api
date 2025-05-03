@@ -15,12 +15,14 @@ const config: Config = {
   collectCoverage: false,
   detectOpenHandles: true,
   verbose: true,
+  setupFilesAfterEnv: ['<rootDir>/tests/config/jest.setup.ts'],
   moduleNameMapper: {
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
     '^@domains/(.*)$': '<rootDir>/src/domains/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@openapi/(.*)$': '<rootDir>/src/openapi/$1',
     '^@database/(.*)$': '<rootDir>/src/database/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
 };
 

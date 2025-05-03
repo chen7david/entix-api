@@ -4,14 +4,15 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "commonjs",
-    "rootDir": "src",
+    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["src/shared/*"],
       "@domains/*": ["src/domains/*"],
       "@config/*": ["src/config/*"],
       "@openapi/*": ["src/openapi/*"],
-      "@database/*": ["src/database/*"]
+      "@database/*": ["src/database/*"],
+      "@tests/*": ["tests/*"]
     },
     "types": ["node", "jest"],
     "sourceMap": true,
@@ -22,5 +23,5 @@
     "noUnusedLocals": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "tests/**/*"]
 }
