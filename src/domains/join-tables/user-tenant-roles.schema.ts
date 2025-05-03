@@ -1,4 +1,4 @@
-import { pgTable, timestamp, primaryKey, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, timestamp, primaryKey, uuid, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from '@domains/user/user.schema';
 import { tenants } from '@domains/tenant/tenant.schema';
@@ -14,15 +14,15 @@ export const userTenantRoles = pgTable(
     /** User ID (FK to users.id) */
     userId: uuid('user_id')
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade' }),
     /** Tenant ID (FK to tenants.id) */
     tenantId: uuid('tenant_id')
       .notNull()
-      .references(() => tenants.id),
+      .references(() => tenants.id, { onDelete: 'cascade' }),
     /** Role ID (FK to roles.id) */
     roleId: uuid('role_id')
       .notNull()
-      .references(() => roles.id),
+      .references(() => roles.id, { onDelete: 'cascade' }),
     /** Created at timestamp */
     createdAt: timestamp('created_at').defaultNow(),
     /** Updated at timestamp */
@@ -30,7 +30,16 @@ export const userTenantRoles = pgTable(
     /** Soft delete timestamp */
     deletedAt: timestamp('deleted_at'),
   },
-  (table) => [primaryKey({ columns: [table.userId, table.tenantId, table.roleId] })],
+  (table) => [
+    // Primary key on composite columns
+    primaryKey({ columns: [table.userId, table.tenantId, table.roleId] }),
+    // Individual indexes for when querying by single columns
+    index('user_tenant_roles_user_id_idx').on(table.userId),
+    index('user_tenant_roles_tenant_id_idx').on(table.tenantId),
+    index('user_tenant_roles_role_id_idx').on(table.roleId),
+    // Index for soft delete filtering
+    index('user_tenant_roles_deleted_at_idx').on(table.deletedAt),
+  ],
 );
 
 /**

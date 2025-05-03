@@ -1,4 +1,9 @@
 import * as userSchema from '@domains/user/user.schema';
+import * as tenantSchema from '@domains/tenant/tenant.schema';
+import * as roleSchema from '@domains/role/role.schema';
+import * as permissionSchema from '@domains/permission/permission.schema';
+import * as userTenantRolesSchema from '@domains/join-tables/user-tenant-roles.schema';
+import * as rolePermissionsSchema from '@domains/join-tables/role-permissions.schema';
 // Import other domain schemas here if they exist
 // e.g., import * as productSchema from '@domains/product/product.schema';
 
@@ -7,6 +12,11 @@ import * as userSchema from '@domains/user/user.schema';
  */
 export const schema = {
   ...userSchema,
+  ...tenantSchema,
+  ...roleSchema,
+  ...permissionSchema,
+  ...userTenantRolesSchema,
+  ...rolePermissionsSchema,
   // ...productSchema,
 };
 

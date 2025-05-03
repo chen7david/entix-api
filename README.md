@@ -12,21 +12,51 @@
 [![ESLint](https://img.shields.io/badge/ESLint-8.x-4B32C3?logo=eslint&logoColor=white)](https://eslint.org/)
 [![Prettier](https://img.shields.io/badge/Prettier-3.x-F7B93E?logo=prettier&logoColor=black)](https://prettier.io/)
 
-Modern, type-safe, and feature-rich REST API boilerplate built with Node.js, Express, TypeScript, TypeDI, Zod, and Drizzle ORM.
+Modern, type-safe, and feature-rich REST API boilerplate built with Node.js, Express, TypeScript, TypeDI, Zod, and Drizzle ORM. This project provides a solid foundation for creating scalable, maintainable, and secure multi-tenant SaaS applications.
 
----
+## Table of Contents
 
-## Prerequisites
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Architecture](#architecture)
+- [Database & ORM](#database--orm)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Security](#security)
+- [Development Workflow](#development-workflow)
+- [Deployment](#deployment)
+- [Documentation](#documentation)
+- [Recent Updates](#recent-updates)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [Docker](https://www.docker.com/) & Docker Compose (for Dev Container / PostgreSQL)
-- [VS Code](https://code.visualstudio.com/) + [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+## Features
 
----
+- **Modern Stack**: Node.js, TypeScript, Express.js, PostgreSQL
+- **Dependency Injection**: Clean architecture using TypeDI
+- **API Documentation**: Automatic OpenAPI generation
+- **Database ORM**: Drizzle ORM for type-safe database access
+- **Schema Management**: Migrations, rollbacks, and change tracking
+- **Multi-Tenant RBAC**: Role-based access control with tenant isolation
+- **Validation**: Request/response validation with Zod
+- **Testing**: Comprehensive test suite with Jest
+- **Logging**: Structured logging with Pino
+- **Error Handling**: Centralized error handling with typed errors
+- **Dev Environment**: Dev Containers for consistent development
+- **Authentication**: AWS Cognito integration
+- **Security**: CORS, Helmet, rate limiting, etc.
+- **CI/CD**: GitHub Actions, Docker, Jenkins integration
 
-## Getting Started (Local Development)
+## Getting Started
 
-This project uses **Dev Containers** for a consistent, isolated development environment, including a PostgreSQL database.
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [Docker](https://www.docker.com/) & Docker Compose
+- [VS Code](https://code.visualstudio.com/) with [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+
+### Quick Start
 
 1. **Clone the repository:**
 
@@ -37,249 +67,418 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
 2. **Open in Dev Container:**
 
-   - Open the folder in VS Code.
-   - Reopen in Container when prompted (or use the Command Palette).
-   - The container includes Node.js, PostgreSQL, and all required tools.
+   - Open the folder in VS Code
+   - Click "Reopen in Container" when prompted or use Command Palette
 
-3. **Set up Environment Variables:**
+3. **Set up environment:**
 
    ```bash
    cp .env.example .env
    cp .env.example .env.test
-   ```
-
-   - Edit `.env` and `.env.test` as needed for your local setup.
-
-4. **Install Dependencies:**
-
-   ```bash
    npm install
    ```
 
-5. **Initialize Databases:**
+4. **Initialize database:**
 
    ```bash
    npm run db:push
    npm run db:push-test
    ```
 
-6. **Run the Development Server:**
+5. **Run development server:**
 
    ```bash
    npm run dev
    ```
 
-   - The API runs on `http://localhost:3000` by default.
+6. **Verify setup:**
+   - Health check: http://localhost:3000/health
+   - API docs: http://localhost:3000/openapi.json
 
-7. **Verify Setup:**
-   - Health check: [http://localhost:3000/health](http://localhost:3000/health)
+### Using the Dev Container
 
----
+The Dev Container provides a consistent development environment with:
 
-## API Documentation & Postman
+- Node.js runtime
+- PostgreSQL database
+- Development tools
+- Proper dependencies
 
-- **OpenAPI Spec:**  
-  The API exposes a live OpenAPI 3.0 spec at [`/openapi.json`](http://localhost:3000/openapi.json).
-- **Importing to Postman:**
-  1. Open Postman.
-  2. Click "Import" > "Link" and paste your running server's `/openapi.json` URL.
-  3. Postman will generate a collection with all current endpoints, request/response schemas, and examples.
-- **API Docs:**  
-  See [API Documentation Guide](./docs/api-documentation.md) for details on annotating endpoints.
-
----
-
-## Database Management
-
-- **Drizzle ORM** is used for schema, migrations, and type-safe queries.
-- **Visualize & Edit Data:**  
-  Run `npm run db:studio` to open Drizzle Studio, a web UI for browsing and editing your database.
-- **Schema Files:**  
-  Located in each domain (e.g., `src/domains/user/user.schema.ts`).
-- **Migrations:**  
-  Use `npm run db:generate` and `npm run db:migrate`.
-- **Seeding:**  
-  Use `npm run db:seed` to populate the database with sample data.
-
----
-
-## Security Features
-
-- **Rate Limiting:**
-
-  - Powered by [express-rate-limit](https://www.npmjs.com/package/express-rate-limit).
-  - Configurable via `.env`:
-    ```env
-    RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
-    RATE_LIMIT_MAX=100           # 100 requests per window
-    ```
-  - Works correctly behind proxies (e.g., Cloudflare) via `app.set('trust proxy', 1)`.
-  - See [API Security Guide](./docs/api-security.md) for details and best practices.
-
-- **Helmet:**
-
-  - Sets secure HTTP headers by default.
-
-- **Validation:**
-
-  - All input is validated using [Zod](https://zod.dev/).
-
-- **Error Handling:**
-
-  - Centralized error middleware for consistent API error responses.
-
-- **CORS:**
-  - Configurable and enabled by default.
-
----
+This eliminates "works on my machine" problems and makes onboarding new developers easier.
 
 ## Project Structure
 
-- `src/domains/` — Business domains (e.g., user, openapi, health)
-- `src/shared/services/` — Core services (AppService, ServerService, ConfigService, DatabaseService, LoggerService)
-- `src/shared/middleware/` — Error handling, validation, and other middleware
-- `src/shared/utils/` — Utilities (rate limiting, env, DI, etc.)
-- `src/database/` — Schema, seed, and migration scripts
+```
+entix-api/
+├── .devcontainer/    # Dev Container configuration
+├── .github/          # GitHub Actions workflows
+├── .husky/           # Git hooks for code quality
+├── docs/             # Documentation files
+├── drizzle/          # Database migrations and metadata
+├── src/
+│   ├── database/     # Database-related files
+│   ├── domains/      # Business domain modules
+│   │   ├── auth/     # Authentication/authorization
+│   │   ├── health/   # Health check endpoint
+│   │   ├── join-tables/  # Junction tables for relationships
+│   │   ├── openapi/  # OpenAPI documentation
+│   │   ├── permission/  # Permissions for RBAC
+│   │   ├── role/     # Roles for RBAC
+│   │   ├── tenant/   # Multi-tenant functionality
+│   │   └── user/     # User management
+│   └── shared/       # Shared utilities and services
+│       ├── middleware/  # Express middleware
+│       ├── repositories/  # Base repository pattern
+│       ├── services/   # Core services
+│       ├── types/      # Shared TypeScript types
+│       └── utils/      # Utility functions
+├── .eslintrc.cjs     # ESLint configuration
+├── .env.example      # Example environment variables
+├── .gitignore        # Git ignore patterns
+├── drizzle.config.ts # Drizzle ORM configuration
+├── jest.config.js    # Jest test configuration
+├── package.json      # Package dependencies
+├── tsconfig.json     # TypeScript configuration
+└── README.md         # This file
+```
 
----
+### Domain Structure
+
+Each domain follows a consistent structure:
+
+```
+domains/user/
+├── user.schema.ts       # Database schema with Drizzle
+├── user.model.ts        # TypeScript entity models
+├── user.dto.ts          # Data Transfer Objects with Zod
+├── user.repository.ts   # Data access layer
+├── user.service.ts      # Business logic
+├── user.controller.ts   # API endpoints/routes
+├── user.middleware.ts   # Domain-specific middleware
+├── *.spec.ts            # Unit tests
+└── *.test.ts            # Integration tests
+```
+
+## Architecture
+
+This project follows a clean, layered architecture using dependency injection:
+
+1. **Controller Layer**: HTTP request handling, validation, and response formatting
+2. **Service Layer**: Business logic, coordinating between repositories
+3. **Repository Layer**: Data access, CRUD operations
+4. **Entity Layer**: Domain models and types
+
+### Key Architectural Patterns
+
+- **Dependency Injection**: Using TypeDI for loose coupling
+- **Repository Pattern**: Abstracting data access
+- **DTOs**: Validating input/output with Zod
+- **Middleware**: Cross-cutting concerns
+
+## Database & ORM
+
+### Database Schema
+
+The system uses a multi-tenant RBAC model with the following key entities:
+
+- **Users**: People who can access the system
+
+  - Contains profile information (first/last name, email, username)
+  - Supports preferred language settings
+  - Tracks account status (enabled/disabled)
+  - Has global admin capability for system-wide access
+
+- **Tenants**: Organizations or logical groups
+
+  - Can be designated as default for new users
+  - Contains optional description for tenant info
+  - Supports soft deletion for tenant deprecation
+
+- **Roles**: Named collections of permissions within tenants
+
+  - Scoped to specific tenants
+  - Enforces unique role names within each tenant
+  - Supports hierarchical permissions
+
+- **Permissions**: Granular access controls
+
+  - System-wide permissions that can be assigned to roles
+  - Grouped by categories for easier management
+  - Contains descriptions for better clarity
+
+- **UserTenantRoles**: Junction table associating users with roles in tenants
+  - Allows users to have different roles in different tenants
+  - Implements many-to-many-to-many relationship
+- **RolePermissions**: Junction table associating roles with permissions
+  - Implements many-to-many relationship between roles and permissions
+
+All entities use UUID primary keys for security and support soft deletion via `deletedAt` timestamp. Foreign keys use `onDelete: 'cascade'` behavior to maintain referential integrity.
+
+#### Entity Relationship Diagram
+
+![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/7a42d17c0cb8b444552790d3902488d9d542b3d0/docs/assets/erd-multi-tenancy-rbac.svg)
+
+### Drizzle ORM
+
+We use [Drizzle ORM](https://orm.drizzle.team/) for type-safe database access:
+
+- **Schema Files**: Located in each domain (e.g., `src/domains/user/user.schema.ts`)
+- **Migrations**: Generated and tracked in `/src/database/migrations`
+- **Type Safety**: Full TypeScript integration
+- **Relations**: Defined with Drizzle's relation system for type-safe joins
+- **Indexes**: Optimized with appropriate indexes on commonly queried fields
+- **Constraints**: Enforced at database level (unique constraints, foreign keys)
+
+### Database Management
+
+```bash
+# Push schema changes to dev database
+npm run db:push
+
+# Push schema changes to test database
+NODE_ENV=test npm run db:push
+
+# Generate a new migration
+npm run db:generate -- --name=migration_name
+
+# Apply migrations
+npm run db:migrate
+
+# Visualize database in web UI
+npm run db:studio
+```
+
+## API Documentation
+
+### OpenAPI
+
+The API automatically generates OpenAPI 3.0 documentation:
+
+- **Live Spec**: http://localhost:3000/openapi.json
+- **Schemas**: Generated from Zod validation schemas
+- **Endpoints**: Documented with routing-controllers-openapi
+
+### Using with Postman
+
+1. Open Postman
+2. Click "Import" > "Link"
+3. Paste your running server's `/openapi.json` URL
+4. Postman will generate a complete collection
+
+### Documentation Guide
+
+See [API Documentation Guide](./docs/api-documentation.md) for best practices on:
+
+- Annotating endpoints
+- Adding examples
+- Documenting responses
+- Schema organization
 
 ## Testing
 
-- **Run all tests:**
-  ```bash
-  npm test
-  ```
-- **Watch mode:**
-  ```bash
-  npm run test:watch
-  ```
-- **Test setup:**
-  - Uses Jest, Supertest, and TypeDI for isolated, fast, and reliable tests.
-  - See [Testing Guide](./docs/testing.md) and [Writing Tests](./docs/writing-tests.md).
+### Test Types
 
----
+- **Unit Tests** (`.spec.ts`): Test individual components in isolation
+- **Integration Tests** (`.test.ts`): Test multiple components together
+- **E2E Tests** (`.e2e.ts`): Test complete workflows (not required at this stage)
 
-## Development & Contribution Workflow
+### Running Tests
 
-- **Branching:**  
-  Use `<type>/<jira-ticket>-<short-description>` (e.g., `feat/ENTIX-123-add-user-profile-endpoint`).
-- **Lint & Format:**
-  ```bash
-  npm run lint
-  npm run format
-  ```
-- **Documentation:**
-  - Use TSDoc for code.
-  - Update `docs/` for new features or changes.
+```bash
+# Run all tests
+npm test
 
----
+# Run specific test file
+npm test -- path/to/file.test.ts
 
-## Useful Scripts
+# Run with coverage report
+npm test -- --coverage
 
-- `npm run db:studio` — Launch Drizzle Studio to view and edit your database in a browser.
-- `npm run db:push` — Sync schema to dev DB.
-- `npm run db:push-test` — Sync schema to test DB.
-- `npm run db:generate` — Generate migration files.
-- `npm run db:migrate` — Run migrations.
-- `npm run db:seed` — Seed the database with sample data.
+# Run in watch mode
+npm run test:watch
+```
 
----
+### Testing Guidelines
 
-## CI/CD Pipeline
+See [Testing Guide](./docs/testing.md) for comprehensive information on:
 
-- **GitHub Actions** for PR checks, builds, and deployments.
-- **Docker** for containerized builds and deployments.
-- **Jenkins** integration for production/staging deploys.
-- See the end of this file for a detailed workflow overview.
+- Using TypeDI in tests
+- Test isolation
+- Mocking strategies
+- Transaction management
+- Test naming conventions
 
-> **Note:** In all CI/CD environments, Husky is automatically disabled by setting the environment variable `HUSKY=0` before running `npm ci` or `npm install`. This prevents issues with Git hooks in CI and follows [Husky best practices](https://typicode.github.io/husky/#/?id=ci-server-and-docker). For details, see [CI/CD Guide](./docs/ci-cd.md).
+## Security
 
----
+### Features
 
-## Technology Stack
+- **Authentication**: AWS Cognito integration
+- **Authorization**: Role-Based Access Control (RBAC)
+- **Multi-Tenancy**: Data isolation between tenants
+- **Input Validation**: All requests validated with Zod
+- **Rate Limiting**: Configurable per endpoint
+- **Headers**: Secure HTTP headers with Helmet
+- **CORS**: Configurable origin restrictions
+- **UUIDs**: Non-sequential IDs to prevent enumeration
+- **Error Handling**: Sanitized error messages
 
-- **Node.js** (v18+)
-- **TypeScript**
-- **Express.js**
-- **TypeDI** (Dependency Injection)
-- **Zod** (Validation)
-- **Drizzle ORM** (PostgreSQL)
-- **Pino** (Logging)
-- **Jest** (Testing)
-- **ESLint & Prettier** (Linting & Formatting)
-- **Docker / Dev Containers**
+### Configuration
 
----
+Security settings are configured via environment variables:
 
-## Additional Tips
+```dotenv
+# Rate limiting
+RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
+RATE_LIMIT_MAX=100           # 100 requests per window
 
-- **API Exploration:**  
-  Use Postman or any OpenAPI-compatible tool to explore and test endpoints. Import `/openapi.json` for up-to-date routes and schemas.
-- **Database Browsing:**  
-  Use `npm run db:studio` for a GUI to inspect and edit your data.
-- **Security:**  
-  Review [API Security Guide](./docs/api-security.md) for best practices and configuration.
-- **Health Check:**  
-  The `/health` endpoint is always available for monitoring.
+# CORS
+CORS_ORIGIN=*                # Set to specific origin in production
 
----
+# Node environment
+NODE_ENV=development         # Set to 'production' in production
+```
 
-## 📚 Additional Documentation
+For detailed security configuration, see [API Security Guide](./docs/api-security.md).
+
+## Development Workflow
+
+### Branching Strategy
+
+Use the following naming convention for branches:
+
+```
+<type>/<jira-ticket>-<short-description>
+```
+
+Examples:
+
+- `feat/ENTIX-123-add-user-profile-endpoint`
+- `fix/ENTIX-456-fix-auth-validation`
+- `refactor/ENTIX-789-improve-error-handling`
+
+### Code Quality
+
+Code quality is enforced via:
+
+- **ESLint**: Static code analysis
+- **Prettier**: Code formatting
+- **Husky**: Git hooks for pre-commit checks
+- **Jest**: Test coverage requirements
+
+Run quality checks:
+
+```bash
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Check formatting
+npm run format:check
+```
+
+### Adding a New Feature
+
+1. Create a new branch
+2. Implement the feature with tests
+3. Update documentation if needed
+4. Submit a pull request
+5. Address review feedback
+6. Merge after approval
+
+## Deployment
+
+### Docker
+
+The project includes Docker configuration for containerized deployment:
+
+```bash
+# Build the Docker image
+docker build -t entix-api .
+
+# Run the container
+docker run -p 3000:3000 --env-file .env entix-api
+```
+
+### CI/CD Pipeline
+
+Our CI/CD pipeline uses:
+
+- **GitHub Actions**: For PR checks and builds
+- **Docker**: For containerized deployments
+- **Jenkins**: For production/staging deploys
+
+See [CI/CD Guide](./docs/ci-cd.md) for detailed pipeline information.
+
+## Documentation
+
+For more detailed documentation, see:
 
 - [CI/CD Guide](./docs/ci-cd.md)
 - [Logger Usage](./docs/logger-usage.md)
 - [Request Validation](./docs/request-validation.md)
-- [Test Setup](./docs/test-setup.md)
+- [Testing Guide](./docs/testing.md)
 - [Path Aliasing Setup](./docs/path-aliasing-setup.md)
 - [ESLint & Prettier Setup](./docs/eslint-prettier-setup.md)
 - [Express + TypeDI Setup](./docs/express-typedi-setup.md)
 - [Error Handling](./docs/error-handling.md)
 - [Database Migrations](./docs/db-migrations.md)
-- [Project Rules](./docs/rules.mdc)
+- [Implementation Tips](./docs/implementation-tips.md)
 
----
-
-## Schema Changes
+## Recent Updates
 
 ### User Schema Updates (May 2025)
-
-The user schema has been updated with the following changes:
 
 - Changed user IDs from numeric to UUIDs for better security and scalability
 - Added `username` as a unique identifier
 - Added `cognitoSub` for AWS Cognito integration
 - Replaced `isActive` with `isDisabled` (reversed logic, default false)
-- Added `isAdmin` flag for global admins (default false, settable only via direct DB access)
+- Added `isAdmin` flag for global admins
 - Added `updatedAt` timestamp field
 
-#### Implementing Database Changes
-
-Database schema changes need to be applied by running:
+To apply these changes:
 
 ```bash
 npm run db:push
 ```
 
-This will update the database schema to match the new model.
-
-For test environments:
-
-```bash
-NODE_ENV=test npm run db:push
-```
-
-#### Migration Path
-
-For existing installations, a database migration is required. A SQL migration script is available at:
+For existing installations, a migration script is available at:
 
 ```
-drizzle/migrations/0001_update_users_schema.sql
+src/database/migrations/0001_update_users_schema.sql
 ```
 
-This script adds the new columns, handles renaming existing columns, and sets default values to maintain compatibility with existing data.
+## Troubleshooting
+
+### Common Issues
+
+- **Database connection errors**: Check your `.env` file for correct database credentials
+- **Dev Container issues**: Ensure Docker is running and VSCode Dev Containers extension is installed
+- **Type errors**: Run `npm install` to ensure all dependencies are updated
+- **Migration errors**: Check your database schema for conflicts
+
+### Getting Help
+
+If you encounter issues:
+
+1. Check documentation in the `docs/` folder
+2. Review the issue tracker for similar problems
+3. Open a new issue with detailed reproduction steps
+
+## Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Update documentation as needed
+6. Submit a pull request
+
+For detailed contribution guidelines, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ---
 
 If you have questions, suggestions, or want to contribute, please open an issue or pull request!
-
----
