@@ -130,6 +130,57 @@ describe('UserService', () => {
 });
 ```
 
+## Test Data Cleanup and Isolation
+
+### Database Transaction Handling
+
+For integration tests that touch the database, we use transactions to ensure test isolation:
+
+1. **Begin Transaction**: Each test starts a transaction in `beforeEach`.
+2. **Rollback Transaction**: Each test rolls back the transaction in `afterEach`.
+3. **No Lingering Data**: This ensures no test data persists between tests.
+
+Example transaction handling for integration tests:
+
+```typescript
+let manager: IntegrationTestManager;
+
+beforeAll(async () => {
+  manager = Container.get(IntegrationTestManager);
+});
+
+beforeEach(async () => {
+  await manager.beginTransaction();
+});
+
+afterEach(async () => {
+  await manager.rollbackTransaction();
+});
+
+afterAll(async () => {
+  await manager.close();
+});
+```
+
+### Multi-Domain Test Isolation
+
+When adding new domains to the system:
+
+1. **Separate Test Suites**: Keep test suites for different domains separate.
+2. **Domain-Specific Fixtures**: Avoid sharing fixtures between domain test suites.
+3. **Clean Up Resources**: Ensure any resources created (files, queues, etc.) are cleaned up.
+4. **Avoid Test Order Dependencies**: Tests should run in any order without affecting each other.
+5. **Mock External Domains**: When testing a domain, mock dependencies from other domains.
+
+### Common Isolation Pitfalls
+
+- **Static Data**: Watch for shared static data that persists between tests.
+- **Global State**: Be careful with global state or singleton services.
+- **External Resources**: Always clean up external resources (files, connections).
+- **Clock Manipulation**: If using `jest.useFakeTimers()`, reset between tests.
+
+Proper test isolation is critical for a maintainable test suite. As the application grows with new domains, following these practices ensures tests remain reliable and repeatable.
+
 ## When to Still Use jest.mock()
 
 While the container-based approach is preferred, there are cases where `jest.mock()` is still appropriate:

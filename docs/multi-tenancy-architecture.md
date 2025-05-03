@@ -74,9 +74,9 @@ Multi-tenancy is enforced through the following mechanisms:
 
 ## 🧩 Entity Relationship Diagram (ERD)
 
-The following ERD illustrates the schema for the multi-tenant RBAC system:
+The following ERD provides an overview of the multi-tenant RBAC schema. While all tables (except pivot tables) implement createdAt, updatedAt, and deletedAt columns, these fields are omitted from the diagram for visual clarity.
 
-![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/be10ca326be50b091e9e23cf445d96bf381214d8/docs/assets/erd-multi-tenancy-rbac.svg)
+![ERD Diagram](https://raw.githubusercontent.com/chen7david/entix-api/7a42d17c0cb8b444552790d3902488d9d542b3d0/docs/assets/erd-multi-tenancy-rbac.svg)
 
 ---
 
