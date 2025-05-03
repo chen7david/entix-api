@@ -1,5 +1,5 @@
 {
-  "id": "8258b58f-db60-42cd-a7a4-083d2fbc8ceb",
+  "id": "7e100c06-4ade-405a-86ff-6aa4f67adae3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -79,8 +79,12 @@
           "name": "role_permissions_role_id_roles_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "roles",
-          "columnsFrom": ["role_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -88,8 +92,12 @@
           "name": "role_permissions_permission_id_permissions_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "permissions",
-          "columnsFrom": ["permission_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "permission_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -97,7 +105,10 @@
       "compositePrimaryKeys": {
         "role_permissions_role_id_permission_id_pk": {
           "name": "role_permissions_role_id_permission_id_pk",
-          "columns": ["role_id", "permission_id"]
+          "columns": [
+            "role_id",
+            "permission_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -215,8 +226,12 @@
           "name": "user_tenant_roles_user_id_users_id_fk",
           "tableFrom": "user_tenant_roles",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -224,8 +239,12 @@
           "name": "user_tenant_roles_tenant_id_tenants_id_fk",
           "tableFrom": "user_tenant_roles",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -233,8 +252,12 @@
           "name": "user_tenant_roles_role_id_roles_id_fk",
           "tableFrom": "user_tenant_roles",
           "tableTo": "roles",
-          "columnsFrom": ["role_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -242,7 +265,11 @@
       "compositePrimaryKeys": {
         "user_tenant_roles_user_id_tenant_id_role_id_pk": {
           "name": "user_tenant_roles_user_id_tenant_id_role_id_pk",
-          "columns": ["user_id", "tenant_id", "role_id"]
+          "columns": [
+            "user_id",
+            "tenant_id",
+            "role_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -317,7 +344,9 @@
         "permissions_name_unique": {
           "name": "permissions_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         }
       },
       "policies": {},
@@ -405,8 +434,12 @@
           "name": "roles_tenant_id_tenants_id_fk",
           "tableFrom": "roles",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -416,7 +449,10 @@
         "tenant_id_name_unique": {
           "name": "tenant_id_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["tenant_id", "name"]
+          "columns": [
+            "tenant_id",
+            "name"
+          ]
         }
       },
       "policies": {},
@@ -490,7 +526,9 @@
         "tenants_name_unique": {
           "name": "tenants_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
+          "columns": [
+            "name"
+          ]
         }
       },
       "policies": {},
@@ -684,12 +722,16 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ]
         },
         "users_cognito_sub_unique": {
           "name": "users_cognito_sub_unique",
           "nullsNotDistinct": false,
-          "columns": ["cognito_sub"]
+          "columns": [
+            "cognito_sub"
+          ]
         }
       },
       "policies": {},

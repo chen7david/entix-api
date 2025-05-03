@@ -5,6 +5,7 @@ import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 /**
  * Zod schema for creating a user (insert)
+ * All fields except id, createdAt, updatedAt, deletedAt are required.
  */
 export const CreateUserDto = createInsertSchema(users)
   .omit({
@@ -14,7 +15,10 @@ export const CreateUserDto = createInsertSchema(users)
     deletedAt: true,
   })
   .extend({
+    /** User email (must be valid email) */
     email: z.string().email(),
+    /** Preferred language code (e.g., 'en-US') */
+    preferredLanguage: z.string().default('en-US'),
   });
 
 /**
@@ -27,11 +31,12 @@ export const UpdateUserDto = CreateUserDto.partial().extend({
 
 /**
  * Zod schema for selecting a user (API response)
+ * Includes all fields from the users table.
  */
 export const UserDto = createSelectSchema(users);
 
 /**
- * TypeScript types
+ * TypeScript types inferred from Zod schemas
  */
 export type CreateUserDto = z.infer<typeof CreateUserDto>;
 export type UpdateUserDto = z.infer<typeof UpdateUserDto>;

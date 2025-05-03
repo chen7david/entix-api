@@ -3,8 +3,8 @@ import { faker } from '@faker-js/faker';
 import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';
 
-// NOTE: This test is skipped until we resolve the database schema migration
-// This file was renamed to skip-test.ts to exclude it from the test runner
+// The database schema has been updated with the new fields
+// (firstName, lastName, preferredLanguage) so these tests can now run.
 
 let manager: IntegrationTestManager;
 
@@ -30,6 +30,7 @@ describe('User API - Integration', () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: false,
         isAdmin: false,
@@ -42,6 +43,7 @@ describe('User API - Integration', () => {
       expect(response.body).toMatchObject({
         email: payload.email,
         username: payload.username,
+        preferredLanguage: payload.preferredLanguage,
         cognitoSub: payload.cognitoSub,
         isDisabled: payload.isDisabled,
         isAdmin: payload.isAdmin,
@@ -68,6 +70,7 @@ describe('User API - Integration', () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: true,
         isAdmin: false,
@@ -95,6 +98,7 @@ describe('User API - Integration', () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: false,
         isAdmin: false,
@@ -107,6 +111,7 @@ describe('User API - Integration', () => {
       expect(response.body).toHaveProperty('id', id);
       expect(response.body).toHaveProperty('email', payload.email);
       expect(response.body).toHaveProperty('username', payload.username);
+      expect(response.body).toHaveProperty('preferredLanguage', payload.preferredLanguage);
     });
   });
 
@@ -116,6 +121,7 @@ describe('User API - Integration', () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: false,
         isAdmin: false,
@@ -129,11 +135,31 @@ describe('User API - Integration', () => {
       expect(response.body).toHaveProperty('username', update.username);
     });
 
+    it('should update preferredLanguage field', async () => {
+      // Seed user
+      const payload: CreateUserDto = {
+        email: faker.internet.email(),
+        username: faker.internet.username(),
+        preferredLanguage: 'en-US',
+        cognitoSub: `cognito-${faker.string.uuid()}`,
+        isDisabled: false,
+        isAdmin: false,
+      };
+      const postRes = await manager.request.post('/api/v1/users').send(payload);
+      const id = postRes.body.id;
+
+      const update = { preferredLanguage: 'fr-FR' };
+      const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty('preferredLanguage', update.preferredLanguage);
+    });
+
     it('should return 422 for invalid email on update', async () => {
       // Seed user
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: false,
         isAdmin: false,
@@ -155,6 +181,7 @@ describe('User API - Integration', () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
         username: faker.internet.username(),
+        preferredLanguage: 'en-US',
         cognitoSub: `cognito-${faker.string.uuid()}`,
         isDisabled: false,
         isAdmin: false,
