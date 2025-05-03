@@ -16,11 +16,14 @@ describe('UserRepository', () => {
 
   // Mock user data
   const mockUser: User = {
-    id: 1,
+    id: 'b3e1c2d4-5678-1234-9abc-1234567890ab',
+    username: 'testuser',
     email: 'test@example.com',
-    name: 'Test User',
-    isActive: true,
+    cognitoSub: 'cognito-123456',
+    isDisabled: false,
+    isAdmin: false,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -63,15 +66,18 @@ describe('UserRepository', () => {
     it('should create a new user and return the created user', async () => {
       // Arrange
       const userData = {
+        username: 'newuser',
         email: 'new@example.com',
-        name: 'New User',
-        isActive: true,
+        cognitoSub: 'cognito-123456',
+        isDisabled: false,
+        isAdmin: false,
       };
 
       const createdUser = {
         ...userData,
-        id: 1,
+        id: 'b3e1c2d4-5678-1234-9abc-1234567890ab',
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -90,9 +96,11 @@ describe('UserRepository', () => {
     it('should throw an error if creation fails', async () => {
       // Arrange
       const userData = {
+        username: 'erroruser',
         email: 'error@example.com',
-        name: 'Error User',
-        isActive: true,
+        cognitoSub: 'cognito-123456',
+        isDisabled: false,
+        isAdmin: false,
       };
 
       mockDb.returning.mockResolvedValue([]);
@@ -108,7 +116,7 @@ describe('UserRepository', () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(mockUser);
 
       // Act
-      const result = await userRepository.findById(1);
+      const result = await userRepository.findById('b3e1c2d4-5678-1234-9abc-1234567890ab');
 
       // Assert
       expect(result).toEqual(mockUser);
@@ -121,14 +129,22 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.findById(999)).rejects.toThrow(NotFoundError);
+      await expect(userRepository.findById('non-existent-id')).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('findAll', () => {
     it('should return all users', async () => {
       // Arrange
-      const usersArray = [mockUser, { ...mockUser, id: 2, email: 'user2@example.com' }];
+      const usersArray = [
+        mockUser,
+        {
+          ...mockUser,
+          id: 'c4f2d3e5-6789-2345-0abc-2345678901bc',
+          username: 'user2',
+          email: 'user2@example.com',
+        },
+      ];
 
       // Direct mocking of the repository method
       jest.spyOn(userRepository, 'findAll').mockResolvedValue(usersArray);
@@ -144,13 +160,16 @@ describe('UserRepository', () => {
   describe('update', () => {
     it('should update user and return updated user', async () => {
       // Arrange
-      const updateData = { name: 'Updated Name' };
+      const updateData = { username: 'updatedname' };
       const updatedUser = { ...mockUser, ...updateData };
 
       mockDb.returning.mockResolvedValue([updatedUser]);
 
       // Act
-      const result = await userRepository.update(1, updateData);
+      const result = await userRepository.update(
+        'b3e1c2d4-5678-1234-9abc-1234567890ab',
+        updateData,
+      );
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -168,19 +187,19 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.update(999, { name: 'Not Found' })).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(
+        userRepository.update('non-existent-id', { username: 'Not Found' }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('delete', () => {
     it('should soft delete user by setting deletedAt', async () => {
       // Arrange
-      mockDb.returning.mockResolvedValue([{ id: 1 }]);
+      mockDb.returning.mockResolvedValue([{ id: 'b3e1c2d4-5678-1234-9abc-1234567890ab' }]);
 
       // Act
-      await userRepository.delete(1);
+      await userRepository.delete('b3e1c2d4-5678-1234-9abc-1234567890ab');
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -197,7 +216,7 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.delete(999)).rejects.toThrow(NotFoundError);
+      await expect(userRepository.delete('non-existent-id')).rejects.toThrow(NotFoundError);
     });
   });
 });

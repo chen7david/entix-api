@@ -239,6 +239,47 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
 ---
 
+## Schema Changes
+
+### User Schema Updates (May 2025)
+
+The user schema has been updated with the following changes:
+
+- Changed user IDs from numeric to UUIDs for better security and scalability
+- Added `username` as a unique identifier
+- Added `cognitoSub` for AWS Cognito integration
+- Replaced `isActive` with `isDisabled` (reversed logic, default false)
+- Added `isAdmin` flag for global admins (default false, settable only via direct DB access)
+- Added `updatedAt` timestamp field
+
+#### Implementing Database Changes
+
+Database schema changes need to be applied by running:
+
+```bash
+npm run db:push
+```
+
+This will update the database schema to match the new model.
+
+For test environments:
+
+```bash
+NODE_ENV=test npm run db:push
+```
+
+#### Migration Path
+
+For existing installations, a database migration is required. A SQL migration script is available at:
+
+```
+drizzle/migrations/0001_update_users_schema.sql
+```
+
+This script adds the new columns, handles renaming existing columns, and sets default values to maintain compatibility with existing data.
+
+---
+
 If you have questions, suggestions, or want to contribute, please open an issue or pull request!
 
 ---

@@ -1,94 +1,50 @@
-import { z } from '@shared/utils/zod.util';
+import { z } from 'zod';
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { users } from '@domains/user/user.schema';
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 /**
- * Zod schema for creating a user. Used for request body validation.
+ * Zod schema for creating a user (insert)
  */
-export const CreateUserDto = z
-  .object({
-    /**
-     * User's email address (must be unique).
-     * @example john.doe@example.com
-     */
-    email: z.string().email().openapi({ example: 'john.doe@example.com' }),
-    /**
-     * User's name.
-     * @example John Doe
-     */
-    name: z.string().min(1).openapi({ example: 'John Doe' }),
-    /**
-     * Indicates if the user account is active. Defaults to true.
-     * @default true
-     */
-    isActive: z.boolean().default(true),
-    // TODO: Add password field if needed for creation?
+export const CreateUserDto = createInsertSchema(users)
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    deletedAt: true,
   })
-  .openapi('CreateUserDto', { description: 'Data required to create a new user.' });
+  .extend({
+    email: z.string().email(),
+  });
 
 /**
- * Zod schema for updating a user. Allows partial updates.
+ * Zod schema for updating a user (partial)
+ * If email is present, it must be a valid email.
  */
-export const UpdateUserDto = CreateUserDto.partial().openapi('UpdateUserDto', {
-  description: 'Data for updating an existing user. All fields are optional.',
+export const UpdateUserDto = CreateUserDto.partial().extend({
+  email: z.string().email().optional(),
 });
 
 /**
- * Type alias for CreateUserDto inferred type.
+ * Zod schema for selecting a user (API response)
+ */
+export const UserDto = createSelectSchema(users);
+
+/**
+ * TypeScript types
  */
 export type CreateUserDto = z.infer<typeof CreateUserDto>;
-/**
- * Type alias for UpdateUserDto inferred type.
- */
 export type UpdateUserDto = z.infer<typeof UpdateUserDto>;
-
-// --- Potential Response Schema ---
-// Based on the Drizzle schema `src/domains/user/user.schema.ts`
-
-/**
- * Zod schema representing a user object as returned by the API.
- */
-export const UserDto = z
-  .object({
-    /**
-     * Unique identifier for the user.
-     * @example 1
-     */
-    id: z.number().int().positive().openapi({ example: 1 }),
-    /**
-     * User's email address.
-     * @example john.doe@example.com
-     */
-    email: z.string().email().openapi({ example: 'john.doe@example.com' }),
-    /**
-     * User's name.
-     * @example John Doe
-     */
-    name: z.string().nullable().openapi({ example: 'John Doe' }), // Assuming name can be null based on Drizzle schema
-    /**
-     * Timestamp when the user was created.
-     * @example 2024-08-15T10:30:00Z
-     */
-    createdAt: z.date().openapi({ example: '2024-08-15T10:30:00Z' }), // Or z.string().datetime() if preferred
-    // Assuming isActive is not part of the core DB schema but might be added
-  })
-  .openapi('UserDto', { description: 'Represents a user.' });
-
-/**
- * Type alias for UserDto inferred type.
- */
 export type UserDto = z.infer<typeof UserDto>;
 
 /**
- * Zod schema for validating user ID path parameter.
+ * Zod schema for validating user ID path parameter (UUID)
  */
-export const UserIdParamDto = z
-  .object({
-    /** User's unique identifier from path parameters. @example 1 */
-    id: z.coerce.number().int().positive().openapi({ example: 1 }),
-  })
-  .openapi('UserIdParamDto', { description: 'Schema for user ID path parameter.' });
+export const UserIdParamDto = z.object({
+  /** User's unique identifier from path parameters. @example "b3e1..." */
+  id: z.string().uuid(),
+});
 
-/** Type alias for UserIdParamDto inferred type. */
 export type UserIdParamDto = z.infer<typeof UserIdParamDto>;
 
 /**

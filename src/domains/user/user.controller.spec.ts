@@ -21,12 +21,18 @@ describe('UsersController', () => {
   let mockLogger: jest.Mocked<Logger>;
   let app: express.Application;
 
+  // Mock UUID for tests
+  const mockUserId = 'b3e1c2d4-5678-1234-9abc-1234567890ab';
+
   const mockUser: User = {
-    id: 1,
+    id: mockUserId,
+    username: 'testuser',
     email: 'test@example.com',
-    name: 'Test User',
-    isActive: true,
+    cognitoSub: 'cognito-123456',
+    isDisabled: false,
+    isAdmin: false,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -99,21 +105,22 @@ describe('UsersController', () => {
       userService.findById.mockResolvedValue(mockUser);
 
       // Act
-      const result = await usersController.getById(1);
+      const result = await usersController.getById(mockUserId);
 
       // Assert
       expect(result).toEqual(mockUser);
-      expect(userService.findById).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', { id: 1 });
+      expect(userService.findById).toHaveBeenCalledWith(mockUserId);
+      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', { id: mockUserId });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
+      const nonExistentId = 'non-existent-id';
       userService.findById.mockRejectedValue(new NotFoundError('User not found'));
 
       // Act & Assert
-      await expect(usersController.getById(999)).rejects.toThrow(NotFoundError);
-      expect(userService.findById).toHaveBeenCalledWith(999);
+      await expect(usersController.getById(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userService.findById).toHaveBeenCalledWith(nonExistentId);
     });
   });
 
@@ -121,15 +128,22 @@ describe('UsersController', () => {
     it('should create and return a new user', async () => {
       // Arrange
       const createDto: CreateUserDto = {
+        username: 'newuser',
         email: 'new@example.com',
-        name: 'New User',
-        isActive: true,
+        cognitoSub: 'cognito-123456',
+        isDisabled: false,
+        isAdmin: false,
       };
 
       const newUser = {
-        id: 2,
-        ...createDto,
+        id: 'c4f2d3e5-6789-2345-0abc-2345678901bc',
+        username: createDto.username,
+        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
+        isDisabled: false,
+        isAdmin: false,
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -141,7 +155,10 @@ describe('UsersController', () => {
       // Assert
       expect(result).toEqual(newUser);
       expect(userService.create).toHaveBeenCalledWith(createDto);
-      expect(mockLogger.info).toHaveBeenCalledWith('Creating user', { email: createDto.email });
+      expect(mockLogger.info).toHaveBeenCalledWith('Creating user', {
+        email: createDto.email,
+        username: createDto.username,
+      });
     });
   });
 
@@ -149,36 +166,37 @@ describe('UsersController', () => {
     it('should update and return user when found', async () => {
       // Arrange
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       const updatedUser = {
         ...mockUser,
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       userService.update.mockResolvedValue(updatedUser);
 
       // Act
-      const result = await usersController.update(1, updateDto);
+      const result = await usersController.update(mockUserId, updateDto);
 
       // Assert
       expect(result).toEqual(updatedUser);
-      expect(userService.update).toHaveBeenCalledWith(1, updateDto);
-      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', { id: 1 });
+      expect(userService.update).toHaveBeenCalledWith(mockUserId, updateDto);
+      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', { id: mockUserId });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
+      const nonExistentId = 'non-existent-id';
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       userService.update.mockRejectedValue(new NotFoundError('User not found'));
 
       // Act & Assert
-      await expect(usersController.update(999, updateDto)).rejects.toThrow(NotFoundError);
-      expect(userService.update).toHaveBeenCalledWith(999, updateDto);
+      await expect(usersController.update(nonExistentId, updateDto)).rejects.toThrow(NotFoundError);
+      expect(userService.update).toHaveBeenCalledWith(nonExistentId, updateDto);
     });
   });
 
@@ -188,20 +206,21 @@ describe('UsersController', () => {
       userService.delete.mockResolvedValue(undefined);
 
       // Act
-      await usersController.delete(1);
+      await usersController.delete(mockUserId);
 
       // Assert
-      expect(userService.delete).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', { id: 1 });
+      expect(userService.delete).toHaveBeenCalledWith(mockUserId);
+      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', { id: mockUserId });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
+      const nonExistentId = 'non-existent-id';
       userService.delete.mockRejectedValue(new NotFoundError('User not found'));
 
       // Act & Assert
-      await expect(usersController.delete(999)).rejects.toThrow(NotFoundError);
-      expect(userService.delete).toHaveBeenCalledWith(999);
+      await expect(usersController.delete(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userService.delete).toHaveBeenCalledWith(nonExistentId);
     });
   });
 });

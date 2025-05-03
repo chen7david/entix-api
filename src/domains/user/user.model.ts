@@ -2,21 +2,24 @@
  * Type representing a user entity as stored in the database.
  */
 export type User = {
-  id: number;
+  id: string;
+  username: string;
   email: string;
-  name: string | null;
-  createdAt: Date;
-  isActive: boolean;
+  cognitoSub: string;
+  isDisabled: boolean;
+  isAdmin: boolean;
+  createdAt: Date | null;
+  updatedAt: Date | null;
   deletedAt: Date | null;
 };
 
 /**
  * Type representing the payload for updating a user.
- * Exclude deletedAt from direct update payload.
+ * Exclude system fields from direct update payload.
  */
-export type UserUpdatePayload = Partial<Pick<User, 'email' | 'name' | 'isActive'>>;
+export type UserUpdatePayload = Partial<Pick<User, 'username' | 'email' | 'isDisabled'>>;
 
 /**
- * Type representing a user ID.
+ * Type representing a user ID (UUID string).
  */
-export type UserId = number;
+export type UserId = string;

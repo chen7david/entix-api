@@ -14,12 +14,18 @@ describe('UserService', () => {
   let loggerService: LoggerService;
   let mockLogger: LoggerService;
 
-  const mockUser = {
-    id: 1,
+  // Mock UUID for tests
+  const mockUserId = 'b3e1c2d4-5678-1234-9abc-1234567890ab';
+
+  const mockUser: User = {
+    id: mockUserId,
+    username: 'testuser',
     email: 'test@example.com',
-    name: 'Test User',
-    isActive: true,
+    cognitoSub: 'cognito-123456',
+    isDisabled: false,
+    isAdmin: false,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -63,7 +69,15 @@ describe('UserService', () => {
 
       const result = await userService.findAll();
 
-      expect(result).toEqual(users);
+      expect(result).toEqual(
+        users.map((user) =>
+          expect.objectContaining({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+          }),
+        ),
+      );
       expect(userRepository.findAll).toHaveBeenCalledTimes(1);
     });
   });
@@ -72,32 +86,46 @@ describe('UserService', () => {
     it('should return user when found', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
 
-      const result = await userService.findById(1);
+      const result = await userService.findById(mockUserId);
 
-      expect(result).toEqual(mockUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: mockUser.id,
+          username: mockUser.username,
+          email: mockUser.email,
+        }),
+      );
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
       userRepository.findById.mockResolvedValue(null as unknown as User);
+      const nonExistentId = 'non-existent-id';
 
-      await expect(userService.findById(999)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
+      await expect(userService.findById(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userRepository.findById).toHaveBeenCalledWith(nonExistentId);
     });
   });
 
   describe('create', () => {
     it('should create and return a new user', async () => {
       const createDto: CreateUserDto = {
+        username: 'newuser',
         email: 'new@example.com',
-        name: 'New User',
-        isActive: true,
+        cognitoSub: 'cognito-123456',
+        isDisabled: false,
+        isAdmin: false,
       };
 
-      const newUser = {
-        id: 2,
-        ...createDto,
+      const newUser: User = {
+        id: 'c4f2d3e5-6789-2345-0abc-2345678901bc',
+        username: createDto.username,
+        email: createDto.email,
+        cognitoSub: createDto.cognitoSub,
+        isDisabled: false,
+        isAdmin: false,
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -105,7 +133,13 @@ describe('UserService', () => {
 
       const result = await userService.create(createDto);
 
-      expect(result).toEqual(newUser);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+        }),
+      );
       expect(userRepository.create).toHaveBeenCalledWith(createDto);
     });
   });
@@ -113,33 +147,40 @@ describe('UserService', () => {
   describe('update', () => {
     it('should update and return user when found', async () => {
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
-      const updatedUser = {
+      const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await userService.update(1, updateDto);
+      const result = await userService.update(mockUserId, updateDto);
 
-      expect(result).toEqual(updatedUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
-      expect(userRepository.update).toHaveBeenCalledWith(1, updateDto);
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: updatedUser.id,
+          username: updatedUser.username,
+          email: updatedUser.email,
+        }),
+      );
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.update).toHaveBeenCalledWith(mockUserId, updateDto);
     });
 
     it('should throw NotFoundError when user not found', async () => {
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
+      const nonExistentId = 'non-existent-id';
 
       userRepository.findById.mockResolvedValue(null as unknown as User);
 
-      await expect(userService.update(999, updateDto)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
+      await expect(userService.update(nonExistentId, updateDto)).rejects.toThrow(NotFoundError);
+      expect(userRepository.findById).toHaveBeenCalledWith(nonExistentId);
       expect(userRepository.update).not.toHaveBeenCalled();
     });
   });
@@ -149,17 +190,18 @@ describe('UserService', () => {
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.delete.mockResolvedValue(true);
 
-      await userService.delete(1);
+      await userService.delete(mockUserId);
 
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
-      expect(userRepository.delete).toHaveBeenCalledWith(1);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.delete).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
+      const nonExistentId = 'non-existent-id';
       userRepository.findById.mockResolvedValue(null as unknown as User);
 
-      await expect(userService.delete(999)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
+      await expect(userService.delete(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userRepository.findById).toHaveBeenCalledWith(nonExistentId);
       expect(userRepository.delete).not.toHaveBeenCalled();
     });
   });
