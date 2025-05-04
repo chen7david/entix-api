@@ -98,7 +98,7 @@ describe('UserService', () => {
         isActive: true,
       };
 
-      const newUser = {
+      const newUser: User = {
         ...createDto,
         id: faker.string.uuid(),
         password: null,
@@ -123,7 +123,7 @@ describe('UserService', () => {
         username: 'updateduser',
       };
 
-      const updatedUser = {
+      const updatedUser: User = {
         ...mockUser,
         username: 'updateduser',
       };

@@ -13,7 +13,7 @@ async function seed() {
   // Example: Insert a user
   await dbService.db.insert(users).values({
     email: 'admin@example.com',
-    name: 'Admin',
+    username: 'Admin',
   });
 
   await dbService.cleanup();

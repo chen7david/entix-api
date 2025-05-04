@@ -73,7 +73,7 @@ describe('UserRepository', () => {
         isActive: true,
       };
 
-      const createdUser = {
+      const createdUser: User = {
         ...userData,
         id: faker.string.uuid(),
         password: null,
@@ -136,14 +136,14 @@ describe('UserRepository', () => {
   describe('findAll', () => {
     it('should return all users', async () => {
       // Arrange
-      const usersArray = [
+      const usersArray: User[] = [
         mockUser,
         {
           ...mockUser,
           id: faker.string.uuid(),
           email: 'user2@example.com',
           username: 'user2',
-        },
+        } as User,
       ];
 
       // Direct mocking of the repository method
@@ -161,7 +161,7 @@ describe('UserRepository', () => {
     it('should update user and return updated user', async () => {
       // Arrange
       const updateData = { username: 'updatedUser' };
-      const updatedUser = { ...mockUser, ...updateData };
+      const updatedUser: User = { ...mockUser, ...updateData };
 
       mockDb.returning.mockResolvedValue([updatedUser]);
 
