@@ -46,11 +46,6 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Sync test database schema
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-        run: npm run db:push-test
-
       - name: Run tests
         env:
           NODE_ENV: test

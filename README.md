@@ -60,7 +60,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
    ```bash
    npm run db:push
-   npm run db:push-test
+   npm run db:push:test
    ```
 
 6. **Run the Development Server:**
@@ -182,7 +182,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
 - `npm run db:studio` — Launch Drizzle Studio to view and edit your database in a browser.
 - `npm run db:push` — Sync schema to dev DB.
-- `npm run db:push-test` — Sync schema to test DB.
+- `npm run db:push:test` — Sync schema to test DB.
 - `npm run db:generate` — Generate migration files.
 - `npm run db:migrate` — Run migrations.
 - `npm run db:seed` — Seed the database with sample data.
