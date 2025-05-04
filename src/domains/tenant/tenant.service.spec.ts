@@ -3,10 +3,8 @@ import { TenantService } from '@domains/tenant/tenant.service';
 import { TenantRepository } from '@domains/tenant/tenant.repository';
 import { CognitoService } from '@shared/services/cognito/cognito.service';
 import { UserService } from '@domains/user/user.service';
-import { LoggerService } from '@shared/services/logger/logger.service';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { Tenant } from '@domains/tenant/tenant.model';
-import { Logger } from '@shared/types/logger.type';
 import { CreateTenantDto, TenantDto, UpdateTenantDto } from '@domains/tenant/tenant.dto';
 import { CreateUserDto, UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';
@@ -30,10 +28,6 @@ describe('TenantService', () => {
   let mockTenantRepository: jest.Mocked<TenantRepository>;
   let mockCognitoService: jest.Mocked<CognitoService>;
   let mockUserService: jest.Mocked<UserService>;
-  // Logger service is used through dependency injection but not directly accessed in tests
-  // @ts-ignore - Mock service is used indirectly through dependency injection
-  let mockLoggerService: jest.Mocked<LoggerService>;
-  let mockLogger: jest.Mocked<Logger>;
 
   const mockTenant: Tenant = {
     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -85,27 +79,6 @@ describe('TenantService', () => {
   };
 
   beforeEach(() => {
-    mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      component: jest.fn().mockReturnThis(),
-      child: jest.fn().mockReturnThis(),
-    } as unknown as jest.Mocked<Logger>;
-
-    mockLoggerService = {
-      component: jest.fn().mockReturnValue(mockLogger),
-      child: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as jest.Mocked<LoggerService>;
-
-    // Since the LoggerService is not directly used in our mocked implementation,
-    // we can ignore it for the tests
-
     mockTenantRepository = {
       findAll: jest.fn(),
       findById: jest.fn(),

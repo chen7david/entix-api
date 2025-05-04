@@ -3,19 +3,19 @@ import { Container } from 'typedi';
 import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import supertest from 'supertest';
 import { Express } from 'express';
 import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
 import { HealthController } from '@domains/health/health.controller';
+import { IntegrationTestManager } from '@shared/utils/test-helpers/integration-test-manager.util';
 
 describe('GET /health - Integration', () => {
-  let request: any; // Use any to avoid typechecking issues
+  let manager: IntegrationTestManager;
   let app: Express;
 
   beforeAll(() => {
     // Reset the container to make sure we have a clean state
     Container.reset();
-
+    manager = Container.get(IntegrationTestManager);
     // Register services
     const configService = new ConfigService();
     Container.set(ConfigService, configService);
@@ -32,9 +32,6 @@ describe('GET /health - Integration', () => {
 
     // Get the app instance
     app = appService.getApp();
-
-    // Create the supertest request instance
-    request = supertest(app);
 
     // Debug routes
     console.log('Available Express routes:');
@@ -84,13 +81,25 @@ describe('GET /health - Integration', () => {
     console.log(JSON.stringify(routes, null, 2));
   });
 
+  beforeEach(async () => {
+    await manager.beginTransaction();
+  });
+
+  afterEach(async () => {
+    await manager.rollbackTransaction();
+  });
+
+  afterAll(async () => {
+    await manager.close();
+  });
+
   // We don't need transaction management for this simple test
   // since we're not modifying any database state
 
   it('should return 200 OK with status, message, and timestamp', async () => {
     try {
       console.log('Making request to /health');
-      const response = await request.get('/health');
+      const response = await manager.request.get('/health');
       console.log('Response status:', response.status);
       console.log('Response body:', response.body);
 
