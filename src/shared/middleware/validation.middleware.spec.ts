@@ -12,7 +12,7 @@ import { faker } from '@faker-js/faker';
 
 describe('validation.middleware', () => {
   const next = jest.fn();
-  const MOCK_USER_ID = faker.string.uuid();
+  const mockUserId = faker.string.uuid();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -69,11 +69,11 @@ describe('validation.middleware', () => {
 
     it('assigns params for valid input', () => {
       const req = httpMocks.createRequest({
-        params: { id: MOCK_USER_ID },
+        params: { id: mockUserId },
       });
       const res = httpMocks.createResponse();
       validateParams(schema)(req, res, next);
-      expect(req.params).toEqual({ id: MOCK_USER_ID });
+      expect(req.params).toEqual({ id: mockUserId });
       expect(next).toHaveBeenCalledWith();
     });
 

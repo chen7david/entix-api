@@ -16,9 +16,9 @@ describe('UserRepository', () => {
   let mockDb: Record<string, jest.Mock>;
 
   // Mock user data
-  const MOCK_USER_ID = faker.string.uuid();
+  const mockUserId = faker.string.uuid();
   const mockUser: User = {
-    id: MOCK_USER_ID,
+    id: mockUserId,
     email: 'test@example.com',
     username: 'testuser',
     password: null,
@@ -116,7 +116,7 @@ describe('UserRepository', () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(mockUser);
 
       // Act
-      const result = await userRepository.findById(MOCK_USER_ID);
+      const result = await userRepository.findById(mockUserId);
 
       // Assert
       expect(result).toEqual(mockUser);
@@ -166,7 +166,7 @@ describe('UserRepository', () => {
       mockDb.returning.mockResolvedValue([updatedUser]);
 
       // Act
-      const result = await userRepository.update(MOCK_USER_ID, updateData);
+      const result = await userRepository.update(mockUserId, updateData);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -193,10 +193,10 @@ describe('UserRepository', () => {
   describe('delete', () => {
     it('should soft delete user by setting deletedAt', async () => {
       // Arrange
-      mockDb.returning.mockResolvedValue([{ id: MOCK_USER_ID }]);
+      mockDb.returning.mockResolvedValue([{ id: mockUserId }]);
 
       // Act
-      await userRepository.delete(MOCK_USER_ID);
+      await userRepository.delete(mockUserId);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);

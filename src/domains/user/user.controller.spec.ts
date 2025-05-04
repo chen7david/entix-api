@@ -21,9 +21,9 @@ describe('UsersController', () => {
   let mockLogger: jest.Mocked<Logger>;
   let app: express.Application;
 
-  const MOCK_USER_ID = faker.string.uuid();
+  const mockUserId = faker.string.uuid();
   const mockUser: User = {
-    id: MOCK_USER_ID,
+    id: mockUserId,
     email: 'test@example.com',
     username: 'testuser',
     password: null,
@@ -103,13 +103,13 @@ describe('UsersController', () => {
       userService.findById.mockResolvedValue(mockUser);
 
       // Act
-      const result = await usersController.getById(MOCK_USER_ID);
+      const result = await usersController.getById(mockUserId);
 
       // Assert
       expect(result).toEqual(mockUser);
-      expect(userService.findById).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(userService.findById).toHaveBeenCalledWith(mockUserId);
       expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', {
-        id: MOCK_USER_ID,
+        id: mockUserId,
       });
     });
 
@@ -169,13 +169,13 @@ describe('UsersController', () => {
       userService.update.mockResolvedValue(updatedUser);
 
       // Act
-      const result = await usersController.update(MOCK_USER_ID, updateDto);
+      const result = await usersController.update(mockUserId, updateDto);
 
       // Assert
       expect(result).toEqual(updatedUser);
-      expect(userService.update).toHaveBeenCalledWith(MOCK_USER_ID, updateDto);
+      expect(userService.update).toHaveBeenCalledWith(mockUserId, updateDto);
       expect(mockLogger.info).toHaveBeenCalledWith('Updating user', {
-        id: MOCK_USER_ID,
+        id: mockUserId,
       });
     });
 
@@ -198,12 +198,12 @@ describe('UsersController', () => {
       userService.delete.mockResolvedValue(undefined);
 
       // Act
-      await usersController.delete(MOCK_USER_ID);
+      await usersController.delete(mockUserId);
 
       // Assert
-      expect(userService.delete).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(userService.delete).toHaveBeenCalledWith(mockUserId);
       expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', {
-        id: MOCK_USER_ID,
+        id: mockUserId,
       });
     });
 

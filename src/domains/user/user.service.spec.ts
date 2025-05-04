@@ -15,9 +15,9 @@ describe('UserService', () => {
   let loggerService: LoggerService;
   let mockLogger: LoggerService;
 
-  const MOCK_USER_ID = faker.string.uuid();
+  const mockUserId = faker.string.uuid();
   const mockUser: User = {
-    id: MOCK_USER_ID,
+    id: mockUserId,
     email: 'test@example.com',
     username: 'testuser',
     password: null,
@@ -77,10 +77,10 @@ describe('UserService', () => {
     it('should return user when found', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
 
-      const result = await userService.findById(MOCK_USER_ID);
+      const result = await userService.findById(mockUserId);
 
       expect(result).toEqual(mockUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
@@ -131,11 +131,11 @@ describe('UserService', () => {
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await userService.update(MOCK_USER_ID, updateDto);
+      const result = await userService.update(mockUserId, updateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(MOCK_USER_ID);
-      expect(userRepository.update).toHaveBeenCalledWith(MOCK_USER_ID, updateDto);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.update).toHaveBeenCalledWith(mockUserId, updateDto);
     });
 
     it('should throw NotFoundError when user not found', async () => {
@@ -156,10 +156,10 @@ describe('UserService', () => {
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.delete.mockResolvedValue(true);
 
-      await userService.delete(MOCK_USER_ID);
+      await userService.delete(mockUserId);
 
-      expect(userRepository.findById).toHaveBeenCalledWith(MOCK_USER_ID);
-      expect(userRepository.delete).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.delete).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
