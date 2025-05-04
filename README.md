@@ -92,6 +92,10 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 ## Database Management
 
 - **Drizzle ORM** is used for schema, migrations, and type-safe queries.
+- **Drizzle-Zod Integration:**
+  - Automatically generate Zod schemas from Drizzle tables
+  - Type-safe validation with perfect alignment to your database schema
+  - See [Drizzle-Zod Guide](./docs/drizzle-zod.md) for implementation details
 - **Visualize & Edit Data:**  
   Run `npm run db:studio` to open Drizzle Studio, a web UI for browsing and editing your database.
 - **Schema Files:**  
@@ -235,6 +239,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 - [Express + TypeDI Setup](./docs/express-typedi-setup.md)
 - [Error Handling](./docs/error-handling.md)
 - [Database Migrations](./docs/db-migrations.md)
+- [Drizzle-Zod Integration](./docs/drizzle-zod.md)
 - [Project Rules](./docs/rules.mdc)
 
 ---

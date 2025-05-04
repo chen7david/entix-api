@@ -1,8 +1,8 @@
 import { Injectable } from '@shared/utils/ioc.util';
 import { DatabaseService } from '@shared/services/database/database.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import { users } from '@domains/user/user.schema';
-import { User, UserId } from '@domains/user/user.model';
+import { users, UserEntity } from '@domains/user/user.schema';
+import { UserId } from '@domains/user/user.model';
 import { BaseRepository } from '@shared/repositories/base.repository';
 
 /**
@@ -10,7 +10,7 @@ import { BaseRepository } from '@shared/repositories/base.repository';
  * Handles specific user-related operations and provides concrete table/column info.
  */
 @Injectable()
-export class UserRepository extends BaseRepository<typeof users, User, UserId> {
+export class UserRepository extends BaseRepository<typeof users, UserEntity, UserId> {
   // Provide concrete implementations for abstract properties
   protected readonly table = users;
   protected readonly idColumn = users.id;
