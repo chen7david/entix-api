@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/server.ts",
-    "build": "npm run clean:dist && tsc && tsc-alias",
+    "build": "npm run clean:dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "NODE_ENV=production node -r newrelic dist/server.js",
     "format:precommit": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
     "prepare": "husky install",
