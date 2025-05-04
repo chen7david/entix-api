@@ -8,9 +8,11 @@ import {
 } from '@shared/middleware/validation.middleware';
 import { ValidationError } from '@shared/utils/error/error.util';
 import httpMocks from 'node-mocks-http';
+import { faker } from '@faker-js/faker';
 
 describe('validation.middleware', () => {
   const next = jest.fn();
+  const mockUserId = faker.string.uuid();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -67,11 +69,11 @@ describe('validation.middleware', () => {
 
     it('assigns params for valid input', () => {
       const req = httpMocks.createRequest({
-        params: { id: '123e4567-e89b-12d3-a456-426614174000' },
+        params: { id: mockUserId },
       });
       const res = httpMocks.createResponse();
       validateParams(schema)(req, res, next);
-      expect(req.params).toEqual({ id: '123e4567-e89b-12d3-a456-426614174000' });
+      expect(req.params).toEqual({ id: mockUserId });
       expect(next).toHaveBeenCalledWith();
     });
 

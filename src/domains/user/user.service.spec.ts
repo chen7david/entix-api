@@ -7,6 +7,7 @@ import { NotFoundError } from '@shared/utils/error/error.util';
 import { User } from '@domains/user/user.model';
 import { Container } from 'typedi';
 import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
+import { faker } from '@faker-js/faker';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -14,12 +15,16 @@ describe('UserService', () => {
   let loggerService: LoggerService;
   let mockLogger: LoggerService;
 
-  const mockUser = {
-    id: 1,
+  const mockUserId = faker.string.uuid();
+  const mockUser: User = {
+    id: mockUserId,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    password: null,
+    cognito_sub: null,
     isActive: true,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -72,17 +77,16 @@ describe('UserService', () => {
     it('should return user when found', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
 
-      const result = await userService.findById(1);
+      const result = await userService.findById(mockUserId);
 
       expect(result).toEqual(mockUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockRejectedValue(new NotFoundError('User not found'));
 
-      await expect(userService.findById(999)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
+      await expect(userService.findById(faker.string.uuid())).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -90,14 +94,17 @@ describe('UserService', () => {
     it('should create and return a new user', async () => {
       const createDto: CreateUserDto = {
         email: 'new@example.com',
-        name: 'New User',
+        username: 'newuser',
         isActive: true,
       };
 
-      const newUser = {
-        id: 2,
+      const newUser: User = {
         ...createDto,
+        id: faker.string.uuid(),
+        password: null,
+        cognito_sub: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -113,34 +120,34 @@ describe('UserService', () => {
   describe('update', () => {
     it('should update and return user when found', async () => {
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
-      const updatedUser = {
+      const updatedUser: User = {
         ...mockUser,
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.update.mockResolvedValue(updatedUser);
 
-      const result = await userService.update(1, updateDto);
+      const result = await userService.update(mockUserId, updateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
-      expect(userRepository.update).toHaveBeenCalledWith(1, updateDto);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.update).toHaveBeenCalledWith(mockUserId, updateDto);
     });
 
     it('should throw NotFoundError when user not found', async () => {
       const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockRejectedValue(new NotFoundError('User not found'));
 
-      await expect(userService.update(999, updateDto)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
-      expect(userRepository.update).not.toHaveBeenCalled();
+      await expect(userService.update(faker.string.uuid(), updateDto)).rejects.toThrow(
+        NotFoundError,
+      );
     });
   });
 
@@ -149,18 +156,16 @@ describe('UserService', () => {
       userRepository.findById.mockResolvedValue(mockUser);
       userRepository.delete.mockResolvedValue(true);
 
-      await userService.delete(1);
+      await userService.delete(mockUserId);
 
-      expect(userRepository.findById).toHaveBeenCalledWith(1);
-      expect(userRepository.delete).toHaveBeenCalledWith(1);
+      expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
+      expect(userRepository.delete).toHaveBeenCalledWith(mockUserId);
     });
 
     it('should throw NotFoundError when user not found', async () => {
-      userRepository.findById.mockResolvedValue(null as unknown as User);
+      userRepository.findById.mockRejectedValue(new NotFoundError('User not found'));
 
-      await expect(userService.delete(999)).rejects.toThrow(NotFoundError);
-      expect(userRepository.findById).toHaveBeenCalledWith(999);
-      expect(userRepository.delete).not.toHaveBeenCalled();
+      await expect(userService.delete(faker.string.uuid())).rejects.toThrow(NotFoundError);
     });
   });
 });

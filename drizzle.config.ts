@@ -35,7 +35,7 @@ function getDatabaseUrl() {
 export default defineConfig({
   dialect: 'postgresql',
   schema: './src/**/*.schema.ts',
-  out: './src/database/drizzle',
+  out: './src/database/migrations',
   dbCredentials: {
     url: getDatabaseUrl(),
   },

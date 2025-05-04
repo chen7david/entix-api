@@ -60,8 +60,8 @@ export class UsersController {
         name: 'id',
         in: 'path',
         required: true,
-        schema: { type: 'integer' },
-        description: 'The ID of the user to retrieve',
+        schema: { type: 'string', format: 'uuid' },
+        description: 'The UUID of the user to retrieve',
       },
     ],
     responses: {
@@ -72,7 +72,7 @@ export class UsersController {
   @ResponseSchema('UserDto', { statusCode: 200, description: 'The user object' })
   @Get('/:id')
   @UseBefore(validateParams(UserIdParamDto))
-  async getById(@Param('id') id: number): Promise<User> {
+  async getById(@Param('id') id: string): Promise<User> {
     this.logger.info('Fetching user by ID', { id });
     return this.userService.findById(id);
   }
@@ -116,8 +116,8 @@ export class UsersController {
         name: 'id',
         in: 'path',
         required: true,
-        schema: { type: 'integer' },
-        description: 'The ID of the user to update',
+        schema: { type: 'string', format: 'uuid' },
+        description: 'The UUID of the user to update',
       },
     ],
     requestBody: {
@@ -138,7 +138,7 @@ export class UsersController {
   @Put('/:id')
   @UseBefore(validateParams(UserIdParamDto))
   @UseBefore(validateBody(UpdateUserDto))
-  async update(@Param('id') id: number, @Body() data: UpdateUserDto): Promise<User> {
+  async update(@Param('id') id: string, @Body() data: UpdateUserDto): Promise<User> {
     this.logger.info('Updating user', { id });
     return this.userService.update(id, data);
   }
@@ -154,8 +154,8 @@ export class UsersController {
         name: 'id',
         in: 'path',
         required: true,
-        schema: { type: 'integer' },
-        description: 'The ID of the user to delete',
+        schema: { type: 'string', format: 'uuid' },
+        description: 'The UUID of the user to delete',
       },
     ],
     responses: {
@@ -167,7 +167,7 @@ export class UsersController {
   @Delete('/:id')
   @UseBefore(validateParams(UserIdParamDto))
   @OnUndefined(204)
-  async delete(@Param('id') id: number): Promise<void> {
+  async delete(@Param('id') id: string): Promise<void> {
     this.logger.info('Deleting user', { id });
     await this.userService.delete(id);
   }
