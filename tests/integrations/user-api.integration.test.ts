@@ -1,4 +1,4 @@
-import { IntegrationTestManager } from '@shared/utils/test-helpers/integration-test-manager.util';
+import { IntegrationTestManager } from '@tests/utils/integration-test-manager.util';
 import { faker } from '@faker-js/faker';
 import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';

@@ -18,7 +18,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_DB: test-entix-api
         ports:
           - 5432:5432
         options: >-
@@ -50,15 +50,19 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Sync test database schema
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
-        run: npm run db:push-test
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -p 5432; do sleep 1; done
 
       - name: Run tests
         env:
           NODE_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/test-entix-api
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: test-entix-api
           PORT: 3000
           LOG_LEVEL: error
           COGNITO_REGION: us-east-1

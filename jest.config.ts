@@ -21,6 +21,7 @@ const config: Config = {
     '^@config/(.*)$': '<rootDir>/src/config/$1',
     '^@openapi/(.*)$': '<rootDir>/src/openapi/$1',
     '^@database/(.*)$': '<rootDir>/src/database/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
 };
 
