@@ -60,7 +60,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
    ```bash
    npm run db:push
-   npm run db:push-test
+   npm run db:push:test
    ```
 
 6. **Run the Development Server:**
@@ -182,7 +182,7 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 
 - `npm run db:studio` — Launch Drizzle Studio to view and edit your database in a browser.
 - `npm run db:push` — Sync schema to dev DB.
-- `npm run db:push-test` — Sync schema to test DB.
+- `npm run db:push:test` — Sync schema to test DB.
 - `npm run db:generate` — Generate migration files.
 - `npm run db:migrate` — Run migrations.
 - `npm run db:seed` — Seed the database with sample data.
@@ -241,6 +241,57 @@ This project uses **Dev Containers** for a consistent, isolated development envi
 - [Database Migrations](./docs/db-migrations.md)
 - [Drizzle-Zod Integration](./docs/drizzle-zod.md)
 - [Project Rules](./docs/rules.mdc)
+
+---
+
+## Test Database Workflow
+
+To ensure a clean and isolated environment for every test run, the test workflow is fully automated:
+
+### How it works
+
+- **`npm test`** will:
+  1. Drop and recreate the test database using a Node.js script (`npm run db:reset:test`).
+  2. Apply the latest schema using Drizzle (`npm run db:push:test`).
+  3. Run all tests with Jest.
+
+This guarantees that every test run starts with a fresh, migrated database—no leftover data, no manual steps.
+
+### Why this approach?
+
+- **Portability:** Works locally, in CI, and in dev containers—no need for psql CLI or platform-specific tools.
+- **Best practice:** Matches industry standards for test isolation and reliability.
+- **No Jest global setup:** All DB prep is handled in the npm script, not in Jest config or setup files.
+
+### Environment Variables
+
+Set these in your `.env.test` or environment:
+
+```
+PGUSER=youruser
+PGPASSWORD=yourpassword
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=test-entix-api
+```
+
+### Usage
+
+Just run:
+
+```
+npm test
+```
+
+This will:
+
+- Reset the test DB
+- Apply the schema
+- Run all tests
+
+---
+
+For more details, see the scripts in `package.json` and the implementation in `scripts/reset-test-db.ts`.
 
 ---
 

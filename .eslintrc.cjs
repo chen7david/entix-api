@@ -12,6 +12,13 @@ module.exports = {
     node: true,
     es2021: true,
   },
+  settings: {
+    'import/resolver': {
+      typescript: {
+        project: './tsconfig.json',
+      },
+    },
+  },
   rules: {
     'max-params': ['error', 2],
     '@typescript-eslint/no-unused-vars': [

@@ -44,6 +44,26 @@ Our tests follow these core principles:
   ],
   ```
 
+### Jest Global Setup: Ensuring Test Database Schema
+
+To ensure the test database schema is always up-to-date, Jest is configured to automatically run the following command before any tests are executed:
+
+```bash
+npm run db:push-test
+```
+
+This is achieved using a Jest setup file located at `tests/config/jest.setup.ts`, which is registered via the `setupFilesAfterEnv` property in `jest.config.ts`:
+
+```ts
+setupFilesAfterEnv: ['<rootDir>/tests/config/jest.setup.ts'],
+```
+
+The setup file runs the database push command using Node's `child_process` API. If the command fails, tests will not run, ensuring you never test against an outdated schema.
+
+**You do not need to run this manually**—it is handled automatically every time you run `npm test` or `npm run test:watch`.
+
+> **Best Practice:** Always keep your test database schema in sync with your migrations. This setup enforces that best practice automatically.
+
 ## Using TypeDI Container in Tests
 
 ### Why Use the DI Container for Testing?
