@@ -217,7 +217,7 @@ describe('BaseRepository', () => {
       email: 'test1@example.com',
       name: 'Test1',
       isActive: true,
-      createdAt: new Date(),
+      createdAt: new Date(2025, 4, 3, 20, 57, 9, 419),
       deletedAt: null,
     };
     const mockUser2 = {
@@ -225,7 +225,7 @@ describe('BaseRepository', () => {
       email: 'test2@example.com',
       name: 'Test2',
       isActive: true,
-      createdAt: new Date(),
+      createdAt: new Date(2025, 4, 3, 20, 57, 9, 419),
       deletedAt: null,
     };
     const mockDeletedUser = {
@@ -233,22 +233,15 @@ describe('BaseRepository', () => {
       email: 'deleted@example.com',
       name: 'Deleted',
       isActive: true,
-      createdAt: new Date(),
-      deletedAt: new Date(),
+      createdAt: new Date(2025, 4, 3, 20, 57, 9, 419),
+      deletedAt: new Date(2025, 4, 3, 20, 57, 9, 419),
     };
 
     it('should return only non-deleted users by default', async () => {
-      // Mock the dynamic query chain for findAll
-      const mockDynamicQuery = {
-        where: jest.fn().mockReturnThis(),
-        then: jest
-          .fn()
-          .mockImplementation((callback) => Promise.resolve(callback([mockUser1, mockUser2]))),
-      };
-
-      // Set up the from implementation to return a dynamic query
+      // Mock implementations for the select chain
+      const mockWhereFn = jest.fn().mockResolvedValue([mockUser1, mockUser2]);
       mockSelectFrom.mockReturnValue({
-        $dynamic: jest.fn().mockReturnValue(mockDynamicQuery),
+        where: mockWhereFn,
       });
 
       const result = await repository.findAll();
@@ -258,25 +251,27 @@ describe('BaseRepository', () => {
     });
 
     it('should return all users if includeDeleted is true', async () => {
-      // Mock the dynamic query chain with all users
-      const mockDynamicQuery = {
-        where: jest.fn().mockReturnThis(),
-        then: jest
-          .fn()
-          .mockImplementation((callback) =>
-            Promise.resolve(callback([mockUser1, mockUser2, mockDeletedUser])),
-          ),
-      };
+      // Create mock data array
+      const allUsers = [mockUser1, mockUser2, mockDeletedUser];
 
-      // Set up the from implementation to return a dynamic query
+      // Mock the query result directly without setting up complex mock structure
       mockSelectFrom.mockReturnValue({
-        $dynamic: jest.fn().mockReturnValue(mockDynamicQuery),
+        where: jest.fn().mockResolvedValue(allUsers),
+      });
+
+      // For the case where there are no filters, we need to handle the direct query
+      mockSelectFrom.mockImplementation(() => {
+        const queryObject = {
+          where: jest.fn().mockResolvedValue(allUsers),
+        };
+        // Make the query object itself return the expected result when awaited directly
+        return Object.assign(Promise.resolve(allUsers), queryObject);
       });
 
       const result = await repository.findAll(true);
 
       expect(mockDbService.db.select).toHaveBeenCalled();
-      expect(result).toEqual([mockUser1, mockUser2, mockDeletedUser]);
+      expect(result).toEqual(allUsers);
     });
   });
 

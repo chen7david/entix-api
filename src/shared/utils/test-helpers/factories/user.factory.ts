@@ -20,7 +20,8 @@ export class UserFactory {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       preferredLanguage: 'en-US',
-      cognitoSub: `cognito-${faker.string.uuid()}`,
+      cognitoSub: `cognito-${faker.string.alphanumeric(10)}`,
+      tenantId: null,
       isDisabled: false,
       isAdmin: false,
       createdAt: faker.date.recent(),
@@ -44,6 +45,7 @@ export class UserFactory {
       lastName: faker.person.lastName(),
       preferredLanguage: 'en-US',
       cognitoSub: `cognito-${faker.string.uuid()}`,
+      tenantId: null,
       isDisabled: false,
       isAdmin: false,
     };

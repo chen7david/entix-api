@@ -22,6 +22,8 @@ export const users = pgTable(
     preferredLanguage: text('preferred_language').default('en-US'),
     /** Cognito sub identifier */
     cognitoSub: text('cognito_sub').notNull().unique(),
+    /** Tenant ID (for multi-tenant applications) */
+    tenantId: uuid('tenant_id').references(() => tenants.id),
     /**
      * Indicates if the user is disabled (soft lockout).
      * Defaults to false (user is enabled).
@@ -51,6 +53,8 @@ export const users = pgTable(
     index('users_name_idx').on(table.firstName, table.lastName),
     // Index for preferred language
     index('users_preferred_language_idx').on(table.preferredLanguage),
+    // Index for tenant ID
+    index('users_tenant_id_idx').on(table.tenantId),
     // Index for soft delete filtering
     index('users_deleted_at_idx').on(table.deletedAt),
   ],
@@ -62,3 +66,6 @@ export const users = pgTable(
 export const usersRelations = relations(users, ({ many }) => ({
   userTenantRoles: many(userTenantRoles),
 }));
+
+// Need to import tenants after users definition to avoid circular references
+import { tenants } from '@domains/tenant/tenant.schema';

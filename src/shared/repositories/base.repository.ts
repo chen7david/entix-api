@@ -113,16 +113,14 @@ export abstract class BaseRepository<
    */
   async findAll(includeDeleted = false): Promise<TEntity[]> {
     const defaultFilters = this.buildDefaultFilters(includeDeleted);
-    const whereCondition = defaultFilters.length > 0 ? and(...defaultFilters) : undefined;
+
     try {
-      const query = this.dbService.db
-        .select()
-        .from(this.table as unknown as PgTable<TableConfig>)
-        .$dynamic();
-      if (whereCondition) {
-        query.where(whereCondition);
-      }
-      const results = await query;
+      const query = this.dbService.db.select().from(this.table as unknown as PgTable<TableConfig>);
+
+      // Apply the where condition only if there are default filters
+      const finalQuery = defaultFilters.length > 0 ? query.where(and(...defaultFilters)) : query;
+
+      const results = await finalQuery;
       return results as unknown as TEntity[];
     } catch (err) {
       throw createAppError(err);

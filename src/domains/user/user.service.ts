@@ -40,6 +40,7 @@ export class UserService {
       lastName: user.lastName ?? null,
       preferredLanguage: user.preferredLanguage,
       cognitoSub: user.cognitoSub,
+      tenantId: user.tenantId,
       isDisabled: user.isDisabled,
       isAdmin: user.isAdmin,
       createdAt: user.createdAt,

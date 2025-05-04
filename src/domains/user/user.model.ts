@@ -17,6 +17,8 @@ export type User = {
   preferredLanguage: string | null;
   /** Cognito sub identifier */
   cognitoSub: string;
+  /** Tenant ID (for multi-tenant applications) */
+  tenantId: string | null;
   /** Indicates if the user is disabled (soft lockout) */
   isDisabled: boolean;
   /** Indicates if the user is a global admin */
@@ -44,6 +46,7 @@ export type UserUpdatePayload = Partial<
     | 'isDisabled'
     | 'isAdmin'
     | 'cognitoSub'
+    | 'tenantId'
   >
 >;
 

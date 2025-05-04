@@ -42,6 +42,7 @@ describe('User API - Integration', () => {
         cognitoSub: payload.cognitoSub,
         isDisabled: payload.isDisabled,
         isAdmin: payload.isAdmin,
+        tenantId: null,
       });
     });
 
@@ -64,6 +65,7 @@ describe('User API - Integration', () => {
       // Seed a new user via API within the same transaction
       const { id: createdId } = await UserIntegrationHelper.createTestUser(manager, {
         isDisabled: true,
+        tenantId: null,
       });
 
       // Verify API returns it
@@ -83,7 +85,9 @@ describe('User API - Integration', () => {
 
     it('should return 200 for an existing user', async () => {
       // Seed user
-      const { id, payload } = await UserIntegrationHelper.createTestUser(manager);
+      const { id, payload } = await UserIntegrationHelper.createTestUser(manager, {
+        tenantId: null,
+      });
 
       const response = await manager.request.get(`/api/v1/users/${id}`);
       expect(response.status).toBe(200);
@@ -91,13 +95,16 @@ describe('User API - Integration', () => {
       expect(response.body).toHaveProperty('email', payload.email);
       expect(response.body).toHaveProperty('username', payload.username);
       expect(response.body).toHaveProperty('preferredLanguage', payload.preferredLanguage);
+      expect(response.body).toHaveProperty('tenantId', null);
     });
   });
 
   describe('PUT /api/v1/users/:id', () => {
     it('should update existing user and return 201', async () => {
       // Seed user
-      const { id } = await UserIntegrationHelper.createTestUser(manager);
+      const { id } = await UserIntegrationHelper.createTestUser(manager, {
+        tenantId: null,
+      });
 
       const update = { username: 'updated-username' };
       const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
@@ -107,7 +114,9 @@ describe('User API - Integration', () => {
 
     it('should update preferredLanguage field', async () => {
       // Seed user
-      const { id } = await UserIntegrationHelper.createTestUser(manager);
+      const { id } = await UserIntegrationHelper.createTestUser(manager, {
+        tenantId: null,
+      });
 
       const update = { preferredLanguage: 'fr-FR' };
       const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
@@ -117,7 +126,9 @@ describe('User API - Integration', () => {
 
     it('should return 422 for invalid email on update', async () => {
       // Seed user
-      const { id } = await UserIntegrationHelper.createTestUser(manager);
+      const { id } = await UserIntegrationHelper.createTestUser(manager, {
+        tenantId: null,
+      });
 
       const response = await manager.request
         .put(`/api/v1/users/${id}`)
@@ -130,7 +141,9 @@ describe('User API - Integration', () => {
   describe('DELETE /api/v1/users/:id', () => {
     it('should delete an existing user and return 204', async () => {
       // Seed user
-      const { id } = await UserIntegrationHelper.createTestUser(manager);
+      const { id } = await UserIntegrationHelper.createTestUser(manager, {
+        tenantId: null,
+      });
 
       // Verify record exists before delete
       const beforeRes = await manager.request.get(`/api/v1/users/${id}`);
