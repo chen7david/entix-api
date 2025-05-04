@@ -26,7 +26,7 @@ describe('User API - Integration', () => {
     it('should create a new user and return 201', async () => {
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: true,
       };
 
@@ -36,7 +36,7 @@ describe('User API - Integration', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body).toMatchObject({
         email: payload.email,
-        name: payload.name,
+        username: payload.username,
         isActive: payload.isActive,
       });
     });
@@ -60,7 +60,7 @@ describe('User API - Integration', () => {
       // Seed a new user via API within the same transaction
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: false,
       };
       const postRes = await manager.request.post('/api/v1/users').send(payload);
@@ -76,7 +76,8 @@ describe('User API - Integration', () => {
 
   describe('GET /api/v1/users/:id', () => {
     it('should return 404 for non-existent user', async () => {
-      const response = await manager.request.get('/api/v1/users/99999');
+      const nonExistentId = faker.string.uuid();
+      const response = await manager.request.get(`/api/v1/users/${nonExistentId}`);
       expect(response.status).toBe(404);
     });
 
@@ -84,7 +85,7 @@ describe('User API - Integration', () => {
       // Seed user
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: true,
       };
       const postRes = await manager.request.post('/api/v1/users').send(payload);
@@ -102,23 +103,23 @@ describe('User API - Integration', () => {
       // Seed user
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: true,
       };
       const postRes = await manager.request.post('/api/v1/users').send(payload);
       const id = postRes.body.id;
 
-      const update = { name: 'Updated Name' };
+      const update = { username: 'UpdatedUsername' };
       const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
       expect(response.status).toBe(201);
-      expect(response.body).toHaveProperty('name', update.name);
+      expect(response.body).toHaveProperty('username', update.username);
     });
 
     it('should return 422 for invalid email on update', async () => {
       // Seed user
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: true,
       };
       const postRes = await manager.request.post('/api/v1/users').send(payload);
@@ -137,7 +138,7 @@ describe('User API - Integration', () => {
       // Seed user
       const payload: CreateUserDto = {
         email: faker.internet.email(),
-        name: faker.person.fullName(),
+        username: faker.internet.username(),
         isActive: true,
       };
       const postRes = await manager.request.post('/api/v1/users').send(payload);
@@ -162,7 +163,8 @@ describe('User API - Integration', () => {
     });
 
     it('should return 404 when deleting non-existent user', async () => {
-      const response = await manager.request.delete('/api/v1/users/99999');
+      const nonExistentId = faker.string.uuid();
+      const response = await manager.request.delete(`/api/v1/users/${nonExistentId}`);
       expect(response.status).toBe(404);
     });
   });

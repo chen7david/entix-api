@@ -4,11 +4,11 @@ import { UsersController } from '@domains/user/user.controller';
 import { UserService } from '@domains/user/user.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { Logger } from '@shared/types/logger.type';
-import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
-import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
+import { User } from '@domains/user/user.model';
 import express from 'express';
 import { useExpressServer } from 'routing-controllers';
+import { faker } from '@faker-js/faker';
 
 /**
  * Tests for the UsersController class, verifying proper API endpoint behavior
@@ -21,12 +21,16 @@ describe('UsersController', () => {
   let mockLogger: jest.Mocked<Logger>;
   let app: express.Application;
 
+  const MOCK_USER_ID = faker.string.uuid();
   const mockUser: User = {
-    id: 1,
+    id: MOCK_USER_ID,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    password: null,
+    cognito_sub: null,
     isActive: true,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -99,37 +103,42 @@ describe('UsersController', () => {
       userService.findById.mockResolvedValue(mockUser);
 
       // Act
-      const result = await usersController.getById(1);
+      const result = await usersController.getById(MOCK_USER_ID);
 
       // Assert
       expect(result).toEqual(mockUser);
-      expect(userService.findById).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', { id: 1 });
+      expect(userService.findById).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', {
+        id: MOCK_USER_ID,
+      });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
       userService.findById.mockRejectedValue(new NotFoundError('User not found'));
-
+      const nonExistentId = faker.string.uuid();
       // Act & Assert
-      await expect(usersController.getById(999)).rejects.toThrow(NotFoundError);
-      expect(userService.findById).toHaveBeenCalledWith(999);
+      await expect(usersController.getById(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userService.findById).toHaveBeenCalledWith(nonExistentId);
     });
   });
 
   describe('Method: create', () => {
     it('should create and return a new user', async () => {
       // Arrange
-      const createDto: CreateUserDto = {
+      const createDto = {
         email: 'new@example.com',
-        name: 'New User',
+        username: 'newuser',
         isActive: true,
       };
 
       const newUser = {
-        id: 2,
         ...createDto,
+        id: faker.string.uuid(),
+        password: null,
+        cognito_sub: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -148,37 +157,38 @@ describe('UsersController', () => {
   describe('Method: update', () => {
     it('should update and return user when found', async () => {
       // Arrange
-      const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+      const updateDto = {
+        username: 'updateduser',
       };
 
       const updatedUser = {
         ...mockUser,
-        name: 'Updated Name',
+        username: 'updateduser',
       };
 
       userService.update.mockResolvedValue(updatedUser);
 
       // Act
-      const result = await usersController.update(1, updateDto);
+      const result = await usersController.update(MOCK_USER_ID, updateDto);
 
       // Assert
       expect(result).toEqual(updatedUser);
-      expect(userService.update).toHaveBeenCalledWith(1, updateDto);
-      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', { id: 1 });
+      expect(userService.update).toHaveBeenCalledWith(MOCK_USER_ID, updateDto);
+      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', {
+        id: MOCK_USER_ID,
+      });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
-      const updateDto: UpdateUserDto = {
-        name: 'Updated Name',
+      const updateDto = {
+        username: 'updateduser',
       };
-
       userService.update.mockRejectedValue(new NotFoundError('User not found'));
-
+      const nonExistentId = faker.string.uuid();
       // Act & Assert
-      await expect(usersController.update(999, updateDto)).rejects.toThrow(NotFoundError);
-      expect(userService.update).toHaveBeenCalledWith(999, updateDto);
+      await expect(usersController.update(nonExistentId, updateDto)).rejects.toThrow(NotFoundError);
+      expect(userService.update).toHaveBeenCalledWith(nonExistentId, updateDto);
     });
   });
 
@@ -188,20 +198,22 @@ describe('UsersController', () => {
       userService.delete.mockResolvedValue(undefined);
 
       // Act
-      await usersController.delete(1);
+      await usersController.delete(MOCK_USER_ID);
 
       // Assert
-      expect(userService.delete).toHaveBeenCalledWith(1);
-      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', { id: 1 });
+      expect(userService.delete).toHaveBeenCalledWith(MOCK_USER_ID);
+      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', {
+        id: MOCK_USER_ID,
+      });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
       userService.delete.mockRejectedValue(new NotFoundError('User not found'));
-
+      const nonExistentId = faker.string.uuid();
       // Act & Assert
-      await expect(usersController.delete(999)).rejects.toThrow(NotFoundError);
-      expect(userService.delete).toHaveBeenCalledWith(999);
+      await expect(usersController.delete(nonExistentId)).rejects.toThrow(NotFoundError);
+      expect(userService.delete).toHaveBeenCalledWith(nonExistentId);
     });
   });
 });

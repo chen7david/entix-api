@@ -5,6 +5,7 @@ import { DatabaseService } from '@shared/services/database/database.service';
 import { users } from '@domains/user/user.schema';
 import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
+import { faker } from '@faker-js/faker';
 
 /**
  * Tests for the UserRepository class, verifying proper interaction with the database
@@ -15,12 +16,16 @@ describe('UserRepository', () => {
   let mockDb: Record<string, jest.Mock>;
 
   // Mock user data
+  const MOCK_USER_ID = faker.string.uuid();
   const mockUser: User = {
-    id: 1,
+    id: MOCK_USER_ID,
     email: 'test@example.com',
-    name: 'Test User',
+    username: 'testuser',
+    password: null,
+    cognito_sub: null,
     isActive: true,
     createdAt: new Date(),
+    updatedAt: new Date(),
     deletedAt: null,
   };
 
@@ -64,14 +69,17 @@ describe('UserRepository', () => {
       // Arrange
       const userData = {
         email: 'new@example.com',
-        name: 'New User',
+        username: 'newuser',
         isActive: true,
       };
 
       const createdUser = {
         ...userData,
-        id: 1,
+        id: faker.string.uuid(),
+        password: null,
+        cognito_sub: null,
         createdAt: new Date(),
+        updatedAt: new Date(),
         deletedAt: null,
       };
 
@@ -91,7 +99,7 @@ describe('UserRepository', () => {
       // Arrange
       const userData = {
         email: 'error@example.com',
-        name: 'Error User',
+        username: 'erroruser',
         isActive: true,
       };
 
@@ -108,7 +116,7 @@ describe('UserRepository', () => {
       jest.spyOn(userRepository, 'findById').mockResolvedValue(mockUser);
 
       // Act
-      const result = await userRepository.findById(1);
+      const result = await userRepository.findById(MOCK_USER_ID);
 
       // Assert
       expect(result).toEqual(mockUser);
@@ -121,14 +129,22 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.findById(999)).rejects.toThrow(NotFoundError);
+      await expect(userRepository.findById(faker.string.uuid())).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('findAll', () => {
     it('should return all users', async () => {
       // Arrange
-      const usersArray = [mockUser, { ...mockUser, id: 2, email: 'user2@example.com' }];
+      const usersArray = [
+        mockUser,
+        {
+          ...mockUser,
+          id: faker.string.uuid(),
+          email: 'user2@example.com',
+          username: 'user2',
+        },
+      ];
 
       // Direct mocking of the repository method
       jest.spyOn(userRepository, 'findAll').mockResolvedValue(usersArray);
@@ -144,13 +160,13 @@ describe('UserRepository', () => {
   describe('update', () => {
     it('should update user and return updated user', async () => {
       // Arrange
-      const updateData = { name: 'Updated Name' };
+      const updateData = { username: 'updatedUser' };
       const updatedUser = { ...mockUser, ...updateData };
 
       mockDb.returning.mockResolvedValue([updatedUser]);
 
       // Act
-      const result = await userRepository.update(1, updateData);
+      const result = await userRepository.update(MOCK_USER_ID, updateData);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -168,19 +184,19 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.update(999, { name: 'Not Found' })).rejects.toThrow(
-        NotFoundError,
-      );
+      await expect(
+        userRepository.update(faker.string.uuid(), { username: 'Not Found' }),
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
   describe('delete', () => {
     it('should soft delete user by setting deletedAt', async () => {
       // Arrange
-      mockDb.returning.mockResolvedValue([{ id: 1 }]);
+      mockDb.returning.mockResolvedValue([{ id: MOCK_USER_ID }]);
 
       // Act
-      await userRepository.delete(1);
+      await userRepository.delete(MOCK_USER_ID);
 
       // Assert
       expect(mockDb.update).toHaveBeenCalledWith(users);
@@ -197,7 +213,7 @@ describe('UserRepository', () => {
       });
 
       // Act & Assert
-      await expect(userRepository.delete(999)).rejects.toThrow(NotFoundError);
+      await expect(userRepository.delete(faker.string.uuid())).rejects.toThrow(NotFoundError);
     });
   });
 });
