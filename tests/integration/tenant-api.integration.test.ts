@@ -1,28 +1,10 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
-// import { AppService } from '@shared/services/app/app.service';
-// import { DatabaseService } from '@shared/services/database/database.service';
+
 import { IntegrationTestManager } from '@tests/utils/integration-test-manager.util';
 import { faker } from '@faker-js/faker';
 import { CreateTenantDto } from '@domains/tenant/tenant.dto';
 import { CognitoService } from '@shared/services/cognito/cognito.service';
-// import { ConfigService } from '@shared/services/config/config.service';
-// import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
-
-// Mock CognitoService to avoid actual AWS calls during tests
-// jest.mock('@shared/services/cognito/cognito.service', () => {
-//   return {
-//     CognitoService: jest.fn().mockImplementation(() => {
-//       return {
-//         signUp: jest.fn().mockResolvedValue({
-//           sub: faker.string.uuid(),
-//           userSub: faker.string.uuid(),
-//           userConfirmed: false,
-//         }),
-//       };
-//     }),
-//   };
-// });
 
 describe('Tenant API', () => {
   //   let manager: IntegrationTestManager;
@@ -42,64 +24,24 @@ describe('Tenant API', () => {
 
   beforeAll(async () => {
     Container.reset();
-    Container.set(
-      CognitoService,
-      jest.fn().mockImplementation(() => {
-        return {
-          signUp: jest.fn().mockResolvedValue({
-            sub: faker.string.uuid(),
-            userSub: faker.string.uuid(),
-            userConfirmed: false,
-          }),
-        };
+    // Replace the CognitoService registration with a simple object mock
+    const mockCognitoService = {
+      signUp: jest.fn().mockResolvedValue({
+        sub: faker.string.uuid(),
+        userSub: faker.string.uuid(),
+        userConfirmed: false,
       }),
-    );
+      // Add mocks for other CognitoService methods if needed by tests
+      // e.g., confirmSignUp: jest.fn().mockResolvedValue({}),
+    };
+    Container.set(CognitoService, mockCognitoService);
+
     manager = Container.get(IntegrationTestManager);
-  });
-
-  beforeEach(async () => {
-    await manager.beginTransaction();
-  });
-
-  afterEach(async () => {
-    await manager.rollbackTransaction();
   });
 
   afterAll(async () => {
     await manager.close();
   });
-
-  //   beforeAll(async () => {
-  //     // Reset container and initialize test manager before all tests
-  //     Container.reset();
-
-  //     // Register mock services
-  //     const mockConfigService = {
-  //       get: jest.fn(() => 'mock-value'),
-  //     } as unknown as ConfigService;
-
-  //     const mockLoggerService = createMockLogger();
-
-  //     Container.set(CognitoService, new CognitoService(mockConfigService, mockLoggerService));
-
-  //     // Initialize test manager
-  //     manager = Container.get(IntegrationTestManager);
-  //   });
-
-  //   beforeEach(async () => {
-  //     // Begin a new transaction for each test
-  //     await manager.beginTransaction();
-  //   });
-
-  //   afterEach(async () => {
-  //     // Rollback transaction after each test to keep the database clean
-  //     await manager.rollbackTransaction();
-  //   });
-
-  //   afterAll(async () => {
-  //     // Clean up resources after all tests
-  //     await manager.close();
-  //   });
 
   describe('POST /api/v1/tenants', () => {
     it('should create a new tenant successfully', async () => {

@@ -29,20 +29,6 @@ export class IntegrationTestManager {
   }
 
   /**
-   * Begins a new transaction for the current test.
-   */
-  public async beginTransaction(): Promise<void> {
-    await this.db.beginTransaction();
-  }
-
-  /**
-   * Rolls back the current test transaction.
-   */
-  public async rollbackTransaction(): Promise<void> {
-    await this.db.rollbackTransaction();
-  }
-
-  /**
    * Closes database connections after tests.
    */
   async close(): Promise<void> {

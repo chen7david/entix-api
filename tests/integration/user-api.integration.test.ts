@@ -1,7 +1,11 @@
 import { IntegrationTestManager } from '@tests/utils/integration-test-manager.util';
 import { faker } from '@faker-js/faker';
-import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
+import type { UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';
+import { createUserFactory } from '@tests/factories/user.factory';
+import { users } from '@domains/user/user.schema';
+import { userTenants } from '@domains/tenant/user-tenant.schema'; // Import userTenants schema
+import { sql } from 'drizzle-orm';
 
 let manager: IntegrationTestManager;
 
@@ -9,12 +13,10 @@ beforeAll(async () => {
   manager = Container.get(IntegrationTestManager);
 });
 
+// Updated beforeEach: Delete from user_tenants first, then users
 beforeEach(async () => {
-  await manager.beginTransaction();
-});
-
-afterEach(async () => {
-  await manager.rollbackTransaction();
+  await manager.db.db.delete(userTenants).where(sql`true`); // Clear dependent table
+  await manager.db.db.delete(users).where(sql`true`); // Clear users table
 });
 
 afterAll(async () => {
@@ -24,11 +26,7 @@ afterAll(async () => {
 describe('User API - Integration', () => {
   describe('POST /api/v1/users', () => {
     it('should create a new user and return 201', async () => {
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      const payload = createUserFactory();
 
       const response = await manager.request.post('/api/v1/users').send(payload);
 
@@ -37,7 +35,7 @@ describe('User API - Integration', () => {
       expect(response.body).toMatchObject({
         email: payload.email,
         username: payload.username,
-        isActive: payload.isActive,
+        isActive: true,
       });
     });
 
@@ -57,20 +55,16 @@ describe('User API - Integration', () => {
     });
 
     it('should return a list containing new users', async () => {
-      // Seed a new user via API within the same transaction
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: false,
-      };
+      const payload = createUserFactory({ isActive: false });
       const postRes = await manager.request.post('/api/v1/users').send(payload);
       expect(postRes.status).toBe(201);
-      const createdId = postRes.body.id;
+      const createdUser = postRes.body as UserDto;
 
       const getRes = await manager.request.get('/api/v1/users');
       expect(getRes.status).toBe(200);
-      const userIds = getRes.body.map((u: UserDto) => u.id);
-      expect(userIds).toContain(createdId);
+      expect(Array.isArray(getRes.body)).toBe(true);
+      const usersInResponse = getRes.body as UserDto[];
+      expect(usersInResponse.some((u) => u.id === createdUser.id)).toBe(true);
     });
   });
 
@@ -82,51 +76,42 @@ describe('User API - Integration', () => {
     });
 
     it('should return 200 for an existing user', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      const payload = createUserFactory();
       const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      expect(postRes.status).toBe(201);
+      const createdUser = postRes.body as UserDto;
 
-      const response = await manager.request.get(`/api/v1/users/${id}`);
+      const response = await manager.request.get(`/api/v1/users/${createdUser.id}`);
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('id', id);
+      expect(response.body).toHaveProperty('id', createdUser.id);
       expect(response.body).toHaveProperty('email', payload.email);
     });
   });
 
   describe('PUT /api/v1/users/:id', () => {
     it('should update existing user and return 201', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      const payload = createUserFactory();
       const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      expect(postRes.status).toBe(201);
+      const createdUser = postRes.body as UserDto;
 
-      const update = { username: 'UpdatedUsername' };
-      const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
+      const update = { username: 'UpdatedUsernameTest' };
+      const response = await manager.request.put(`/api/v1/users/${createdUser.id}`).send(update);
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('username', update.username);
+
+      const getRes = await manager.request.get(`/api/v1/users/${createdUser.id}`);
+      expect(getRes.body.username).toBe(update.username);
     });
 
     it('should return 422 for invalid email on update', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      const payload = createUserFactory();
       const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      expect(postRes.status).toBe(201);
+      const createdUser = postRes.body as UserDto;
 
       const response = await manager.request
-        .put(`/api/v1/users/${id}`)
+        .put(`/api/v1/users/${createdUser.id}`)
         .send({ email: 'not-an-email' });
       expect(response.status).toBe(422);
       expect(response.body).toHaveProperty('details');
@@ -135,31 +120,19 @@ describe('User API - Integration', () => {
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should delete an existing user and return 204', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      const payload = createUserFactory();
       const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      expect(postRes.status).toBe(201);
+      const createdUser = postRes.body as UserDto;
 
-      // Verify record exists before delete
-      const beforeRes = await manager.request.get(`/api/v1/users/${id}`);
+      const beforeRes = await manager.request.get(`/api/v1/users/${createdUser.id}`);
       expect(beforeRes.status).toBe(200);
 
-      // Perform the delete operation
-      const delRes = await manager.request.delete(`/api/v1/users/${id}`);
+      const delRes = await manager.request.delete(`/api/v1/users/${createdUser.id}`);
       expect(delRes.status).toBe(204);
 
-      // Because we're in a transaction and tests roll back changes, the record will
-      // still be returned even though the delete function is executed.
-      // In a real application environment, the record would appear deleted.
-      // So for this test, we'll verify the API endpoint returns a 204 status
-      // which shows the controller is correctly handling the delete request.
-
-      // Success! The delete endpoint returned 204 as expected, indicating
-      // that the delete operation was processed correctly.
+      const afterRes = await manager.request.get(`/api/v1/users/${createdUser.id}`);
+      expect(afterRes.status).toBe(404);
     });
 
     it('should return 404 when deleting non-existent user', async () => {
