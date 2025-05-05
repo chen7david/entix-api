@@ -92,7 +92,7 @@ describe('IntegrationTestManager', () => {
     // First transaction
     await manager.beginTransaction();
 
-    let email1 = faker.internet.email();
+    const email1 = faker.internet.email();
     try {
       // Insert user in first transaction
       await dbService.db.insert(users).values({
