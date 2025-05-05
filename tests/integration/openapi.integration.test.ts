@@ -1,5 +1,6 @@
 import { IntegrationTestManager } from '@tests/utils/integration-test-manager.util';
 import { Container } from 'typedi';
+
 describe('OpenAPI API - Integration', () => {
   describe('GET /api/openapi.json - Integration', () => {
     let manager: IntegrationTestManager;

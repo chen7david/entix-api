@@ -4,6 +4,8 @@ import { createAppError, NotFoundError } from '@shared/utils/error/error.util';
 import { and, eq, isNull, SQLWrapper, InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { AnyPgColumn, PgTable, TableConfig } from 'drizzle-orm/pg-core';
 import type { Logger } from '@shared/types/logger.type';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import * as schema from '@database/schema';
 
 /**
  * Abstract base class for repositories providing common CRUD operations
@@ -65,6 +67,28 @@ export abstract class BaseRepository<
   async create(data: InferInsertModel<TTable>): Promise<TEntity> {
     try {
       const results = await this.dbService.db.insert(this.table).values(data).returning();
+      const resultsArray = results as unknown as TEntity[];
+      if (!resultsArray || resultsArray.length === 0) {
+        throw new Error('Failed to create entity, no returning data.');
+      }
+      return resultsArray[0];
+    } catch (err) {
+      throw createAppError(err);
+    }
+  }
+
+  /**
+   * Creates a new entity in the database within a transaction.
+   * @param data - The data for the new entity.
+   * @param tx - The transaction object from Drizzle.
+   * @returns The newly created entity.
+   */
+  async createWithTx(
+    data: InferInsertModel<TTable>,
+    tx: NodePgDatabase<typeof schema>,
+  ): Promise<TEntity> {
+    try {
+      const results = await tx.insert(this.table).values(data).returning();
       const resultsArray = results as unknown as TEntity[];
       if (!resultsArray || resultsArray.length === 0) {
         throw new Error('Failed to create entity, no returning data.');
