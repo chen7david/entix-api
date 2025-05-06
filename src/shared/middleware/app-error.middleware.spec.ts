@@ -4,11 +4,7 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { ZodError, z } from 'zod';
 import type { Request, Response, NextFunction } from 'express';
 import { createMockLogger } from '@tests/mocks/logger.service.mock';
-import {
-  createMockRes,
-  createMockReq,
-  createMockNext,
-} from '@shared/utils/test-helpers/mocks/mock-express.util';
+import { createMockRes, createMockReq, createMockNext } from '@tests/mocks/express.mock';
 
 describe('ErrorHandlerMiddleware', () => {
   let logger: LoggerService;

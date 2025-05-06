@@ -21,7 +21,7 @@ import {
   ChangePasswordCommand,
   ConfirmSignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { createMockCognitoClient } from '@shared/utils/test-helpers/mocks/mock-cognito-client.util';
+import { createMockCognitoClient } from '@tests/mocks/cognito-client.mock';
 
 const mockSend = jest.fn();
 const mockCognitoClient = createMockCognitoClient(mockSend);
