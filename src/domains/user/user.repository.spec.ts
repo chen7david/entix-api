@@ -6,6 +6,7 @@ import { users } from '@domains/user/user.schema';
 import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { faker } from '@faker-js/faker';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
 
 /**
  * Tests for the UserRepository class, verifying proper interaction with the database
@@ -14,6 +15,7 @@ import { faker } from '@faker-js/faker';
 describe('UserRepository', () => {
   let userRepository: UserRepository;
   let mockDb: Record<string, jest.Mock>;
+  const mockLoggerInstance = createMockLogger();
 
   // Mock user data
   const mockUserId = faker.string.uuid();
@@ -56,8 +58,8 @@ describe('UserRepository', () => {
     // Register mock with TypeDI
     Container.set(DatabaseService, mockDbService);
 
-    // Get repository instance from container
-    userRepository = Container.get(UserRepository);
+    // Instantiate using the mocks
+    userRepository = new UserRepository(mockDbService, mockLoggerInstance);
   });
 
   afterEach(() => {
