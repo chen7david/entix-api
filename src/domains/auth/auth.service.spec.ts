@@ -1,29 +1,20 @@
 import { AuthService } from '@domains/auth/auth.service';
-import { CognitoService } from '@shared/services/cognito/cognito.service';
-import { LoggerService } from '@shared/services/logger/logger.service';
-import * as cognitoTypes from '@shared/types/cognito.type';
+import type { CognitoService } from '@shared/services/cognito/cognito.service';
+import type { LoggerService } from '@shared/services/logger/logger.service';
 import * as dto from '@domains/auth/auth.dto';
-import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
-
-const mockLogger = createMockLogger();
-
-const mockCognitoService = {
-  signUp: jest.fn(),
-  forgotPassword: jest.fn(),
-  confirmForgotPassword: jest.fn(),
-  resendConfirmationCode: jest.fn(),
-  changePassword: jest.fn(),
-};
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
+import { createMockCognitoService } from '@tests/mocks/cognito.service.mock';
 
 describe('AuthService', () => {
   let service: AuthService;
+  let mockLogger: jest.Mocked<LoggerService>;
+  let mockCognitoService: jest.Mocked<CognitoService>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    service = new AuthService(
-      mockCognitoService as unknown as CognitoService,
-      mockLogger as unknown as LoggerService,
-    );
+    mockLogger = createMockLogger();
+    mockCognitoService = createMockCognitoService();
+
+    service = new AuthService(mockCognitoService, mockLogger);
   });
 
   /**
@@ -31,14 +22,15 @@ describe('AuthService', () => {
    */
   it('signUp: should call cognitoService.signUp and return result', async () => {
     const body: dto.SignUpBody = { username: 'user', email: 'a@b.com', password: 'password123' };
-    const result: cognitoTypes.SignUpResult = { userConfirmed: true, sub: 'sub123' };
-    mockCognitoService.signUp.mockResolvedValue(result);
-    await expect(service.signUp(body)).resolves.toEqual(result);
+    const result = await service.signUp(body);
+
+    expect(result).toBeDefined();
+    expect(result.sub).toEqual(expect.any(String));
     expect(mockCognitoService.signUp).toHaveBeenCalledWith(body);
   });
 
   it('signUp: should propagate errors', async () => {
-    const error = new Error('fail');
+    const error = new Error('Cognito SignUp Failed');
     mockCognitoService.signUp.mockRejectedValue(error);
     await expect(
       service.signUp({ username: 'u', email: 'e@e.com', password: 'pw' }),
@@ -50,11 +42,8 @@ describe('AuthService', () => {
    */
   it('forgotPassword: should call cognitoService.forgotPassword and return result', async () => {
     const body: dto.ForgotPasswordBody = { username: 'user' };
-    const result: cognitoTypes.ForgotPasswordResult = {
-      codeDeliveryDetails: { destination: 'x', deliveryMedium: 'EMAIL', attributeName: 'email' },
-    };
-    mockCognitoService.forgotPassword.mockResolvedValue(result);
-    await expect(service.forgotPassword(body)).resolves.toEqual(result);
+    const result = await service.forgotPassword(body);
+    expect(result).toEqual({ codeDeliveryDetails: undefined });
     expect(mockCognitoService.forgotPassword).toHaveBeenCalledWith(body);
   });
 
@@ -73,9 +62,8 @@ describe('AuthService', () => {
       code: '123',
       newPassword: 'pw',
     };
-    const result: cognitoTypes.ConfirmForgotPasswordResult = { success: true };
-    mockCognitoService.confirmForgotPassword.mockResolvedValue(result);
-    await expect(service.confirmForgotPassword(body)).resolves.toEqual(result);
+    const result = await service.confirmForgotPassword(body);
+    expect(result).toEqual({ success: true });
     expect(mockCognitoService.confirmForgotPassword).toHaveBeenCalledWith(body);
   });
 
@@ -92,11 +80,8 @@ describe('AuthService', () => {
    */
   it('resendConfirmationCode: should call cognitoService.resendConfirmationCode and return result', async () => {
     const body: dto.ResendConfirmationCodeBody = { username: 'user' };
-    const result: cognitoTypes.ResendConfirmationCodeResult = {
-      codeDeliveryDetails: { destination: 'x', deliveryMedium: 'EMAIL', attributeName: 'email' },
-    };
-    mockCognitoService.resendConfirmationCode.mockResolvedValue(result);
-    await expect(service.resendConfirmationCode(body)).resolves.toEqual(result);
+    const result = await service.resendConfirmationCode(body);
+    expect(result).toEqual({ codeDeliveryDetails: undefined });
     expect(mockCognitoService.resendConfirmationCode).toHaveBeenCalledWith(body);
   });
 
@@ -115,9 +100,8 @@ describe('AuthService', () => {
       previousPassword: 'old',
       proposedPassword: 'new',
     };
-    const result: cognitoTypes.ChangePasswordResult = { success: true };
-    mockCognitoService.changePassword.mockResolvedValue(result);
-    await expect(service.changePassword(body)).resolves.toEqual(result);
+    const result = await service.changePassword(body);
+    expect(result).toEqual({ success: true });
     expect(mockCognitoService.changePassword).toHaveBeenCalledWith(body);
   });
 

@@ -1,4 +1,6 @@
 import type { AuthService } from '@domains/auth/auth.service';
+import { createMockLogger } from '@tests/mocks/logger.service.mock'; // Use path alias
+import { createMockCognitoService } from '@tests/mocks/cognito.service.mock'; // Use path alias
 
 /**
  * Returns a fully-mocked AuthService for use in tests.
@@ -18,10 +20,10 @@ export function createMockAuthService(): jest.Mocked<AuthService> {
     getMe: jest.fn(),
     updateMe: jest.fn(),
     deleteMe: jest.fn(),
-    // Required properties for AuthService class
-    logger: undefined,
-    cognitoService: undefined,
-    loggerService: undefined,
+    // Use actual mocks for properties if needed for type casting
+    logger: createMockLogger(),
+    cognitoService: createMockCognitoService(),
   };
+  // Cast to unknown first to bypass strict private property checks
   return mock as unknown as jest.Mocked<AuthService>;
 }

@@ -1,20 +1,19 @@
 import { IntegrationTestManager } from '@tests/utils/integration-test-manager.util';
-import { faker } from '@faker-js/faker';
-import type { CreateUserDto, UserDto } from '@domains/user/user.dto';
+import { faker } from '@faker-js/faker'; // Re-added faker import
+import type { UserDto } from '@domains/user/user.dto';
 import { Container } from 'typedi';
+import { users } from '@domains/user/user.schema';
+import { UserFactory } from '@tests/factories/user.factory';
+import { DatabaseService } from '@shared/services/database/database.service'; // Import DatabaseService
 
 let manager: IntegrationTestManager;
+let userFactory: UserFactory;
+let dbService: DatabaseService; // Declare DatabaseService instance
 
 beforeAll(async () => {
   manager = Container.get(IntegrationTestManager);
-});
-
-beforeEach(async () => {
-  await manager.beginTransaction();
-});
-
-afterEach(async () => {
-  await manager.rollbackTransaction();
+  userFactory = new UserFactory(manager);
+  dbService = Container.get(DatabaseService); // Get DatabaseService instance
 });
 
 afterAll(async () => {
@@ -24,11 +23,8 @@ afterAll(async () => {
 describe('User API - Integration', () => {
   describe('POST /api/v1/users', () => {
     it('should create a new user and return 201', async () => {
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
+      // Use factory to build payload
+      const payload = userFactory.build({ isActive: true });
 
       const response = await manager.request.post('/api/v1/users').send(payload);
 
@@ -49,7 +45,13 @@ describe('User API - Integration', () => {
   });
 
   describe('GET /api/v1/users', () => {
+    beforeEach(async () => {
+      // Clear users table using the injected dbService
+      await dbService.db.delete(users);
+    });
+
     it('should return empty array when no users exist', async () => {
+      // Test remains the same, relies on beforeEach cleanup
       const response = await manager.request.get('/api/v1/users');
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
@@ -57,76 +59,51 @@ describe('User API - Integration', () => {
     });
 
     it('should return a list containing new users', async () => {
-      // Seed a new user via API within the same transaction
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: false,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      expect(postRes.status).toBe(201);
-      const createdId = postRes.body.id;
+      // Use factory to create user via API
+      const createdUser = await userFactory.create({ isActive: false });
 
       const getRes = await manager.request.get('/api/v1/users');
       expect(getRes.status).toBe(200);
       const userIds = getRes.body.map((u: UserDto) => u.id);
-      expect(userIds).toContain(createdId);
+      expect(userIds).toContain(createdUser.id); // Use ID from factory result
     });
   });
 
   describe('GET /api/v1/users/:id', () => {
     it('should return 404 for non-existent user', async () => {
-      const nonExistentId = faker.string.uuid();
+      const nonExistentId = faker.string.uuid(); // Keep faker import if this is used
       const response = await manager.request.get(`/api/v1/users/${nonExistentId}`);
       expect(response.status).toBe(404);
     });
 
     it('should return 200 for an existing user', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      // Use factory to create user via API
+      const createdUser = await userFactory.create({ isActive: true });
 
-      const response = await manager.request.get(`/api/v1/users/${id}`);
+      const response = await manager.request.get(`/api/v1/users/${createdUser.id}`);
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('id', id);
-      expect(response.body).toHaveProperty('email', payload.email);
+      expect(response.body).toHaveProperty('id', createdUser.id);
+      expect(response.body).toHaveProperty('email', createdUser.email); // Assert against factory result
     });
   });
 
   describe('PUT /api/v1/users/:id', () => {
     it('should update existing user and return 201', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      // Use factory to create user via API
+      const createdUser = await userFactory.create({ isActive: true });
 
       const update = { username: 'UpdatedUsername' };
-      const response = await manager.request.put(`/api/v1/users/${id}`).send(update);
+      const response = await manager.request.put(`/api/v1/users/${createdUser.id}`).send(update);
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('username', update.username);
     });
 
     it('should return 422 for invalid email on update', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      // Use factory to create user via API
+      const createdUser = await userFactory.create({ isActive: true });
 
       const response = await manager.request
-        .put(`/api/v1/users/${id}`)
+        .put(`/api/v1/users/${createdUser.id}`)
         .send({ email: 'not-an-email' });
       expect(response.status).toBe(422);
       expect(response.body).toHaveProperty('details');
@@ -135,35 +112,28 @@ describe('User API - Integration', () => {
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should delete an existing user and return 204', async () => {
-      // Seed user
-      const payload: CreateUserDto = {
-        email: faker.internet.email(),
-        username: faker.internet.username(),
-        isActive: true,
-      };
-      const postRes = await manager.request.post('/api/v1/users').send(payload);
-      const id = postRes.body.id;
+      // Use factory to create user via API
+      const createdUser = await userFactory.create({ isActive: true });
 
       // Verify record exists before delete
-      const beforeRes = await manager.request.get(`/api/v1/users/${id}`);
+      const beforeRes = await manager.request.get(`/api/v1/users/${createdUser.id}`);
       expect(beforeRes.status).toBe(200);
 
       // Perform the delete operation
-      const delRes = await manager.request.delete(`/api/v1/users/${id}`);
+      const delRes = await manager.request.delete(`/api/v1/users/${createdUser.id}`);
       expect(delRes.status).toBe(204);
 
-      // Because we're in a transaction and tests roll back changes, the record will
-      // still be returned even though the delete function is executed.
-      // In a real application environment, the record would appear deleted.
-      // So for this test, we'll verify the API endpoint returns a 204 status
-      // which shows the controller is correctly handling the delete request.
-
-      // Success! The delete endpoint returned 204 as expected, indicating
-      // that the delete operation was processed correctly.
+      // Optional: Verify record is marked as deleted in DB if needed
+      // try {
+      //   await dbService.db.select().from(users).where(eq(users.id, createdUser.id)).execute();
+      //   // Should throw NotFoundError or return record with deletedAt set, depending on repo logic
+      // } catch (error) {
+      //    expect(error).toBeInstanceOf(NotFoundError) // Or check deletedAt
+      // }
     });
 
     it('should return 404 when deleting non-existent user', async () => {
-      const nonExistentId = faker.string.uuid();
+      const nonExistentId = faker.string.uuid(); // Keep faker import if this is used
       const response = await manager.request.delete(`/api/v1/users/${nonExistentId}`);
       expect(response.status).toBe(404);
     });

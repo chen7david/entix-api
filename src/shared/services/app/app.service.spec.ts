@@ -4,7 +4,7 @@ import { AppService } from '@shared/services/app/app.service';
 import { ConfigService } from '@shared/services/config/config.service';
 import { Container } from '@shared/utils/ioc.util';
 import supertest from 'supertest';
-import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
 
 describe('AppService', () => {
   // Reset container before each test for isolation
