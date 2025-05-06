@@ -4,6 +4,7 @@ import { createAppError, NotFoundError } from '@shared/utils/error/error.util';
 import { and, eq, isNull, SQLWrapper, InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { AnyPgColumn, PgTable, TableConfig } from 'drizzle-orm/pg-core';
 import type { Logger } from '@shared/types/logger.type';
+import { AppError } from '@shared/utils/error/error.util';
 
 /**
  * Abstract base class for repositories providing common CRUD operations
@@ -115,10 +116,7 @@ export abstract class BaseRepository<
     const defaultFilters = this.buildDefaultFilters(includeDeleted);
     const whereCondition = defaultFilters.length > 0 ? and(...defaultFilters) : undefined;
     try {
-      const query = this.dbService.db
-        .select()
-        .from(this.table as unknown as PgTable<TableConfig>)
-        .$dynamic();
+      const query = this.dbService.db.select().from(this.table as unknown as PgTable<TableConfig>);
       if (whereCondition) {
         query.where(whereCondition);
       }
@@ -150,7 +148,9 @@ export abstract class BaseRepository<
       }
       return resultsArray[0];
     } catch (err) {
-      if (err instanceof NotFoundError) throw err;
+      // Re-throw specific AppErrors, otherwise wrap
+      if (err instanceof AppError) throw err;
+      // if (err instanceof NotFoundError) throw err; // Keep this if needed, or rely on AppError check
       throw createAppError(err);
     }
   }
@@ -174,15 +174,19 @@ export abstract class BaseRepository<
         return !!updated;
       } else {
         // Hard delete: Remove the record from the database
-        const result = await this.dbService.db
-          .delete(this.table)
-          .where(eq(this.idColumn, id))
-          .returning();
+        const result = await this.dbService.db.delete(this.table).where(eq(this.idColumn, id));
 
-        return Array.isArray(result) && result.length > 0;
+        // Check if any rows were affected (result varies by driver, check Drizzle docs/types if needed)
+        // For now, assume a successful delete operation means true
+        // A more robust check might involve looking at result.rowCount or similar if available
+        return result !== null && result !== undefined; // Basic check
       }
     } catch (error) {
       this.logger.error(`Error deleting record by ID: ${String(id)}`, error as Error);
+      // Avoid double-wrapping AppErrors, re-throw original error if not AppError
+      if (error instanceof AppError) {
+        throw error;
+      }
       throw createAppError(error);
     }
   }

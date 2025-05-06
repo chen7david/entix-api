@@ -3,12 +3,13 @@ import { Container } from 'typedi';
 import { UsersController } from '@domains/user/user.controller';
 import { UserService } from '@domains/user/user.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import { Logger } from '@shared/types/logger.type';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { User } from '@domains/user/user.model';
 import express from 'express';
 import { useExpressServer } from 'routing-controllers';
 import { faker } from '@faker-js/faker';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
+import { createMockUserService } from '@tests/mocks/user.service.mock';
 
 /**
  * Tests for the UsersController class, verifying proper API endpoint behavior
@@ -16,9 +17,8 @@ import { faker } from '@faker-js/faker';
  */
 describe('UsersController', () => {
   let usersController: UsersController;
-  let userService: jest.Mocked<UserService>;
-  let loggerService: jest.Mocked<LoggerService>;
-  let mockLogger: jest.Mocked<Logger>;
+  let mockUserService: jest.Mocked<UserService>;
+  let mockLoggerService: jest.Mocked<LoggerService>;
   let app: express.Application;
 
   const mockUserId = faker.string.uuid();
@@ -39,31 +39,13 @@ describe('UsersController', () => {
     // Reset the TypeDI container
     Container.reset();
 
-    // Create mock logger
-    mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
-
-    // Create mock services
-    loggerService = {
-      child: jest.fn().mockReturnValue(mockLogger),
-      component: jest.fn().mockReturnValue(mockLogger),
-    } as unknown as jest.Mocked<LoggerService>;
-
-    userService = {
-      findAll: jest.fn(),
-      findById: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    } as unknown as jest.Mocked<UserService>;
+    // Create mocks using factories
+    mockLoggerService = createMockLogger();
+    mockUserService = createMockUserService();
 
     // Register mocks with the container
-    Container.set(LoggerService, loggerService);
-    Container.set(UserService, userService);
+    Container.set(LoggerService, mockLoggerService);
+    Container.set(UserService, mockUserService);
 
     // Get controller instance from container
     usersController = Container.get(UsersController);
@@ -85,41 +67,44 @@ describe('UsersController', () => {
     it('should return all users', async () => {
       // Arrange
       const users = [mockUser];
-      userService.findAll.mockResolvedValue(users);
+      mockUserService.findAll.mockResolvedValue(users);
 
       // Act
       const result = await usersController.getAll();
 
       // Assert
       expect(result).toEqual(users);
-      expect(userService.findAll).toHaveBeenCalledTimes(1);
-      expect(mockLogger.info).toHaveBeenCalledWith('Fetching all users');
+      expect(mockUserService.findAll).toHaveBeenCalledTimes(1);
+      expect(mockLoggerService.component).toHaveBeenCalledWith('UsersController');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Fetching all users');
     });
   });
 
   describe('Method: getById', () => {
     it('should return user by ID when found', async () => {
       // Arrange
-      userService.findById.mockResolvedValue(mockUser);
+      mockUserService.findById.mockResolvedValue(mockUser);
 
       // Act
       const result = await usersController.getById(mockUserId);
 
       // Assert
       expect(result).toEqual(mockUser);
-      expect(userService.findById).toHaveBeenCalledWith(mockUserId);
-      expect(mockLogger.info).toHaveBeenCalledWith('Fetching user by ID', {
+      expect(mockUserService.findById).toHaveBeenCalledWith(mockUserId);
+      expect(mockLoggerService.component).toHaveBeenCalledWith('UsersController');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Fetching user by ID', {
         id: mockUserId,
       });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
-      userService.findById.mockRejectedValue(new NotFoundError('User not found'));
+      const error = new NotFoundError('User not found');
+      mockUserService.findById.mockRejectedValue(error);
       const nonExistentId = faker.string.uuid();
       // Act & Assert
       await expect(usersController.getById(nonExistentId)).rejects.toThrow(NotFoundError);
-      expect(userService.findById).toHaveBeenCalledWith(nonExistentId);
+      expect(mockUserService.findById).toHaveBeenCalledWith(nonExistentId);
     });
   });
 
@@ -142,15 +127,18 @@ describe('UsersController', () => {
         deletedAt: null,
       };
 
-      userService.create.mockResolvedValue(newUser);
+      mockUserService.create.mockResolvedValue(newUser);
 
       // Act
       const result = await usersController.create(createDto);
 
       // Assert
       expect(result).toEqual(newUser);
-      expect(userService.create).toHaveBeenCalledWith(createDto);
-      expect(mockLogger.info).toHaveBeenCalledWith('Creating user', { email: createDto.email });
+      expect(mockUserService.create).toHaveBeenCalledWith(createDto);
+      expect(mockLoggerService.component).toHaveBeenCalledWith('UsersController');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Creating user', {
+        email: createDto.email,
+      });
     });
   });
 
@@ -166,15 +154,16 @@ describe('UsersController', () => {
         username: 'updateduser',
       };
 
-      userService.update.mockResolvedValue(updatedUser);
+      mockUserService.update.mockResolvedValue(updatedUser);
 
       // Act
       const result = await usersController.update(mockUserId, updateDto);
 
       // Assert
       expect(result).toEqual(updatedUser);
-      expect(userService.update).toHaveBeenCalledWith(mockUserId, updateDto);
-      expect(mockLogger.info).toHaveBeenCalledWith('Updating user', {
+      expect(mockUserService.update).toHaveBeenCalledWith(mockUserId, updateDto);
+      expect(mockLoggerService.component).toHaveBeenCalledWith('UsersController');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Updating user', {
         id: mockUserId,
       });
     });
@@ -184,36 +173,39 @@ describe('UsersController', () => {
       const updateDto = {
         username: 'updateduser',
       };
-      userService.update.mockRejectedValue(new NotFoundError('User not found'));
+      const error = new NotFoundError('User not found');
+      mockUserService.update.mockRejectedValue(error);
       const nonExistentId = faker.string.uuid();
       // Act & Assert
       await expect(usersController.update(nonExistentId, updateDto)).rejects.toThrow(NotFoundError);
-      expect(userService.update).toHaveBeenCalledWith(nonExistentId, updateDto);
+      expect(mockUserService.update).toHaveBeenCalledWith(nonExistentId, updateDto);
     });
   });
 
   describe('Method: delete', () => {
     it('should delete user when found', async () => {
       // Arrange
-      userService.delete.mockResolvedValue(undefined);
+      mockUserService.delete.mockResolvedValue(undefined);
 
       // Act
       await usersController.delete(mockUserId);
 
       // Assert
-      expect(userService.delete).toHaveBeenCalledWith(mockUserId);
-      expect(mockLogger.info).toHaveBeenCalledWith('Deleting user', {
+      expect(mockUserService.delete).toHaveBeenCalledWith(mockUserId);
+      expect(mockLoggerService.component).toHaveBeenCalledWith('UsersController');
+      expect(mockLoggerService.info).toHaveBeenCalledWith('Deleting user', {
         id: mockUserId,
       });
     });
 
     it('should propagate error when user not found', async () => {
       // Arrange
-      userService.delete.mockRejectedValue(new NotFoundError('User not found'));
+      const error = new NotFoundError('User not found');
+      mockUserService.delete.mockRejectedValue(error);
       const nonExistentId = faker.string.uuid();
       // Act & Assert
       await expect(usersController.delete(nonExistentId)).rejects.toThrow(NotFoundError);
-      expect(userService.delete).toHaveBeenCalledWith(nonExistentId);
+      expect(mockUserService.delete).toHaveBeenCalledWith(nonExistentId);
     });
   });
 });
