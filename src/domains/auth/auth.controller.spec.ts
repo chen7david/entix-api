@@ -4,8 +4,8 @@ import { LoggerService } from '@shared/services/logger/logger.service';
 import { AuthService } from '@domains/auth/auth.service';
 import { Container } from 'typedi';
 import { AppError } from '@shared/utils/error/error.util';
-import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
-import { createMockAuthService } from '@shared/utils/test-helpers/mocks/mock-auth-service.util';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
+import { createMockAuthService } from '@tests/mocks/auth.service.mock';
 
 // Mock AuthService
 const mockAuthService = createMockAuthService();

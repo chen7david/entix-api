@@ -21,26 +21,28 @@ import {
   ChangePasswordCommand,
   ConfirmSignUpCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import { createMockCognitoClient } from '@shared/utils/test-helpers/mocks/mock-cognito-client.util';
+import { createMockCognitoClient } from '@tests/mocks/cognito-client.mock';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
+import { createMockConfigService } from '@tests/mocks/config.service.mock';
 
 const mockSend = jest.fn();
 const mockCognitoClient = createMockCognitoClient(mockSend);
 
-const mockLogger = { component: jest.fn(), log: jest.fn() } as unknown as LoggerService;
-const mockConfigService = {
-  get: jest.fn((key: string) => {
-    switch (key) {
-      case 'COGNITO_REGION':
-        return 'us-east-1';
-      case 'COGNITO_USER_POOL_ID':
-        return 'test-pool';
-      case 'COGNITO_CLIENT_ID':
-        return 'test-client';
-      default:
-        return '';
-    }
-  }),
-} as ConfigService;
+const mockLogger: jest.Mocked<LoggerService> = createMockLogger();
+const mockConfigService: jest.Mocked<ConfigService> = createMockConfigService();
+
+mockConfigService.get.mockImplementation((key: string) => {
+  switch (key) {
+    case 'COGNITO_REGION':
+      return 'us-east-1';
+    case 'COGNITO_USER_POOL_ID':
+      return 'test-pool';
+    case 'COGNITO_CLIENT_ID':
+      return 'test-client';
+    default:
+      return undefined;
+  }
+});
 
 describe('CognitoService', () => {
   let service: CognitoService;

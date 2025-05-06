@@ -1,14 +1,10 @@
 import { ErrorHandlerMiddleware } from '@shared/middleware/app-error.middleware';
 import { AppError, NotFoundError, ValidationError } from '@shared/utils/error/error.util';
 import { LoggerService } from '@shared/services/logger/logger.service';
-import { ZodError, z } from '@shared/utils/zod.util';
-import { Request, Response, NextFunction } from 'express';
-import { createMockLogger } from '@shared/utils/test-helpers/mocks/mock-logger.util';
-import {
-  createMockRes,
-  createMockReq,
-  createMockNext,
-} from '@shared/utils/test-helpers/mocks/mock-express.util';
+import { ZodError, z } from 'zod';
+import type { Request, Response, NextFunction } from 'express';
+import { createMockLogger } from '@tests/mocks/logger.service.mock';
+import { createMockRes, createMockReq, createMockNext } from '@tests/mocks/express.mock';
 
 describe('ErrorHandlerMiddleware', () => {
   let logger: LoggerService;
