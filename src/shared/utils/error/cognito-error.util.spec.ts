@@ -4,6 +4,7 @@ import {
   UnauthorizedError,
   ValidationError,
   NotFoundError,
+  BadRequestError,
 } from '@shared/utils/error/error.util';
 import { mapCognitoErrorToAppError } from '@shared/utils/error/cognito-error.util';
 
@@ -53,10 +54,10 @@ describe('mapCognitoErrorToAppError', () => {
     expect(result.message).toBe('Confirmation code expired');
   });
 
-  it('maps InvalidPasswordException to ValidationError', () => {
+  it('maps InvalidPasswordException to BadRequestError', () => {
     const err = baseError('InvalidPasswordException');
     const result = mapCognitoErrorToAppError(err);
-    expect(result).toBeInstanceOf(ValidationError);
+    expect(result).toBeInstanceOf(BadRequestError);
     expect(result.message).toBe('Password does not meet requirements');
   });
 

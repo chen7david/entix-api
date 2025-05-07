@@ -18,20 +18,10 @@ export const CreateUserDto = z
      */
     username: z.string().min(3).openapi({ example: 'johndoe' }),
     /**
-     * User's password (optional depending on auth strategy).
+     * User's password.
      * @example StrongPassword123!
      */
-    password: z.string().min(8).optional().openapi({ example: 'StrongPassword123!' }),
-    /**
-     * Cognito sub identifier (optional).
-     * @example abc123def456
-     */
-    cognito_sub: z.string().optional().openapi({ example: 'abc123def456' }),
-    /**
-     * Indicates if the user account is active. Defaults to true.
-     * @default true
-     */
-    isActive: z.boolean().default(true),
+    password: z.string().min(8).openapi({ example: 'StrongPassword123!' }),
   })
   .openapi('CreateUserDto', { description: 'Data required to create a new user.' });
 
@@ -41,11 +31,23 @@ export const CreateUserDto = z
 export type CreateUserDto = z.infer<typeof CreateUserDto>;
 
 /**
- * Zod schema for updating a user. Allows partial updates.
+ * Zod schema for updating a user. Allows partial updates for specific fields.
  */
-export const UpdateUserDto = CreateUserDto.partial().openapi('UpdateUserDto', {
-  description: 'Data for updating an existing user. All fields are optional.',
-});
+export const UpdateUserDto = z
+  .object({
+    /**
+     * Indicates if the user account is active. Defaults to true.
+     * @default true
+     */
+    isActive: z.boolean().optional(),
+    // Add other updatable profile fields here in the future, e.g.:
+    // firstName: z.string().min(1).optional(),
+    // lastName: z.string().min(1).optional(),
+  })
+  .strict()
+  .openapi('UpdateUserDto', {
+    description: 'Data for updating an existing user. All fields are optional.',
+  });
 
 /**
  * Type alias for UpdateUserDto schema inference
@@ -103,6 +105,42 @@ export const UserIdParamDto = z
 export type UserIdParamDto = z.infer<typeof UserIdParamDto>;
 
 /**
+ * Zod schema for assigning a role to a user.
+ */
+export const AssignRoleToUserDto = z
+  .object({
+    /**
+     * The ID of the role to assign.
+     * @example 123
+     */
+    roleId: z.number().int().positive().openapi({ example: 123 }),
+  })
+  .openapi('AssignRoleToUserDto', { description: 'Payload for assigning a role to a user.' });
+
+export type AssignRoleToUserDto = z.infer<typeof AssignRoleToUserDto>;
+
+/**
+ * Zod schema for parameters when removing a role from a user.
+ * Includes both user ID (uuid) and role ID (number) from the path.
+ */
+export const RemoveRoleFromUserParamsDto = z
+  .object({
+    id: z.string().uuid().openapi({
+      example: '123e4567-e89b-12d3-a456-426614174000',
+      description: 'The UUID of the user',
+    }),
+    roleId: z.coerce.number().int().positive().openapi({
+      example: 456,
+      description: 'The ID of the role to remove',
+    }),
+  })
+  .openapi('RemoveRoleFromUserParamsDto', {
+    description: 'URL parameters for removing a role from a user.',
+  });
+
+export type RemoveRoleFromUserParamsDto = z.infer<typeof RemoveRoleFromUserParamsDto>;
+
+/**
  * Registers user-related Zod schemas with the OpenAPI registry.
  * @param registry - The OpenAPIRegistry instance to register schemas on.
  */
@@ -112,4 +150,6 @@ export function registerUserSchemas(registry: OpenAPIRegistry): void {
   registry.register('UserDto', UserDto);
   registry.register('UserIdParamDto', UserIdParamDto);
   registry.register('UserFilterDto', UserFilterDto);
+  registry.register('AssignRoleToUserDto', AssignRoleToUserDto);
+  registry.register('RemoveRoleFromUserParamsDto', RemoveRoleFromUserParamsDto);
 }

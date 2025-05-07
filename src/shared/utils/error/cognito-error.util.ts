@@ -4,6 +4,7 @@ import {
   UnauthorizedError,
   ValidationError,
   NotFoundError,
+  BadRequestError,
 } from '@shared/utils/error/error.util';
 
 /**
@@ -28,7 +29,7 @@ export function mapCognitoErrorToAppError(error: unknown): AppError {
     case 'ExpiredCodeException':
       return new ValidationError('Confirmation code expired');
     case 'InvalidPasswordException':
-      return new ValidationError('Password does not meet requirements');
+      return new BadRequestError('Password does not meet requirements');
     case 'InvalidParameterException':
       return new ValidationError('Invalid parameter provided');
     case 'UserNotConfirmedException':
