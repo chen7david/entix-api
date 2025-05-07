@@ -59,13 +59,13 @@ export class CognitoService {
    * Constructs a CognitoService.
    * @param configService - The config service
    * @param logger - The logger service
-   * @param cognitoClient - (Optional) Cognito client for dependency injection/testing
+   * @param cognitoClient - Cognito client for dependency injection/testing
    */
   // eslint-disable-next-line max-params
   constructor(
     private readonly configService: ConfigService,
     private readonly logger: LoggerService,
-    cognitoClient?: CognitoIdentityProviderClient,
+    cognitoClient: CognitoIdentityProviderClient,
   ) {
     this.logger.component('CognitoService');
     this.config = {
@@ -73,11 +73,7 @@ export class CognitoService {
       userPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       clientId: this.configService.get('COGNITO_CLIENT_ID'),
     };
-    this.cognito =
-      cognitoClient ??
-      new CognitoIdentityProviderClient({
-        region: this.config.region,
-      });
+    this.cognito = cognitoClient;
   }
 
   /**
