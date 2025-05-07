@@ -39,6 +39,7 @@ describe('PermissionRepository', () => {
       set: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockDbService = { db: mockDb as any } as DatabaseService;
     Container.set(DatabaseService, mockDbService);
     permissionRepository = new PermissionRepository(mockDbService, mockLoggerInstance);
@@ -50,8 +51,11 @@ describe('PermissionRepository', () => {
 
   describe('constructor', () => {
     it('should set table, idColumn, and deletedAtColumn correctly', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((permissionRepository as any).table).toBe(permissionsTable);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((permissionRepository as any).idColumn).toBe(permissionsTable.id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((permissionRepository as any).deletedAtColumn).toBe(permissionsTable.deletedAt);
     });
   });

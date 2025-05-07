@@ -119,17 +119,23 @@ export class OpenApiService {
 
 **Aggregating Multiple Domains**
 
-Centralize all per-domain registration function calls within the `registerSchemas` function:
+Centralize all per-domain registration function calls within the `registerSchemas` function in `src/domains/openapi/openapi.register-schema.ts`:
 
 ```ts
-// src/domains/openapi/openapi.schema.ts
+// src/domains/openapi/openapi.register-schema.ts
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { registerUserSchemas } from '@src/domains/user/user.dto';
+import { registerAuthSchemas } from '@src/domains/auth/auth.dto';
+import { registerRoleSchemas } from '@src/domains/role/role.dto'; // Example for Roles
+import { registerPermissionSchemas } from '@src/domains/permission/permission.dto'; // Example for Permissions
 // import other registerXxxSchemas...
 
 /** Registers all domain Zod schemas with OpenAPI registry. */
 export function registerSchemas(registry: OpenAPIRegistry): void {
   registerUserSchemas(registry);
+  registerAuthSchemas(registry);
+  registerRoleSchemas(registry); // Call for Roles
+  registerPermissionSchemas(registry); // Call for Permissions
   // registerProductSchemas(registry);
   // registerOrderSchemas(registry);
 }
@@ -138,7 +144,7 @@ export function registerSchemas(registry: OpenAPIRegistry): void {
 **Flow when adding a new DTO:**
 
 1. In your new DTO file, define `export function registerYourDtoSchemas(registry: OpenAPIRegistry) { /*…*/ }`.
-2. Add an import and call to your helper in `src/domains/openapi/openapi.schema.ts` within the `registerSchemas` function.
+2. Add an import and call to your helper in `src/domains/openapi/openapi.register-schema.ts` within the `registerSchemas` function.
 3. `OpenApiService` now automatically picks up your new schemas via its call to `registerSchemas(registry)`.
 
 ---
@@ -185,4 +191,6 @@ export function registerSchemas(registry: OpenAPIRegistry): void {
 
 ## Example: Annotated User Controller
 
-See [`src/domains/user/user.controller.ts`](../src/domains/user/user.controller.ts) for a fully annotated example following these best practices.
+See [`src/domains/user/user.controller.ts`](../src/domains/user/user.controller.ts) for a fully annotated example following these best practices. The `UserController` now also includes endpoints for managing user-role associations.
+
+Additionally, [`src/domains/role/role.controller.ts`](../src/domains/role/role.controller.ts) and [`src/domains/permission/permission.controller.ts`](../src/domains/permission/permission.controller.ts) provide comprehensive examples of annotated controllers for the Role-Based Access Control (RBAC) system.

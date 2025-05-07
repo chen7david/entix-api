@@ -1,6 +1,6 @@
 import { DatabaseService } from '@shared/services/database/database.service';
 import { ConfigService } from '@shared/services/config/config.service';
-import { users } from '@domains/user/user.schema';
+import { usersTable } from '@domains/user/user.schema';
 
 /**
  * Example seed script for Drizzle ORM.
@@ -11,7 +11,7 @@ async function seed() {
   const dbService = new DatabaseService(configService);
 
   // Example: Insert a user
-  await dbService.db.insert(users).values({
+  await dbService.db.insert(usersTable).values({
     email: 'admin@example.com',
     username: 'Admin',
   });
