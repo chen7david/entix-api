@@ -22,6 +22,14 @@ export const CreateUserDto = z
      * @example StrongPassword123!
      */
     password: z.string().min(8).openapi({ example: 'StrongPassword123!' }),
+    /**
+     * Optional user attributes for Cognito.
+     * @example { "custom:department": "Engineering" }
+     */
+    attributes: z
+      .record(z.string())
+      .optional()
+      .openapi({ example: { 'custom:department': 'Engineering' } }),
   })
   .openapi('CreateUserDto', { description: 'Data required to create a new user.' });
 
@@ -153,3 +161,15 @@ export function registerUserSchemas(registry: OpenAPIRegistry): void {
   registry.register('AssignRoleToUserDto', AssignRoleToUserDto);
   registry.register('RemoveRoleFromUserParamsDto', RemoveRoleFromUserParamsDto);
 }
+
+/**
+ * Represents the combined result of creating a user in Cognito and the local database.
+ */
+export type CreateUserResultType = {
+  /** The created user entity from the local database. */
+  user: import('@domains/user/user.model').User;
+  /** The confirmation status of the user in Cognito. */
+  cognitoUserConfirmed: boolean | undefined;
+  /** The Cognito unique identifier for the user. */
+  cognitoSub: string | undefined;
+};

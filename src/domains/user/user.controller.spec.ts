@@ -152,9 +152,13 @@ describe('UsersController', () => {
     };
 
     it('should create and return a new user', async () => {
-      mockUserService.create.mockResolvedValue(createdUserFromService);
+      mockUserService.create.mockResolvedValue({
+        user: createdUserFromService,
+        cognitoUserConfirmed: false, // Example value for the mock
+        cognitoSub: createdUserFromService.cognito_sub ?? undefined, // Handle null to undefined conversion
+      });
       const result = await usersController.create(createDtoWithPassword);
-      expect(result).toEqual(expectedCreatedUserDtoShape); // Compare with DTO shape
+      expect(result).toEqual(expectedCreatedUserDtoShape); // This assertion remains the same as controller maps it back
       expect(mockUserService.create).toHaveBeenCalledWith(createDtoWithPassword);
     });
   });

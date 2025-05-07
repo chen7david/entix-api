@@ -1,6 +1,7 @@
 import { Injectable } from '@shared/utils/ioc.util';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { CognitoService } from '@shared/services/cognito/cognito.service';
+import { UserService } from '@domains/user/user.service';
 import {
   SignUpBody,
   ForgotPasswordBody,
@@ -30,6 +31,7 @@ import {
   DeleteUserResult,
 } from '@shared/types/cognito.type';
 import { Logger } from '@shared/types/logger.type';
+import { CreateUserDto } from '@domains/user/user.dto';
 
 /**
  * Service for authentication and user management using AWS Cognito.
@@ -38,19 +40,36 @@ import { Logger } from '@shared/types/logger.type';
 export class AuthService {
   private readonly logger: Logger;
 
+  // eslint-disable-next-line max-params
   constructor(
     private readonly cognitoService: CognitoService,
     private readonly loggerService: LoggerService,
+    private readonly userService: UserService,
   ) {
     this.logger = this.loggerService.component('AuthService');
   }
 
   /**
-   * Registers a new user.
+   * Registers a new user by creating them in Cognito and the local database via UserService.
+   * @param body - The signup data including username, email, password, and optional attributes.
+   * @returns A promise resolving to the signup result including user confirmation status and Cognito sub.
    */
   async signUp(body: SignUpBody): Promise<SignUpResult> {
-    this.logger.info('signUp called', { username: body.username });
-    return this.cognitoService.signUp(body);
+    this.logger.info('AuthService signUp called', { username: body.username });
+
+    const createUserDto: CreateUserDto = {
+      username: body.username,
+      email: body.email,
+      password: body.password,
+      attributes: body.attributes,
+    };
+
+    const { cognitoUserConfirmed, cognitoSub } = await this.userService.create(createUserDto);
+
+    return {
+      userConfirmed: cognitoUserConfirmed,
+      sub: cognitoSub,
+    };
   }
 
   /**

@@ -3,7 +3,7 @@ import { Logger } from '@shared/types/logger.type';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { UserRepository } from '@domains/user/user.repository';
 import { User, UserId } from '@domains/user/user.model';
-import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
+import { CreateUserDto, UpdateUserDto, type CreateUserResultType } from '@domains/user/user.dto';
 import { NotFoundError, ConflictError, BadRequestError } from '@shared/utils/error/error.util';
 import { CognitoService } from '@shared/services/cognito/cognito.service';
 import { mapCognitoErrorToAppError } from '@shared/utils/error/cognito-error.util';
@@ -66,28 +66,32 @@ export class UserService {
   /**
    * Creates a new user in Cognito and then in the local database.
    * @param data - Data for creating the user (email, username, password)
-   * @returns Promise resolving to the created User object (local representation)
+   * @returns Promise resolving to an object containing the created User, cognitoUserConfirmed status, and cognitoSub.
    * @throws ConflictError if username or email already exists in Cognito or locally
    * @throws BadRequestError for invalid parameters (e.g., password policy)
    */
-  async create(data: CreateUserDto): Promise<User> {
+  async create(data: CreateUserDto): Promise<CreateUserResultType> {
     this.logger.info('Attempting to create user in Cognito', {
       username: data.username,
       email: data.email,
     });
 
     let cognitoUserSub: string | undefined;
+    let cognitoUserConfirmed: boolean | undefined;
 
     try {
       const cognitoResult = await this.cognitoService.signUp({
         username: data.username,
         email: data.email,
         password: data.password,
+        attributes: data.attributes,
       });
       cognitoUserSub = cognitoResult.sub;
+      cognitoUserConfirmed = cognitoResult.userConfirmed; // Capture this
       this.logger.info('User successfully created in Cognito', {
         username: data.username,
         sub: cognitoUserSub,
+        confirmed: cognitoUserConfirmed,
       });
     } catch (error) {
       this.logger.error('Cognito signUp failed', { error });
@@ -109,6 +113,8 @@ export class UserService {
       email: data.email,
       username: data.username,
       cognito_sub: cognitoUserSub,
+      // isActive could be set based on cognitoUserConfirmed or other logic for admin creation
+      // For now, assuming default isActive behavior from schema or repository.
     };
 
     try {
@@ -121,7 +127,11 @@ export class UserService {
         id: newUser.id,
         username: newUser.username,
       });
-      return newUser;
+      return {
+        user: newUser,
+        cognitoUserConfirmed,
+        cognitoSub: cognitoUserSub,
+      };
     } catch (dbError: unknown) {
       this.logger.error('Local database user creation failed', {
         error: dbError,

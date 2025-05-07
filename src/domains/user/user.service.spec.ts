@@ -172,11 +172,16 @@ describe('UserService', () => {
         username: createDto.username,
         email: createDto.email,
         password: createDto.password,
+        attributes: createDto.attributes, // Ensure attributes are checked if CreateUserDto has them
       });
       expect(mockUserRepository.create).toHaveBeenCalledWith(
         expect.objectContaining(expectedUserPayloadToRepo),
       );
-      expect(result).toEqual(createdUserFromRepo);
+      expect(result).toEqual({
+        user: createdUserFromRepo,
+        cognitoUserConfirmed: cognitoSignUpResult.userConfirmed,
+        cognitoSub: cognitoSignUpResult.sub,
+      });
     });
 
     it('should throw ConflictError if Cognito signUp throws UsernameExistsException', async () => {

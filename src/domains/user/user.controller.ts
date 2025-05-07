@@ -124,8 +124,8 @@ export class UsersController {
   @UseBefore(validateBody(CreateUserDto))
   async create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
     this.logger.info('Creating user', { email: createUserDto.email });
-    const user = await this.userService.create(createUserDto);
-    return toUserDto(user);
+    const { user: createdUser } = await this.userService.create(createUserDto);
+    return toUserDto(createdUser);
   }
 
   /**
