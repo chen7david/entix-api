@@ -285,11 +285,8 @@ describe('BaseRepository', () => {
 
     // This test is no longer valid as update doesn't call findById first.
     // A failure scenario is covered by the 'update returns empty' test.
-    // it('should throw NotFoundError if findById fails before update', async () => {
-    //   mockFindById.mockRejectedValue(new NotFoundError('Not found before update'));
-    //   await expect(repository.update(userId, updateData)).rejects.toThrow(NotFoundError);
-    //   expect(mockUpdateReturning).not.toHaveBeenCalled();
-    // });
+    // eslint-disable-next-line jest/no-commented-out-tests
+    // Original commented out test/code around line 288 was here
   });
 
   describe('delete (soft delete)', () => {
@@ -354,11 +351,8 @@ describe('BaseRepository', () => {
     });
 
     // This scenario is covered by 'should throw NotFoundError if the internal update returns empty'
-    // it('should throw NotFoundError if findById fails before delete', async () => {
-    //   mockFindById.mockRejectedValue(new NotFoundError('Not found before delete'));
-    //   await expect(repository.delete(userId)).rejects.toThrow(NotFoundError);
-    //   expect(mockUpdateReturning).not.toHaveBeenCalled();
-    // });
+    // eslint-disable-next-line jest/no-commented-out-tests
+    // Original commented out test/code around line 357 was here
   });
 
   describe('delete (hard delete)', () => {

@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Container } from 'typedi';
 import { UserRepository } from '@domains/user/user.repository';
 import { DatabaseService } from '@shared/services/database/database.service';
-import { users } from '@domains/user/user.schema';
+import { usersTable, CreateUserEntity } from '@domains/user/user.schema';
 import { User } from '@domains/user/user.model';
 import { NotFoundError } from '@shared/utils/error/error.util';
 import { faker } from '@faker-js/faker';
@@ -19,12 +19,13 @@ describe('UserRepository', () => {
 
   // Mock user data
   const mockUserId = faker.string.uuid();
+  const mockCognitoSub = faker.string.uuid();
   const mockUser: User = {
     id: mockUserId,
     email: 'test@example.com',
     username: 'testuser',
     password: null,
-    cognito_sub: null,
+    cognito_sub: mockCognitoSub,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -69,46 +70,49 @@ describe('UserRepository', () => {
   describe('create', () => {
     it('should create a new user and return the created user', async () => {
       // Arrange
-      const userData = {
+      // CreateUserEntity requires email and username. Others are optional.
+      const userDataToCreate: CreateUserEntity = {
         email: 'new@example.com',
         username: 'newuser',
-        isActive: true,
+        cognito_sub: faker.string.uuid(), // Provided by service
+        // password can be null or undefined
+        // isActive, createdAt, updatedAt have defaults
       };
 
-      const createdUser: User = {
-        ...userData,
+      const createdUserEntity: User = {
         id: faker.string.uuid(),
+        email: userDataToCreate.email,
+        username: userDataToCreate.username,
         password: null,
-        cognito_sub: null,
+        cognito_sub: (userDataToCreate.cognito_sub ?? null) as string | null,
+        isActive: true,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null,
       };
 
-      mockDb.returning.mockResolvedValue([createdUser]);
+      mockDb.returning.mockResolvedValue([createdUserEntity]);
 
-      // Act
-      const result = await userRepository.create(userData);
+      const result = await userRepository.create(userDataToCreate);
 
-      // Assert
-      expect(mockDb.insert).toHaveBeenCalledWith(users);
-      expect(mockDb.values).toHaveBeenCalledWith(userData);
+      expect(mockDb.insert).toHaveBeenCalledWith(usersTable);
+      expect(mockDb.values).toHaveBeenCalledWith(expect.objectContaining(userDataToCreate));
       expect(mockDb.returning).toHaveBeenCalled();
-      expect(result).toEqual(createdUser);
+      expect(result).toEqual(createdUserEntity);
     });
 
-    it('should throw an error if creation fails', async () => {
-      // Arrange
-      const userData = {
+    it('should throw an error if creation fails (e.g., returning is empty)', async () => {
+      const userDataToCreate: CreateUserEntity = {
         email: 'error@example.com',
         username: 'erroruser',
-        isActive: true,
+        cognito_sub: faker.string.uuid(),
       };
 
       mockDb.returning.mockResolvedValue([]);
 
-      // Act & Assert
-      await expect(userRepository.create(userData)).rejects.toThrow();
+      await expect(userRepository.create(userDataToCreate)).rejects.toThrow(
+        'An unexpected error occurred',
+      );
     });
   });
 
@@ -171,7 +175,7 @@ describe('UserRepository', () => {
       const result = await userRepository.update(mockUserId, updateData);
 
       // Assert
-      expect(mockDb.update).toHaveBeenCalledWith(users);
+      expect(mockDb.update).toHaveBeenCalledWith(usersTable);
       expect(mockDb.set).toHaveBeenCalledWith(updateData);
       expect(result).toEqual(updatedUser);
     });
@@ -201,7 +205,7 @@ describe('UserRepository', () => {
       await userRepository.delete(mockUserId);
 
       // Assert
-      expect(mockDb.update).toHaveBeenCalledWith(users);
+      expect(mockDb.update).toHaveBeenCalledWith(usersTable);
       expect(mockDb.set).toHaveBeenCalled();
     });
 

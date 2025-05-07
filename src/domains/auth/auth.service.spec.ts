@@ -1,47 +1,84 @@
 import { AuthService } from '@domains/auth/auth.service';
 import type { CognitoService } from '@shared/services/cognito/cognito.service';
 import type { LoggerService } from '@shared/services/logger/logger.service';
+import type { UserService } from '@domains/user/user.service';
+import type { CreateUserDto, CreateUserResultType } from '@domains/user/user.dto';
 import * as dto from '@domains/auth/auth.dto';
 import { createMockLogger } from '@tests/mocks/logger.service.mock';
 import { createMockCognitoService } from '@tests/mocks/cognito.service.mock';
+import { faker } from '@faker-js/faker';
 
 describe('AuthService', () => {
   let service: AuthService;
   let mockLogger: jest.Mocked<LoggerService>;
   let mockCognitoService: jest.Mocked<CognitoService>;
+  let mockUserService: jest.Mocked<UserService>;
 
   beforeEach(() => {
     mockLogger = createMockLogger();
     mockCognitoService = createMockCognitoService();
-
-    service = new AuthService(mockCognitoService, mockLogger);
+    mockUserService = {
+      create: jest.fn(),
+    } as unknown as jest.Mocked<UserService>;
+    service = new AuthService(mockCognitoService, mockLogger, mockUserService);
   });
 
-  /**
-   * Test signUp
-   */
-  it('signUp: should call cognitoService.signUp and return result', async () => {
-    const body: dto.SignUpBody = { username: 'user', email: 'a@b.com', password: 'password123' };
-    const result = await service.signUp(body);
+  // New tests for the refactored signUp method
+  describe('signUp', () => {
+    const signUpBody: dto.SignUpBody = {
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'Password123!',
+      attributes: { 'custom:city': 'TestCity' },
+    };
+    const expectedCreateUserDto: CreateUserDto = {
+      username: signUpBody.username,
+      email: signUpBody.email,
+      password: signUpBody.password,
+      attributes: signUpBody.attributes,
+    };
+    const mockUserServiceResult: CreateUserResultType = {
+      user: {
+        id: faker.string.uuid(),
+        email: signUpBody.email,
+        username: signUpBody.username,
+        cognito_sub: faker.string.uuid(),
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        password: null,
+        deletedAt: null,
+      },
+      cognitoUserConfirmed: false,
+      cognitoSub: faker.string.uuid(),
+    };
 
-    expect(result).toBeDefined();
-    expect(result.sub).toEqual(expect.any(String));
-    expect(mockCognitoService.signUp).toHaveBeenCalledWith(body);
-  });
+    it('should call userService.create with mapped DTO and return mapped SignUpResult', async () => {
+      mockUserService.create.mockResolvedValue(mockUserServiceResult);
+      const result = await service.signUp(signUpBody);
+      expect(mockUserService.create).toHaveBeenCalledWith(expectedCreateUserDto);
+      expect(result).toEqual({
+        userConfirmed: mockUserServiceResult.cognitoUserConfirmed,
+        sub: mockUserServiceResult.cognitoSub,
+      });
+      expect(mockCognitoService.signUp).not.toHaveBeenCalled();
+    });
 
-  it('signUp: should propagate errors', async () => {
-    const error = new Error('Cognito SignUp Failed');
-    mockCognitoService.signUp.mockRejectedValue(error);
-    await expect(
-      service.signUp({ username: 'u', email: 'e@e.com', password: 'pw' }),
-    ).rejects.toThrow(error);
-  });
+    it('should propagate errors from userService.create', async () => {
+      const error = new Error('UserService Create Failed');
+      mockUserService.create.mockRejectedValue(error);
+      await expect(service.signUp(signUpBody)).rejects.toThrow(error);
+    });
+  }); // End of describe('signUp')
+
+  // **** OLD signUp tests are explicitly NOT HERE ****
 
   /**
    * Test forgotPassword
    */
   it('forgotPassword: should call cognitoService.forgotPassword and return result', async () => {
     const body: dto.ForgotPasswordBody = { username: 'user' };
+    mockCognitoService.forgotPassword.mockResolvedValue({ codeDeliveryDetails: undefined });
     const result = await service.forgotPassword(body);
     expect(result).toEqual({ codeDeliveryDetails: undefined });
     expect(mockCognitoService.forgotPassword).toHaveBeenCalledWith(body);
@@ -62,6 +99,7 @@ describe('AuthService', () => {
       code: '123',
       newPassword: 'pw',
     };
+    mockCognitoService.confirmForgotPassword.mockResolvedValue({ success: true });
     const result = await service.confirmForgotPassword(body);
     expect(result).toEqual({ success: true });
     expect(mockCognitoService.confirmForgotPassword).toHaveBeenCalledWith(body);
@@ -80,6 +118,7 @@ describe('AuthService', () => {
    */
   it('resendConfirmationCode: should call cognitoService.resendConfirmationCode and return result', async () => {
     const body: dto.ResendConfirmationCodeBody = { username: 'user' };
+    mockCognitoService.resendConfirmationCode.mockResolvedValue({ codeDeliveryDetails: undefined });
     const result = await service.resendConfirmationCode(body);
     expect(result).toEqual({ codeDeliveryDetails: undefined });
     expect(mockCognitoService.resendConfirmationCode).toHaveBeenCalledWith(body);
@@ -100,6 +139,7 @@ describe('AuthService', () => {
       previousPassword: 'old',
       proposedPassword: 'new',
     };
+    mockCognitoService.changePassword.mockResolvedValue({ success: true });
     const result = await service.changePassword(body);
     expect(result).toEqual({ success: true });
     expect(mockCognitoService.changePassword).toHaveBeenCalledWith(body);
@@ -112,4 +152,7 @@ describe('AuthService', () => {
       service.changePassword({ accessToken: 't', previousPassword: 'o', proposedPassword: 'n' }),
     ).rejects.toThrow(error);
   });
-});
+
+  // Tests for confirmSignUp, signOut, refreshToken, login, getMe, updateMe, deleteMe would follow a similar pattern,
+  // using mockCognitoService directly as AuthService delegates to it for these.
+}); // End of describe('AuthService')
