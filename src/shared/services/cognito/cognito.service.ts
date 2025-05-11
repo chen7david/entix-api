@@ -40,6 +40,8 @@ import {
   UpdateUserAttributesResult,
   DeleteUserParams,
   DeleteUserResult,
+  SigninParams,
+  SigninResult,
 } from '@shared/types/cognito.type';
 
 /**
@@ -52,7 +54,7 @@ type CognitoConfig = {
 };
 @Injectable()
 export class CognitoService {
-  private readonly cognito: CognitoIdentityProviderClient;
+  // private readonly cognito: CognitoIdentityProviderClient;
   private readonly config: CognitoConfig;
 
   /**
@@ -65,7 +67,7 @@ export class CognitoService {
   constructor(
     private readonly configService: ConfigService,
     private readonly logger: LoggerService,
-    cognitoClient: CognitoIdentityProviderClient,
+    private readonly cognito: CognitoIdentityProviderClient,
   ) {
     this.logger.component('CognitoService');
     this.config = {
@@ -73,7 +75,7 @@ export class CognitoService {
       userPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       clientId: this.configService.get('COGNITO_CLIENT_ID'),
     };
-    this.cognito = cognitoClient;
+    // this.cognito = cognitoClient;
   }
 
   /**
@@ -258,8 +260,17 @@ export class CognitoService {
   }
 
   /**
+   * Regular user signin (USER_PASSWORD_AUTH).
+   * @param params - Signin parameters
+   */
+  async signin(params: SigninParams): Promise<SigninResult> {
+    return this.login(params);
+  }
+
+  /**
    * Regular user login (USER_PASSWORD_AUTH).
    * @param params - Login parameters
+   * @deprecated Use signin instead
    */
   async login(params: LoginParams): Promise<LoginResult> {
     try {

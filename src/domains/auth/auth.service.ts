@@ -11,7 +11,7 @@ import {
   ConfirmSignUpBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
+  SigninBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
@@ -133,11 +133,11 @@ export class AuthService {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user signin (USER_PASSWORD_AUTH).
    */
-  async login(body: LoginBody): Promise<LoginResult> {
-    this.logger.info('login called', { username: body.username });
-    return this.cognitoService.login(body);
+  async signin(body: SigninBody): Promise<LoginResult> {
+    this.logger.info('signin called', { username: body.username });
+    return this.cognitoService.signin(body);
   }
 
   /**

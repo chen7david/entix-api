@@ -200,4 +200,39 @@ describe('AuthController', () => {
       await expect(controller.changePassword(body)).rejects.toThrow(error);
     });
   });
+
+  describe('signin', () => {
+    it('should call authService.signin and return the result', async () => {
+      const result = {
+        accessToken: 'valid-token',
+        refreshToken: 'refresh-token',
+        idToken: 'id-token',
+        expiresIn: 3600,
+        tokenType: 'Bearer',
+      };
+      mockAuthService.signin.mockResolvedValue(result);
+
+      const body = {
+        username: 'validuser',
+        password: 'password12345',
+      };
+
+      const response = await controller.signin(body);
+
+      expect(mockAuthService.signin).toHaveBeenCalledWith(body);
+      expect(response).toEqual(result);
+    });
+
+    it('should pass errors to caller', async () => {
+      const error = new AppError('Something went wrong');
+      mockAuthService.signin.mockRejectedValue(error);
+
+      const body = {
+        username: 'validuser',
+        password: 'password12345',
+      };
+
+      await expect(controller.signin(body)).rejects.toThrow(error);
+    });
+  });
 });

@@ -13,6 +13,8 @@ import type {
   GetUserResult,
   LoginParams,
   LoginResult,
+  SigninParams,
+  SigninResult,
   RefreshTokenParams,
   RefreshTokenResult,
   ResendConfirmationCodeParams,
@@ -63,6 +65,11 @@ export const createMockCognitoService = (
       .fn<Promise<RefreshTokenResult>, [RefreshTokenParams]>()
       .mockResolvedValue({ accessToken: 'mock-access-token', idToken: 'mock-id-token' }),
     login: jest.fn<Promise<LoginResult>, [LoginParams]>().mockResolvedValue({
+      accessToken: 'mock-access-token',
+      idToken: 'mock-id-token',
+      refreshToken: 'mock-refresh-token',
+    }),
+    signin: jest.fn<Promise<SigninResult>, [SigninParams]>().mockResolvedValue({
       accessToken: 'mock-access-token',
       idToken: 'mock-id-token',
       refreshToken: 'mock-refresh-token',

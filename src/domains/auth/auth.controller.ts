@@ -11,7 +11,7 @@ import {
   changePasswordBodySchema,
   signOutBodySchema,
   refreshTokenBodySchema,
-  loginBodySchema,
+  signinBodySchema,
   getMeHeadersSchema,
   updateMeBodySchema,
   deleteMeHeadersSchema,
@@ -21,7 +21,7 @@ import {
   ResendConfirmationCodeBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
+  SigninBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
@@ -195,17 +195,17 @@ export class AuthController {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user signin (USER_PASSWORD_AUTH).
    */
-  @Post('/login')
-  @UseBefore(validateBody(loginBodySchema))
-  @OpenAPI({ summary: 'User login (USER_PASSWORD_AUTH)' })
-  async login(@Body() body: LoginBody): Promise<LoginResult> {
-    this.logger.info('POST /auth/login', { username: body.username });
+  @Post('/signin')
+  @UseBefore(validateBody(signinBodySchema))
+  @OpenAPI({ summary: 'User signin (USER_PASSWORD_AUTH)' })
+  async signin(@Body() body: SigninBody): Promise<LoginResult> {
+    this.logger.info('POST /auth/signin', { username: body.username });
     try {
-      return await this.authService.login(body);
+      return await this.authService.signin(body);
     } catch (err) {
-      this.logger.error('Error in login', { err });
+      this.logger.error('Error in signin', { err });
       throw err;
     }
   }

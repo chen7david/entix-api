@@ -135,17 +135,17 @@ export type RefreshTokenResult = {
 };
 
 /**
- * Parameters for login method (USER_PASSWORD_AUTH).
+ * Parameters for signin method (USER_PASSWORD_AUTH).
  */
-export type LoginParams = {
+export type SigninParams = {
   username: string;
   password: string;
 };
 
 /**
- * Result type for login method.
+ * Result type for signin method.
  */
-export type LoginResult = {
+export type SigninResult = {
   accessToken: string;
   refreshToken?: string;
   idToken?: string;
@@ -200,3 +200,14 @@ export type DeleteUserParams = {
 export type DeleteUserResult = {
   success: boolean;
 };
+
+// For backwards compatibility with AWS SDK
+/**
+ * @deprecated Use SigninParams instead
+ */
+export type LoginParams = SigninParams;
+
+/**
+ * @deprecated Use SigninResult instead
+ */
+export type LoginResult = SigninResult;

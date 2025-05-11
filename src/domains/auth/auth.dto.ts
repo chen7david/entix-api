@@ -107,17 +107,17 @@ export const refreshTokenBodySchema = z.object({
 export type RefreshTokenBody = z.infer<typeof refreshTokenBodySchema>;
 
 /**
- * Zod schema for login request body.
+ * Zod schema for signin request body.
  */
-export const loginBodySchema = z.object({
+export const signinBodySchema = z.object({
   username: z.string().min(3),
   password: z.string().min(8),
 });
 
 /**
- * Type for login request body.
+ * Type for signin request body.
  */
-export type LoginBody = z.infer<typeof loginBodySchema>;
+export type SigninBody = z.infer<typeof signinBodySchema>;
 
 /**
  * Zod schema for getMe request headers (access token required).
@@ -168,7 +168,7 @@ export function registerAuthSchemas(registry: OpenAPIRegistry): void {
   registry.register('ConfirmSignUpBody', confirmSignUpBodySchema);
   registry.register('SignOutBody', signOutBodySchema);
   registry.register('RefreshTokenBody', refreshTokenBodySchema);
-  registry.register('LoginBody', loginBodySchema);
+  registry.register('SigninBody', signinBodySchema);
   registry.register('GetMeHeaders', getMeHeadersSchema);
   registry.register('UpdateMeBody', updateMeBodySchema);
   registry.register('DeleteMeHeaders', deleteMeHeadersSchema);
