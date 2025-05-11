@@ -1,5 +1,13 @@
-import { JsonController, Post, Body, Get, UseBefore, HttpCode } from 'routing-controllers';
-import { OpenAPI } from 'routing-controllers-openapi';
+import {
+  JsonController,
+  Post,
+  Body,
+  Get,
+  UseBefore,
+  HttpCode,
+  CurrentUser,
+} from 'routing-controllers';
+import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { AuthService } from '@domains/auth/auth.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { Logger } from '@shared/types/logger.type';
@@ -11,7 +19,7 @@ import {
   changePasswordBodySchema,
   signOutBodySchema,
   refreshTokenBodySchema,
-  loginBodySchema,
+  signinBodySchema,
   getMeHeadersSchema,
   updateMeBodySchema,
   deleteMeHeadersSchema,
@@ -21,7 +29,7 @@ import {
   ResendConfirmationCodeBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
+  SigninBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
@@ -38,13 +46,17 @@ import {
   ChangePasswordResult,
   SignOutResult,
   RefreshTokenResult,
-  LoginResult,
-  GetUserResult,
+  SigninResult,
   UpdateUserAttributesResult,
   DeleteUserResult,
   ConfirmSignUpResult,
 } from '@shared/types/cognito.type';
 import { Injectable } from '@shared/utils/ioc.util';
+import { AuthUser } from '@shared/services/auth/auth-verification.service';
+import { UserDto } from '@domains/user/user.dto';
+import { toUserDto } from '@domains/user/user.controller';
+import { UserService } from '@domains/user/user.service';
+import { UnauthorizedError } from '@shared/utils/error/error.util';
 /**
  * Controller for authentication and user management endpoints.
  */
@@ -54,9 +66,11 @@ import { Injectable } from '@shared/utils/ioc.util';
 export class AuthController {
   private readonly logger: Logger;
 
+  /* eslint-disable-next-line max-params */
   constructor(
     private readonly authService: AuthService,
     private readonly loggerService: LoggerService,
+    private readonly userService: UserService,
   ) {
     this.logger = this.loggerService.component('AuthController');
   }
@@ -195,36 +209,57 @@ export class AuthController {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user signin (USER_PASSWORD_AUTH).
    */
-  @Post('/login')
-  @UseBefore(validateBody(loginBodySchema))
-  @OpenAPI({ summary: 'User login (USER_PASSWORD_AUTH)' })
-  async login(@Body() body: LoginBody): Promise<LoginResult> {
-    this.logger.info('POST /auth/login', { username: body.username });
+  @Post('/signin')
+  @UseBefore(validateBody(signinBodySchema))
+  @OpenAPI({ summary: 'User signin (USER_PASSWORD_AUTH)' })
+  async signin(@Body() body: SigninBody): Promise<SigninResult> {
+    this.logger.info('POST /auth/signin', { username: body.username });
     try {
-      return await this.authService.login(body);
+      return await this.authService.signin(body);
     } catch (err) {
-      this.logger.error('Error in login', { err });
+      this.logger.error('Error in signin', { err });
       throw err;
     }
   }
 
   /**
+   * Get current user.
+   */
+  @OpenAPI({
+    summary: 'Get current user',
+    description: 'Returns the current user.',
+    tags: ['Users'],
+  })
+  @ResponseSchema('UserDto', { isArray: true })
+  @Get('/me')
+  async getMe(@CurrentUser() currUser: AuthUser): Promise<UserDto> {
+    this.logger.info('Fetching current user');
+
+    if (!currUser) {
+      throw new UnauthorizedError('Invalid token');
+    }
+
+    const user = await this.userService.findById(currUser.id);
+    return toUserDto(user);
+  }
+
+  /**
    * Get current user info (self-service, by access token).
    */
-  @Get('/me')
-  @UseBefore(validateBody(getMeHeadersSchema))
-  @OpenAPI({ summary: 'Get current user info (requires Authorization header)' })
-  async getMe(@Body() headers: GetMeHeaders): Promise<GetUserResult> {
-    this.logger.info('GET /auth/me');
-    try {
-      return await this.authService.getMe(headers);
-    } catch (err) {
-      this.logger.error('Error in getMe', { err });
-      throw err;
-    }
-  }
+  // @Get('/me')
+  // @UseBefore(validateBody(getMeHeadersSchema))
+  // @OpenAPI({ summary: 'Get current user info (requires Authorization header)' })
+  // async getMe(@Body() headers: GetMeHeaders): Promise<GetUserResult> {
+  //   this.logger.info('GET /auth/me');
+  //   try {
+  //     return await this.authService.getMe(headers);
+  //   } catch (err) {
+  //     this.logger.error('Error in getMe', { err });
+  //     throw err;
+  //   }
+  // }
 
   /**
    * Update current user attributes (self-service).

@@ -16,7 +16,7 @@ export function createMockAuthService(): jest.Mocked<AuthService> {
     changePassword: jest.fn(),
     signOut: jest.fn(),
     refreshToken: jest.fn(),
-    login: jest.fn(),
+    signin: jest.fn(),
     getMe: jest.fn(),
     updateMe: jest.fn(),
     deleteMe: jest.fn(),

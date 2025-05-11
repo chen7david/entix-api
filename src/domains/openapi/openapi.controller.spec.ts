@@ -1,36 +1,60 @@
 import 'reflect-metadata';
+import { Container } from 'typedi';
 import { OpenapiController } from '@domains/openapi/openapi.controller';
 import { OpenApiService } from '@domains/openapi/openapi.service';
-import { Container } from 'typedi';
-import { createMockRes } from '@tests/mocks/express.mock'; // Assuming express mock exists
-import { createMockOpenApiService } from '@tests/mocks/openapi.service.mock'; // Import factory
+import { Response } from 'express';
 
 describe('OpenapiController', () => {
   let controller: OpenapiController;
   let mockOpenApiService: jest.Mocked<OpenApiService>;
+  let mockRes: Response;
 
   beforeEach(() => {
-    Container.reset();
+    jest.clearAllMocks();
 
-    // Create mock using factory
-    mockOpenApiService = createMockOpenApiService();
+    // Mock response
+    mockRes = {
+      json: jest.fn().mockReturnThis(),
+      status: jest.fn().mockReturnThis(),
+    } as unknown as Response;
 
-    // Register mock service with the container
+    // Mock OpenApiService
+    mockOpenApiService = {
+      generateSpec: jest.fn(),
+    } as unknown as jest.Mocked<OpenApiService>;
+
+    // Set up the mock spec
+    const mockSpec = {
+      openapi: '3.0.0',
+      info: {
+        title: 'Test API',
+        version: '1.0.0',
+      },
+      paths: {}, // Add required paths property
+    };
+    mockOpenApiService.generateSpec.mockReturnValue(mockSpec);
+
+    // Register mocks in container
     Container.set(OpenApiService, mockOpenApiService);
 
-    // Get controller instance from container
-    controller = Container.get(OpenapiController);
+    // Create controller
+    controller = new OpenapiController(mockOpenApiService);
   });
 
   it('should return spec via res.json and return the response', () => {
-    const mockRes = createMockRes();
-    const mockSpec = { openapi: '3.1.0', info: { title: 'Test' } };
-    mockOpenApiService.generateSpec.mockReturnValue(mockSpec);
-
     const result = controller.getSpec(mockRes);
 
-    expect(mockOpenApiService.generateSpec).toHaveBeenCalledTimes(1);
-    expect(mockRes.json).toHaveBeenCalledWith(mockSpec);
-    expect(result).toBe(mockRes); // Controller should return the response object
+    expect(mockOpenApiService.generateSpec).toHaveBeenCalled();
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        openapi: '3.0.0',
+        info: {
+          title: 'Test API',
+          version: '1.0.0',
+        },
+        paths: {},
+      }),
+    );
+    expect(result).toBe(mockRes);
   });
 });

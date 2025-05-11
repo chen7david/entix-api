@@ -3,8 +3,14 @@ import { Logger } from '@shared/types/logger.type';
 import { LoggerService } from '@shared/services/logger/logger.service';
 import { UserRepository } from '@domains/user/user.repository';
 import { User, UserId } from '@domains/user/user.model';
-import { CreateUserDto, UpdateUserDto } from '@domains/user/user.dto';
-import { NotFoundError } from '@shared/utils/error/error.util';
+import { CreateUserDto, UpdateUserDto, type CreateUserResultType } from '@domains/user/user.dto';
+import { NotFoundError, ConflictError, BadRequestError } from '@shared/utils/error/error.util';
+import { CognitoService } from '@shared/services/cognito/cognito.service';
+import { mapCognitoErrorToAppError } from '@shared/utils/error/cognito-error.util';
+import { CreateUserEntity } from '@domains/user/user.schema';
+import { RoleDto } from '@domains/role/role.dto';
+import { RoleService } from '@domains/role/role.service';
+import { RoleId } from '@domains/role/role.model';
 
 /**
  * Service responsible for user-related business logic.
@@ -18,10 +24,15 @@ export class UserService {
    * Creates an instance of UserService.
    * @param loggerService - Logger service for creating child loggers
    * @param userRepository - Repository for user data access
+   * @param cognitoService - Service for Cognito interactions
+   * @param roleService - Service for role-related operations
    */
+  // eslint-disable-next-line max-params
   constructor(
     private readonly loggerService: LoggerService,
     private readonly userRepository: UserRepository,
+    private readonly cognitoService: CognitoService,
+    private readonly roleService: RoleService,
   ) {
     this.logger = this.loggerService.component('UserService');
   }
@@ -52,14 +63,103 @@ export class UserService {
     return user;
   }
 
+  async findByCognitoSub(cognitoSub: string): Promise<User> {
+    this.logger.info('Finding user by Cognito Sub', { cognitoSub });
+    const user = await this.userRepository.findByCognitoSub(cognitoSub);
+
+    if (!user) {
+      throw new NotFoundError(`User with Cognito Sub ${cognitoSub} not found`);
+    }
+
+    return user;
+  }
+
   /**
-   * Creates a new user.
-   * @param data - Data for creating the user
-   * @returns Promise resolving to the created User object
+   * Creates a new user in Cognito and then in the local database.
+   * @param data - Data for creating the user (email, username, password)
+   * @returns Promise resolving to an object containing the created User, cognitoUserConfirmed status, and cognitoSub.
+   * @throws ConflictError if username or email already exists in Cognito or locally
+   * @throws BadRequestError for invalid parameters (e.g., password policy)
    */
-  async create(data: CreateUserDto): Promise<User> {
-    this.logger.info('Creating user', { email: data.email });
-    return this.userRepository.create(data);
+  async create(data: CreateUserDto): Promise<CreateUserResultType> {
+    this.logger.info('Attempting to create user in Cognito', {
+      username: data.username,
+      email: data.email,
+    });
+
+    let cognitoUserSub: string | undefined;
+    let cognitoUserConfirmed: boolean | undefined;
+
+    try {
+      const cognitoResult = await this.cognitoService.signUp({
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        attributes: data.attributes,
+      });
+      cognitoUserSub = cognitoResult.sub;
+      cognitoUserConfirmed = cognitoResult.userConfirmed; // Capture this
+      this.logger.info('User successfully created in Cognito', {
+        username: data.username,
+        sub: cognitoUserSub,
+        confirmed: cognitoUserConfirmed,
+      });
+    } catch (error) {
+      this.logger.error('Cognito signUp failed', { error });
+      throw mapCognitoErrorToAppError(error);
+    }
+
+    if (!cognitoUserSub) {
+      this.logger.error('Cognito user sub is undefined after signUp call', {
+        username: data.username,
+      });
+      throw new BadRequestError('Failed to retrieve Cognito user identifier after sign up.');
+    }
+
+    const userToCreate: Omit<
+      CreateUserEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'isActive' | 'password'
+    > &
+      Partial<Pick<CreateUserEntity, 'isActive' | 'password'>> = {
+      email: data.email,
+      username: data.username,
+      cognito_sub: cognitoUserSub,
+      // isActive could be set based on cognitoUserConfirmed or other logic for admin creation
+      // For now, assuming default isActive behavior from schema or repository.
+    };
+
+    try {
+      this.logger.info('Creating user in local database', {
+        username: data.username,
+        cognito_sub: cognitoUserSub,
+      });
+      const newUser = await this.userRepository.create(userToCreate as CreateUserEntity);
+      this.logger.info('User successfully created in local database', {
+        id: newUser.id,
+        username: newUser.username,
+      });
+      return {
+        user: newUser,
+        cognitoUserConfirmed,
+        cognitoSub: cognitoUserSub,
+      };
+    } catch (dbError: unknown) {
+      this.logger.error('Local database user creation failed', {
+        error: dbError,
+        username: data.username,
+      });
+      if (
+        typeof dbError === 'object' &&
+        dbError !== null &&
+        'code' in dbError &&
+        (dbError as { code: unknown }).code === '23505'
+      ) {
+        throw new ConflictError(
+          `User with username '${data.username}' or email '${data.email}' already exists.`,
+        );
+      }
+      throw dbError;
+    }
   }
 
   /**
@@ -90,5 +190,51 @@ export class UserService {
     await this.findById(id);
 
     await this.userRepository.delete(id);
+  }
+
+  /**
+   * Retrieves all roles assigned to a specific user.
+   * @param userId The ID of the user.
+   * @returns Promise resolving to an array of RoleDto objects.
+   * @throws NotFoundError if the user doesn't exist.
+   */
+  async getRolesForUser(userId: UserId): Promise<RoleDto[]> {
+    this.logger.info('Getting roles for user', { userId });
+    await this.findById(userId); // Ensure user exists
+    const roles = await this.userRepository.getRolesForUser(userId);
+    // Map RoleEntity to RoleDto (omitting deletedAt etc.)
+    return roles.map((r) => ({
+      id: r.id,
+      name: r.name,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+  }
+
+  /**
+   * Assigns a role to a user.
+   * @param userId The ID of the user.
+   * @param roleId The ID of the role to assign.
+   * @throws NotFoundError if the user or role doesn't exist.
+   */
+  async assignRoleToUser(userId: UserId, roleId: RoleId): Promise<void> {
+    this.logger.info('Assigning role to user', { userId, roleId });
+    await this.findById(userId); // Ensure user exists
+    await this.roleService.findById(roleId); // Ensure role exists
+    await this.userRepository.assignRole(userId, roleId);
+    this.logger.info('Role assigned to user successfully', { userId, roleId });
+  }
+
+  /**
+   * Removes a role from a user.
+   * @param userId The ID of the user.
+   * @param roleId The ID of the role to remove.
+   * @throws NotFoundError if the user doesn't exist.
+   */
+  async removeRoleFromUser(userId: UserId, roleId: RoleId): Promise<void> {
+    this.logger.info('Removing role from user', { userId, roleId });
+    await this.findById(userId); // Ensure user exists
+    await this.userRepository.removeRole(userId, roleId);
+    this.logger.info('Role removed from user successfully', { userId, roleId });
   }
 }
