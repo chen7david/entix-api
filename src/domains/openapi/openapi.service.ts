@@ -1,38 +1,53 @@
 import { Injectable } from '@shared/utils/ioc.util';
-import { getMetadataArgsStorage } from 'routing-controllers';
-import { routingControllersToSpec } from 'routing-controllers-openapi';
 import { OpenAPIRegistry, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
-import { registerSchemas } from '@domains/openapi/openapi.register-schema';
+import { LoggerService } from '@shared/services/logger/logger.service';
+import { Logger } from '@shared/types/logger.type';
+import { createApiRegistry } from '@domains/openapi/openapi.register-schema';
 
 /**
  * Service responsible for generating the OpenAPI JSON spec.
  */
 @Injectable()
 export class OpenApiService {
+  private readonly registry: OpenAPIRegistry;
+  private readonly logger: Logger;
+
+  constructor(private readonly loggerService: LoggerService) {
+    this.logger = this.loggerService.component('OpenApiService');
+    this.registry = createApiRegistry();
+  }
+
   /**
-   * Generate and return the OpenAPI specification.
+   * Generates an OpenAPI specification document
+   * @returns OpenAPI specification document
    */
-  public generateSpec(): unknown {
-    // Register all Zod schemas
-    const registry = new OpenAPIRegistry();
-    registerSchemas(registry);
+  public generateSpec(): ReturnType<OpenApiGeneratorV3['generateDocument']> {
+    this.logger.debug('Generating OpenAPI spec...');
 
-    // Generate components from Zod definitions
-    const generator = new OpenApiGeneratorV3(registry.definitions);
-    const components = generator.generateComponents();
+    const generator = new OpenApiGeneratorV3(this.registry.definitions);
 
-    // Generate the full OpenAPI spec from routing-controllers metadata
-    return routingControllersToSpec(
-      getMetadataArgsStorage(),
-      {},
-      {
-        components: components.components,
-        info: {
-          title: 'Entix API',
-          version: '1.0.0',
-          description: 'OpenAPI documentation for Entix API',
-        },
+    // Generate the OpenAPI specification
+    const document = generator.generateDocument({
+      openapi: '3.0.0',
+      info: {
+        title: 'Entix API',
+        version: '1.0.0',
+        description: 'API documentation for Entix API',
       },
-    );
+      servers: [
+        {
+          url: 'http://localhost:3000',
+          description: 'API server',
+        },
+      ],
+      // Add global security - require Bearer auth for all endpoints unless explicitly overridden
+      security: [
+        {
+          BearerAuth: [],
+        },
+      ],
+    });
+
+    return document;
   }
 }

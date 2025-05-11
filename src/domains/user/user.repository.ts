@@ -87,4 +87,12 @@ export class UserRepository extends BaseRepository<typeof usersTable, UserEntity
   // Add any user-specific methods here if needed in the future.
   // For example:
   // async findByEmail(email: string): Promise<User | null> { ... }
+  async findByCognitoSub(cognitoSub: string): Promise<UserEntity | null> {
+    this.loggerService.info('Finding user by Cognito Sub', { cognitoSub });
+    const users = await this.dbService.db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.cognito_sub, cognitoSub));
+    return users[0] || null;
+  }
 }

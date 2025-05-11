@@ -28,7 +28,7 @@ import {
 import { RoleDto } from '@domains/role/role.dto';
 
 /** Helper to map User entity to UserDto */
-const toUserDto = (user: User): UserDto => ({
+export const toUserDto = (user: User): UserDto => ({
   id: user.id,
   email: user.email,
   username: user.username,

@@ -1,69 +1,104 @@
 # API Endpoints Documentation
 
-## Authentication Endpoints
+This document outlines all endpoints in the Entix API, their request/response formats, and authentication requirements.
 
-### Endpoint: `POST /api/v1/auth/signup`
+## Authentication
 
-#### Description
+The API uses JWT tokens from AWS Cognito for authentication. Most endpoints require authentication.
 
-Registers a new user.
+### Obtaining a Token
 
-#### Request
+To use authenticated endpoints, first obtain a token:
 
-- **Body**:
+```
+POST /api/v1/auth/signin
+```
+
+**Request Body:**
 
 ```json
 {
-  "username": "validuser",
-  "email": "valid@example.com",
-  "password": "password12345"
+  "username": "user@example.com",
+  "password": "yourpassword"
 }
 ```
 
-#### Response
+**Response (200 OK):**
 
-- **Status Code**: `201 Created`
-- **Body**:
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJjd...",
+  "idToken": "eyJhb...",
+  "expiresIn": 3600,
+  "tokenType": "Bearer"
+}
+```
+
+**Error Response (401 Unauthorized):**
+
+```json
+{
+  "message": "Incorrect username or password",
+  "errorId": "8e3d9b3c-4a5f-44e2-a3bd-67fc43388a2a",
+  "type": "unauthorized",
+  "status": 401
+}
+```
+
+### Using the Token
+
+Include the token in the `Authorization` header:
+
+```
+Authorization: Bearer eyJhbG...
+```
+
+## Endpoints
+
+### Auth Endpoints
+
+#### Sign Up
+
+```
+POST /api/v1/auth/signup
+```
+
+**Request Body:**
+
+```json
+{
+  "username": "newuser@example.com",
+  "password": "newpassword123",
+  "email": "newuser@example.com"
+}
+```
+
+**Response (201 Created):**
 
 ```json
 {
   "userConfirmed": false,
-  "sub": "sub-123"
+  "userSub": "6c872a2a-35a7-43de-9bd7-c78e3d4e966b"
 }
 ```
 
-#### Error Responses
+#### Confirm Sign Up
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+POST /api/v1/auth/confirm-signup
+```
+
+**Request Body:**
 
 ```json
 {
-  "error": "Validation error"
+  "username": "newuser@example.com",
+  "confirmationCode": "123456"
 }
 ```
 
-### Endpoint: `POST /api/v1/auth/confirm-signup`
-
-#### Description
-
-Confirms user signup with confirmation code.
-
-#### Request
-
-- **Body**:
-
-```json
-{
-  "username": "validuser",
-  "code": "123456"
-}
-```
-
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
@@ -71,81 +106,80 @@ Confirms user signup with confirmation code.
 }
 ```
 
-#### Error Responses
+#### Sign In
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+POST /api/v1/auth/signin
+```
+
+See "Obtaining a Token" section above for request/response.
+
+#### Forgot Password
+
+```
+POST /api/v1/auth/forgot-password
+```
+
+**Request Body:**
 
 ```json
 {
-  "error": "Validation error"
+  "username": "user@example.com"
 }
 ```
 
-### Endpoint: `POST /api/v1/auth/forgot-password`
-
-#### Description
-
-Initiates forgot password flow.
-
-#### Request
-
-- **Body**:
-
-```json
-{
-  "username": "validuser"
-}
-```
-
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
   "codeDeliveryDetails": {
-    "destination": "test@example.com",
+    "destination": "u***@e***.com",
     "deliveryMedium": "EMAIL",
     "attributeName": "email"
   }
 }
 ```
 
-#### Error Responses
+#### Confirm Forgot Password
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+POST /api/v1/auth/confirm-forgot-password
+```
+
+**Request Body:**
 
 ```json
 {
-  "error": "Validation error"
+  "username": "user@example.com",
+  "password": "newpassword123",
+  "confirmationCode": "123456"
 }
 ```
 
-### Endpoint: `POST /api/v1/auth/confirm-forgot-password`
-
-#### Description
-
-Confirms a new password using a confirmation code.
-
-#### Request
-
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
-  "username": "validuser",
-  "code": "123456",
+  "success": true
+}
+```
+
+#### Change Password
+
+```
+POST /api/v1/auth/change-password
+```
+
+**Request Body:**
+
+```json
+{
+  "oldPassword": "currentpassword",
   "newPassword": "newpassword123"
 }
 ```
 
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
@@ -153,232 +187,636 @@ Confirms a new password using a confirmation code.
 }
 ```
 
-#### Error Responses
+#### Refresh Token
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+POST /api/v1/auth/refresh-token
+```
+
+**Request Body:**
 
 ```json
 {
-  "error": "Validation error"
+  "refreshToken": "eyJjd..."
 }
 ```
 
-### Endpoint: `POST /api/v1/auth/resend-confirmation-code`
-
-#### Description
-
-Resends the confirmation code for user sign-up.
-
-#### Request
-
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
-  "username": "validuser"
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJjd...",
+  "idToken": "eyJhb...",
+  "expiresIn": 3600,
+  "tokenType": "Bearer"
 }
 ```
 
-#### Response
+#### Sign Out
 
-- **Status Code**: `200 OK`
-- **Body**:
+```
+POST /api/v1/auth/signout
+```
+
+**Request Body:**
 
 ```json
 {
-  "codeDeliveryDetails": {
-    "destination": "test@example.com",
-    "deliveryMedium": "EMAIL",
-    "attributeName": "email"
+  "refreshToken": "eyJjd..."
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true
+}
+```
+
+#### Get Current User
+
+```
+GET /api/v1/auth/me
+```
+
+**Authentication Required**: Yes
+
+**Response (200 OK):**
+
+```json
+{
+  "id": "user123",
+  "username": "user@example.com",
+  "email": "user@example.com",
+  "isActive": true,
+  "createdAt": "2023-07-14T12:00:00Z",
+  "updatedAt": "2023-07-14T12:00:00Z"
+}
+```
+
+### User Endpoints
+
+#### Get All Users
+
+```
+GET /api/v1/users
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:users' permission
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": "user123",
+    "username": "user@example.com",
+    "email": "user@example.com",
+    "isActive": true,
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
   }
-}
+]
 ```
 
-#### Error Responses
+#### Get User by ID
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+GET /api/v1/users/:id
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role, 'read:users' permission, or own user ID
+
+**Response (200 OK):**
 
 ```json
 {
-  "error": "Validation error"
+  "id": "user123",
+  "username": "user@example.com",
+  "email": "user@example.com",
+  "isActive": true,
+  "createdAt": "2023-07-14T12:00:00Z",
+  "updatedAt": "2023-07-14T12:00:00Z"
 }
 ```
 
-### Endpoint: `POST /api/v1/auth/change-password`
+#### Create User
 
-#### Description
+```
+POST /api/v1/users
+```
 
-Changes the password for the currently authenticated user.
+**Authentication Required**: Yes (admin only)  
+**Authorization Required**: Admin role or 'write:users' permission
 
-#### Request
-
-- **Body**:
+**Request Body:**
 
 ```json
 {
-  "accessToken": "validaccesstoken12345",
-  "previousPassword": "previouspassword12345",
-  "proposedPassword": "newpassword12345"
+  "username": "newuser@example.com",
+  "password": "newpassword123",
+  "email": "newuser@example.com"
 }
 ```
 
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (201 Created):**
 
 ```json
 {
-  "success": true
+  "id": "user124",
+  "username": "newuser@example.com",
+  "email": "newuser@example.com",
+  "isActive": true,
+  "createdAt": "2023-07-15T10:00:00Z",
+  "updatedAt": "2023-07-15T10:00:00Z"
 }
 ```
 
-#### Error Responses
+#### Update User
 
-- **Status Code**: `400 Bad Request`
-  - **Body**:
+```
+PUT /api/v1/users/:id
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role, 'write:users' permission, or own user ID
+
+**Request Body:**
 
 ```json
 {
-  "error": "Validation error"
+  "email": "updatedemail@example.com",
+  "isActive": true
 }
 ```
 
-## Health Endpoint
-
-### Endpoint: `GET /health`
-
-#### Description
-
-Checks the health status of the API.
-
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
-  "status": "ok",
-  "message": "API is running",
-  "timestamp": "2023-10-01T12:00:00Z"
+  "id": "user123",
+  "username": "user@example.com",
+  "email": "updatedemail@example.com",
+  "isActive": true,
+  "createdAt": "2023-07-14T12:00:00Z",
+  "updatedAt": "2023-07-15T11:00:00Z"
 }
 ```
 
-## Role Management Endpoints
+#### Delete User
 
-### Endpoint: `GET /api/v1/roles`
+```
+DELETE /api/v1/users/:id
+```
 
-#### Description
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'delete:users' permission
 
-Retrieves a list of all roles.
+**Response (204 No Content)**
 
-#### Response
+### Role Endpoints
 
-- **Status Code**: `200 OK`
-- **Body**:
+#### Get All Roles
+
+```
+GET /api/v1/roles
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:roles' permission
+
+**Response (200 OK):**
 
 ```json
 [
   {
     "id": 1,
-    "name": "Administrator",
-    "createdAt": "2023-10-01T12:00:00Z",
-    "updatedAt": "2023-10-01T12:00:00Z"
+    "name": "admin",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "user",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
   }
 ]
 ```
 
-### Endpoint: `POST /api/v1/roles`
+#### Get Role by ID
 
-#### Description
-
-Creates a new role.
-
-#### Request
-
-- **Body**:
-
-```json
-{
-  "name": "NewRole"
-}
+```
+GET /api/v1/roles/:id
 ```
 
-#### Response
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:roles' permission
 
-- **Status Code**: `201 Created`
-- **Body**:
-
-```json
-{
-  "id": 2,
-  "name": "NewRole",
-  "createdAt": "2023-10-01T12:00:00Z",
-  "updatedAt": "2023-10-01T12:00:00Z"
-}
-```
-
-#### Error Responses
-
-- **Status Code**: `409 Conflict`
-  - **Body**:
-
-```json
-{
-  "error": "Role with this name already exists"
-}
-```
-
-### Endpoint: `PUT /api/v1/roles/:id`
-
-#### Description
-
-Updates an existing role by its ID.
-
-#### Request
-
-- **Body**:
-
-```json
-{
-  "name": "UpdatedRoleName"
-}
-```
-
-#### Response
-
-- **Status Code**: `200 OK`
-- **Body**:
+**Response (200 OK):**
 
 ```json
 {
   "id": 1,
-  "name": "UpdatedRoleName",
-  "createdAt": "2023-10-01T12:00:00Z",
-  "updatedAt": "2023-10-01T12:00:00Z"
+  "name": "admin",
+  "createdAt": "2023-07-14T12:00:00Z",
+  "updatedAt": "2023-07-14T12:00:00Z"
 }
 ```
 
-#### Error Responses
+#### Create Role
 
-- **Status Code**: `404 Not Found`
-  - **Body**:
+```
+POST /api/v1/roles
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:roles' permission
+
+**Request Body:**
 
 ```json
 {
-  "error": "Role not found"
+  "name": "moderator"
 }
 ```
 
-### Endpoint: `DELETE /api/v1/roles/:id`
+**Response (201 Created):**
 
-#### Description
+```json
+{
+  "id": 3,
+  "name": "moderator",
+  "createdAt": "2023-07-15T10:00:00Z",
+  "updatedAt": "2023-07-15T10:00:00Z"
+}
+```
 
-Deletes a role by its ID.
+#### Update Role
 
-#### Response
+```
+PUT /api/v1/roles/:id
+```
 
-- **Status Code**: `204 No Content`
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:roles' permission
+
+**Request Body:**
+
+```json
+{
+  "name": "supervisor"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 3,
+  "name": "supervisor",
+  "createdAt": "2023-07-15T10:00:00Z",
+  "updatedAt": "2023-07-15T11:00:00Z"
+}
+```
+
+#### Delete Role
+
+```
+DELETE /api/v1/roles/:id
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'delete:roles' permission
+
+**Response (204 No Content)**
+
+### Permission Endpoints
+
+#### Get All Permissions
+
+```
+GET /api/v1/permissions
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:permissions' permission
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "read:users",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "write:users",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  }
+]
+```
+
+#### Get Permission by ID
+
+```
+GET /api/v1/permissions/:id
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:permissions' permission
+
+**Response (200 OK):**
+
+```json
+{
+  "id": 1,
+  "name": "read:users",
+  "createdAt": "2023-07-14T12:00:00Z",
+  "updatedAt": "2023-07-14T12:00:00Z"
+}
+```
+
+#### Create Permission
+
+```
+POST /api/v1/permissions
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:permissions' permission
+
+**Request Body:**
+
+```json
+{
+  "name": "read:reports"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "id": 3,
+  "name": "read:reports",
+  "createdAt": "2023-07-15T10:00:00Z",
+  "updatedAt": "2023-07-15T10:00:00Z"
+}
+```
+
+### Role-Permission Management
+
+#### Get Permissions for Role
+
+```
+GET /api/v1/roles/:id/permissions
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'read:roles' permission
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "read:users",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "write:users",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  }
+]
+```
+
+#### Assign Permission to Role
+
+```
+POST /api/v1/roles/:id/permissions
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:roles' permission
+
+**Request Body:**
+
+```json
+{
+  "permissionId": 3
+}
+```
+
+**Response (204 No Content)**
+
+#### Remove Permission from Role
+
+```
+DELETE /api/v1/roles/:id/permissions/:permissionId
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:roles' permission
+
+**Response (204 No Content)**
+
+### User-Role Management
+
+#### Get Roles for User
+
+```
+GET /api/v1/users/:id/roles
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role, 'read:users' permission, or own user ID
+
+**Response (200 OK):**
+
+```json
+[
+  {
+    "id": 2,
+    "name": "user",
+    "createdAt": "2023-07-14T12:00:00Z",
+    "updatedAt": "2023-07-14T12:00:00Z"
+  }
+]
+```
+
+#### Assign Role to User
+
+```
+POST /api/v1/users/:id/roles
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:users' permission
+
+**Request Body:**
+
+```json
+{
+  "roleId": 3
+}
+```
+
+**Response (204 No Content)**
+
+#### Remove Role from User
+
+```
+DELETE /api/v1/users/:id/roles/:roleId
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role or 'write:users' permission
+
+**Response (204 No Content)**
+
+### Health Endpoint
+
+```
+GET /health
+```
+
+**Authentication Required**: No
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "ok",
+  "message": "Service is healthy",
+  "timestamp": "2023-07-15T12:00:00Z"
+}
+```
+
+### Demo Endpoints
+
+The demo endpoints showcase various authentication and authorization patterns:
+
+#### Public Endpoint
+
+```
+GET /api/v1/demo/public
+```
+
+**Authentication Required**: No
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "This is a public endpoint",
+  "timestamp": "2023-07-15T12:00:00Z"
+}
+```
+
+#### Authenticated Endpoint
+
+```
+GET /api/v1/demo/authenticated
+```
+
+**Authentication Required**: Yes (any authenticated user)
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "You are authenticated!",
+  "user": {
+    "id": "user123",
+    "username": "user@example.com",
+    "email": "user@example.com"
+  },
+  "timestamp": "2023-07-15T12:00:00Z"
+}
+```
+
+#### Admin-Only Endpoint
+
+```
+GET /api/v1/demo/admin
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: Admin role
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "You are an admin!",
+  "roles": ["admin", "user"],
+  "timestamp": "2023-07-15T12:00:00Z"
+}
+```
+
+#### Permission-Based Endpoint
+
+```
+GET /api/v1/demo/users
+```
+
+**Authentication Required**: Yes  
+**Authorization Required**: 'users:read' permission
+
+**Response (200 OK):**
+
+```json
+{
+  "message": "You have permission to read users!",
+  "permissions": ["users:read", "users:write"],
+  "timestamp": "2023-07-15T12:00:00Z"
+}
+```
+
+## Error Handling
+
+All endpoints follow a consistent error format:
+
+**Error Response:**
+
+```json
+{
+  "message": "Error message describing what went wrong",
+  "errorId": "unique-error-id",
+  "type": "error_type",
+  "status": 400
+}
+```
+
+Common error types include:
+
+- `validation` (422): Invalid request data
+- `notfound` (404): Resource not found
+- `conflict` (409): Resource already exists
+- `unauthorized` (401): Missing or invalid authentication
+- `forbidden` (403): Insufficient permissions
+- `internal` (500): Server error
+
+## Improvements
+
+Potential future improvements include:
+
+- Implementing rate limiting per endpoint
+- Adding comprehensive API versioning
+- Implementing a refresh token rotation strategy
+- Supporting multiple authentication methods
+- Enhancing permission granularity with resource-based permissions
+- Adding support for multi-factor authentication

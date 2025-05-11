@@ -63,6 +63,17 @@ export class UserService {
     return user;
   }
 
+  async findByCognitoSub(cognitoSub: string): Promise<User> {
+    this.logger.info('Finding user by Cognito Sub', { cognitoSub });
+    const user = await this.userRepository.findByCognitoSub(cognitoSub);
+
+    if (!user) {
+      throw new NotFoundError(`User with Cognito Sub ${cognitoSub} not found`);
+    }
+
+    return user;
+  }
+
   /**
    * Creates a new user in Cognito and then in the local database.
    * @param data - Data for creating the user (email, username, password)

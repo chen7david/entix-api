@@ -10,6 +10,7 @@ import { Container } from 'typedi';
 import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
+import { authorizationChecker, currentUserChecker } from '@shared/utils/auth/auth-checkers.util';
 /**
  * AppService configures the Express app with routing-controllers and DI.
  */
@@ -58,6 +59,8 @@ export class AppService {
       classTransformer: false, // Disable class-transformer
       middlewares: [ErrorHandlerMiddleware, NotFoundMiddleware],
       defaultErrorHandler: false,
+      authorizationChecker,
+      currentUserChecker,
     });
   }
 

@@ -16,3 +16,28 @@ export function registerSchemas(registry: OpenAPIRegistry): void {
   registerRoleSchemas(registry);
   registerPermissionSchemas(registry);
 }
+
+/**
+ * Creates and configures an OpenAPI registry with schemas
+ *
+ * @returns An OpenAPI registry with all API schemas registered
+ */
+export function createApiRegistry(): OpenAPIRegistry {
+  const registry = new OpenAPIRegistry();
+
+  // Add global security components
+  registry.registerComponent('securitySchemes', 'BearerAuth', {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    description: 'JWT token issued by Cognito upon successful authentication',
+  });
+
+  // Register all schemas
+  registerAuthSchemas(registry);
+  registerRoleSchemas(registry);
+  registerPermissionSchemas(registry);
+  registerUserSchemas(registry);
+
+  return registry;
+}
