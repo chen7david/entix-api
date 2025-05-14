@@ -20,7 +20,6 @@ import {
   changePasswordBodySchema,
   signOutBodySchema,
   refreshTokenBodySchema,
-  loginBodySchema,
   getMeHeadersSchema,
   updateMeBodySchema,
   deleteMeHeadersSchema,
@@ -30,13 +29,14 @@ import {
   ResendConfirmationCodeBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
   ChangePasswordBody,
   confirmSignUpBodySchema,
   ConfirmSignUpBody,
+  signInBodySchema,
+  SignInBody,
 } from '@domains/auth/auth.dto';
 import { validateBody } from '@shared/middleware/validation.middleware';
 import { validateHeaders } from '@shared/middleware/validation.middleware';
@@ -48,11 +48,11 @@ import {
   ChangePasswordResult,
   SignOutResult,
   RefreshTokenResult,
-  LoginResult,
   GetUserResult,
   UpdateUserAttributesResult,
   DeleteUserResult,
   ConfirmSignUpResult,
+  SignInResult,
 } from '@shared/types/cognito.type';
 import { Injectable } from '@shared/utils/ioc.util';
 /**
@@ -205,17 +205,17 @@ export class AuthController {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user sign-in (USER_PASSWORD_AUTH).
    */
-  @Post('/login')
-  @UseBefore(validateBody(loginBodySchema))
-  @OpenAPI({ summary: 'User login (USER_PASSWORD_AUTH)' })
-  async login(@Body() body: LoginBody): Promise<LoginResult> {
-    this.logger.info('POST /auth/login', { username: body.username });
+  @Post('/signin')
+  @UseBefore(validateBody(signInBodySchema))
+  @OpenAPI({ summary: 'User sign-in (USER_PASSWORD_AUTH)' })
+  async signin(@Body() body: SignInBody): Promise<SignInResult> {
+    this.logger.info('POST /auth/signin', { username: body.username });
     try {
-      return await this.authService.login(body);
+      return await this.authService.signin(body);
     } catch (err) {
-      this.logger.error('Error in login', { err });
+      this.logger.error('Error in signin', { err });
       throw err;
     }
   }

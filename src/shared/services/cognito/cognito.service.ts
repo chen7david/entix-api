@@ -32,14 +32,14 @@ import {
   SignOutResult,
   RefreshTokenParams,
   RefreshTokenResult,
-  LoginParams,
-  LoginResult,
   GetUserParams,
   GetUserResult,
   UpdateUserAttributesParams,
   UpdateUserAttributesResult,
   DeleteUserParams,
   DeleteUserResult,
+  SignInParams,
+  SignInResult,
 } from '@shared/types/cognito.type';
 
 /**
@@ -254,7 +254,7 @@ export class CognitoService {
       });
       const result = await this.cognito.send(command);
       return {
-        accessToken: result.AuthenticationResult?.AccessToken || '',
+        accessToken: result.AuthenticationResult?.AccessToken ?? '',
         idToken: result.AuthenticationResult?.IdToken,
         expiresIn: result.AuthenticationResult?.ExpiresIn,
         tokenType: result.AuthenticationResult?.TokenType,
@@ -265,10 +265,11 @@ export class CognitoService {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
-   * @param params - Login parameters
+   * Regular user sign-in (USER_PASSWORD_AUTH).
+   * @param params - SignIn parameters
+   * @returns Authentication tokens.
    */
-  async login(params: LoginParams): Promise<LoginResult> {
+  async signin(params: SignInParams): Promise<SignInResult> {
     try {
       const command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
@@ -279,12 +280,20 @@ export class CognitoService {
         },
       });
       const result = await this.cognito.send(command);
+
+      // Add null/undefined checks for AuthenticationResult and its properties
+      if (!result.AuthenticationResult) {
+        // This case should ideally be handled by mapCognitoErrorToAppError or a specific error
+        // For now, let's throw a generic error or return a shape that indicates failure clearly
+        throw new Error('Authentication failed: No authentication result received.');
+      }
+
       return {
-        accessToken: result.AuthenticationResult?.AccessToken || '',
-        refreshToken: result.AuthenticationResult?.RefreshToken,
-        idToken: result.AuthenticationResult?.IdToken,
-        expiresIn: result.AuthenticationResult?.ExpiresIn,
-        tokenType: result.AuthenticationResult?.TokenType,
+        accessToken: result.AuthenticationResult.AccessToken ?? '', // Ensure accessToken is always a string
+        refreshToken: result.AuthenticationResult.RefreshToken,
+        idToken: result.AuthenticationResult.IdToken,
+        expiresIn: result.AuthenticationResult.ExpiresIn,
+        tokenType: result.AuthenticationResult.TokenType,
       };
     } catch (error) {
       throw mapCognitoErrorToAppError(error);

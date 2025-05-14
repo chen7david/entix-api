@@ -135,17 +135,17 @@ export type RefreshTokenResult = {
 };
 
 /**
- * Parameters for login method (USER_PASSWORD_AUTH).
+ * Parameters for sign-in method (USER_PASSWORD_AUTH).
  */
-export type LoginParams = {
+export type SignInParams = {
   username: string;
   password: string;
 };
 
 /**
- * Result type for login method.
+ * Result type for sign-in method.
  */
-export type LoginResult = {
+export type SignInResult = {
   accessToken: string;
   refreshToken?: string;
   idToken?: string;
