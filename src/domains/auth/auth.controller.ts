@@ -1,4 +1,13 @@
-import { JsonController, Post, Body, Get, UseBefore, HttpCode } from 'routing-controllers';
+import {
+  JsonController,
+  Post,
+  Body,
+  Get,
+  UseBefore,
+  HttpCode,
+  Delete,
+  Patch,
+} from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { AuthService } from '@domains/auth/auth.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
@@ -30,6 +39,7 @@ import {
   ConfirmSignUpBody,
 } from '@domains/auth/auth.dto';
 import { validateBody } from '@shared/middleware/validation.middleware';
+import { validateHeaders } from '@shared/middleware/validation.middleware';
 import {
   SignUpResult,
   ForgotPasswordResult,
@@ -229,8 +239,8 @@ export class AuthController {
   /**
    * Update current user attributes (self-service).
    */
-  @Post('/me')
-  @UseBefore(validateBody(getMeHeadersSchema))
+  @Patch('/me')
+  @UseBefore(validateHeaders(getMeHeadersSchema))
   @UseBefore(validateBody(updateMeBodySchema))
   @OpenAPI({ summary: 'Update current user attributes (requires Authorization header)' })
   async updateMe(
@@ -249,7 +259,7 @@ export class AuthController {
   /**
    * Delete current user (self-service).
    */
-  @Post('/me/delete')
+  @Delete('/me')
   @UseBefore(validateBody(deleteMeHeadersSchema))
   @OpenAPI({ summary: 'Delete current user (requires Authorization header)' })
   async deleteMe(@Body() headers: DeleteMeHeaders): Promise<DeleteUserResult> {

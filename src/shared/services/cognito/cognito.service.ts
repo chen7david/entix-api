@@ -52,32 +52,35 @@ type CognitoConfig = {
 };
 @Injectable()
 export class CognitoService {
-  private readonly cognito: CognitoIdentityProviderClient;
   private readonly config: CognitoConfig;
 
   /**
    * Constructs a CognitoService.
    * @param configService - The config service
    * @param logger - The logger service
-   * @param cognitoClient - (Optional) Cognito client for dependency injection/testing
+   * @param cognito - Cognito client, now injected by TypeDI
    */
   // eslint-disable-next-line max-params
   constructor(
     private readonly configService: ConfigService,
     private readonly logger: LoggerService,
-    cognitoClient?: CognitoIdentityProviderClient,
+    private readonly cognito: CognitoIdentityProviderClient,
   ) {
     this.logger.component('CognitoService');
+    // Temporary debug log
+    this.logger.info('Inspecting injected Cognito Client in CognitoService constructor:', {
+      cognitoInstance: this.cognito,
+      constructorName: this.cognito?.constructor?.name,
+    });
+    // You can also use console.log for more direct output during dev if logger is complex:
+    // console.log('[CognitoService Constructor] Injected cognito client:', this.cognito);
+    // console.log('[CognitoService Constructor] Is cognito.send a function?', typeof this.cognito?.send === 'function');
+
     this.config = {
       region: this.configService.get('COGNITO_REGION'),
       userPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       clientId: this.configService.get('COGNITO_CLIENT_ID'),
     };
-    this.cognito =
-      cognitoClient ??
-      new CognitoIdentityProviderClient({
-        region: this.config.region,
-      });
   }
 
   /**
