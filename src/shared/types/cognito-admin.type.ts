@@ -289,3 +289,37 @@ export type AdminInitiateAuthResult = {
   expiresIn?: number;
   tokenType?: string;
 };
+
+/**
+ * Parameters for adminListGroupsForUser method.
+ */
+export type AdminListGroupsForUserParams = {
+  username: string;
+  limit?: number;
+  nextToken?: string;
+};
+
+/**
+ * Result type for adminListGroupsForUser method.
+ */
+export type AdminListGroupsForUserResult = {
+  groups: GroupType[];
+  nextToken?: string;
+};
+
+/**
+ * Parameters for listUsersInGroup method.
+ */
+export type ListUsersInGroupParams = {
+  groupName: string;
+  limit?: number;
+  nextToken?: string;
+};
+
+/**
+ * Result type for listUsersInGroup method.
+ */
+export type ListUsersInGroupResult = {
+  users: UserType[];
+  nextToken?: string;
+};

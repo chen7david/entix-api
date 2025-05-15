@@ -19,6 +19,7 @@ import {
   validateBody,
   validateHeaders,
   validateParams,
+  validateQuery,
 } from '@shared/middleware/validation.middleware';
 import {
   adminAuthHeadersSchema,
@@ -30,6 +31,10 @@ import {
   createGroupBodySchema,
   updateGroupBodySchema,
   adminAuthBodySchema,
+  adminAddUserToGroupBodySchema,
+  adminRemoveUserFromGroupBodySchema,
+  listUsersInGroupQuerySchema,
+  listGroupsForUserQuerySchema,
   ListUsersQueryDto,
   AdminCreateUserBody,
   AdminUpdateUserAttributesBody,
@@ -38,26 +43,38 @@ import {
   CreateGroupBody,
   UpdateGroupBody,
   AdminAuthBody,
+  AdminAddUserToGroupBody,
+  AdminRemoveUserFromGroupBody,
+  ListUsersInGroupQueryDto,
+  ListGroupsForUserQueryDto,
+  groupNameParamsSchema,
+  usernameParamsSchema,
 } from '@domains/admin/admin.dto';
-import {
-  ListUsersResult,
-  AdminCreateUserResult,
-  AdminGetUserResult,
-  AdminUpdateUserAttributesResult,
-  AdminDeleteUserResult,
-  AdminDisableUserResult,
-  AdminEnableUserResult,
-  AdminResetUserPasswordResult,
-  AdminSetUserPasswordResult,
-  AdminConfirmSignUpResult,
-  AdminAddUserToGroupResult,
-  AdminRemoveUserFromGroupResult,
-  CreateGroupResult,
-  UpdateGroupResult,
-  DeleteGroupResult,
-  ListGroupsResult,
-  AdminInitiateAuthResult,
-} from '@shared/types/cognito-admin.type';
+import { AdminInitiateAuthResult, UserType, GroupType } from '@shared/types/cognito-admin.type';
+
+/**
+ * Type for normalized user response
+ */
+type NormalizedUser = {
+  username: string;
+  email?: string;
+  enabled?: boolean;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+};
+
+/**
+ * Type for normalized group response
+ */
+type NormalizedGroup = {
+  name: string;
+  description?: string;
+  precedence?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 /**
  * Controller for admin operations.
@@ -76,16 +93,67 @@ export class AdminController {
   }
 
   /**
+   * Normalizes a Cognito user to a more friendly API response
+   * @param user - The Cognito user to normalize
+   */
+  public normalizeUser(user: UserType): NormalizedUser {
+    const normalized: NormalizedUser = {
+      username: user.username,
+      email: user.attributes.email,
+      enabled: user.enabled,
+      status: user.userStatus,
+      createdAt: user.userCreateDate?.toISOString(),
+      updatedAt: user.userLastModifiedDate?.toISOString(),
+    };
+
+    // Add any custom attributes (excluding internal cognito ones)
+    Object.entries(user.attributes).forEach(([key, value]) => {
+      if (!key.startsWith('cognito:') && !['sub', 'email_verified'].includes(key)) {
+        if (key.startsWith('custom:')) {
+          // Remove custom: prefix for cleaner API
+          const cleanKey = key.replace('custom:', '');
+          normalized[cleanKey] = value;
+        } else if (!['email'].includes(key)) {
+          // Skip duplicates we already added
+          normalized[key] = value;
+        }
+      }
+    });
+
+    return normalized;
+  }
+
+  /**
+   * Normalizes a Cognito group to a more friendly API response
+   * @param group - The Cognito group to normalize
+   */
+  public normalizeGroup(group: GroupType): NormalizedGroup {
+    return {
+      name: group.groupName,
+      description: group.description,
+      precedence: group.precedence,
+      createdAt: group.creationDate?.toISOString(),
+      updatedAt: group.lastModifiedDate?.toISOString(),
+    };
+  }
+
+  /**
    * List all users in the Cognito user pool.
    */
   @Get('/users')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
   @UseBefore(validateParams(listUsersQuerySchema))
   @OpenAPI({ summary: 'List all users' })
-  async listUsers(@QueryParams() query: ListUsersQueryDto): Promise<ListUsersResult> {
+  async listUsers(
+    @QueryParams() query: ListUsersQueryDto,
+  ): Promise<{ users: NormalizedUser[]; paginationToken?: string }> {
     this.logger.info('GET /admin/users', { query });
     try {
-      return await this.adminService.listUsers(query);
+      const result = await this.adminService.listUsers(query);
+      return {
+        users: result.users.map((user) => this.normalizeUser(user)),
+        paginationToken: result.paginationToken,
+      };
     } catch (err) {
       this.logger.error('Error in listUsers', { err });
       throw err;
@@ -100,10 +168,13 @@ export class AdminController {
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
   @UseBefore(validateBody(adminCreateUserBodySchema))
   @OpenAPI({ summary: 'Create a new user' })
-  async createUser(@Body() body: AdminCreateUserBody): Promise<AdminCreateUserResult> {
+  async createUser(@Body() body: AdminCreateUserBody): Promise<{ user: NormalizedUser }> {
     this.logger.info('POST /admin/users', { username: body.username });
     try {
-      return await this.adminService.createUser(body);
+      const result = await this.adminService.createUser(body);
+      return {
+        user: this.normalizeUser(result.user),
+      };
     } catch (err) {
       this.logger.error('Error in createUser', { err });
       throw err;
@@ -115,11 +186,13 @@ export class AdminController {
    */
   @Get('/users/:username')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: 'Get user details by username' })
-  async getUser(@Param('username') username: string): Promise<AdminGetUserResult> {
+  async getUser(@Param('username') username: string): Promise<NormalizedUser> {
     this.logger.info('GET /admin/users/:username', { username });
     try {
-      return await this.adminService.getUser({ username });
+      const result = await this.adminService.getUser({ username });
+      return this.normalizeUser(result);
     } catch (err) {
       this.logger.error('Error in getUser', { err });
       throw err;
@@ -131,18 +204,20 @@ export class AdminController {
    */
   @Patch('/users/:username')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @UseBefore(validateBody(adminUpdateUserAttributesBodySchema))
   @OpenAPI({ summary: 'Update user attributes' })
   async updateUserAttributes(
     @Param('username') username: string,
     @Body() body: AdminUpdateUserAttributesBody,
-  ): Promise<AdminUpdateUserAttributesResult> {
+  ): Promise<{ success: boolean }> {
     this.logger.info('PATCH /admin/users/:username', { username });
     try {
-      return await this.adminService.updateUserAttributes(username, {
+      const result = await this.adminService.updateUserAttributes(username, {
         attributes: body.attributes,
         username,
       });
+      return result;
     } catch (err) {
       this.logger.error('Error in updateUserAttributes', { err });
       throw err;
@@ -154,8 +229,9 @@ export class AdminController {
    */
   @Delete('/users/:username')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: 'Delete a user' })
-  async deleteUser(@Param('username') username: string): Promise<AdminDeleteUserResult> {
+  async deleteUser(@Param('username') username: string): Promise<{ success: boolean }> {
     this.logger.info('DELETE /admin/users/:username', { username });
     try {
       return await this.adminService.deleteUser({ username });
@@ -170,8 +246,9 @@ export class AdminController {
    */
   @Post('/users/:username/disable')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: 'Disable a user' })
-  async disableUser(@Param('username') username: string): Promise<AdminDisableUserResult> {
+  async disableUser(@Param('username') username: string): Promise<{ success: boolean }> {
     this.logger.info('POST /admin/users/:username/disable', { username });
     try {
       return await this.adminService.disableUser({ username });
@@ -186,8 +263,9 @@ export class AdminController {
    */
   @Post('/users/:username/enable')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: 'Enable a user' })
-  async enableUser(@Param('username') username: string): Promise<AdminEnableUserResult> {
+  async enableUser(@Param('username') username: string): Promise<{ success: boolean }> {
     this.logger.info('POST /admin/users/:username/enable', { username });
     try {
       return await this.adminService.enableUser({ username });
@@ -202,10 +280,9 @@ export class AdminController {
    */
   @Post('/users/:username/reset-password')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: "Reset a user's password" })
-  async resetUserPassword(
-    @Param('username') username: string,
-  ): Promise<AdminResetUserPasswordResult> {
+  async resetUserPassword(@Param('username') username: string): Promise<{ success: boolean }> {
     this.logger.info('POST /admin/users/:username/reset-password', { username });
     try {
       return await this.adminService.resetUserPassword({ username });
@@ -220,12 +297,13 @@ export class AdminController {
    */
   @Post('/users/:username/set-password')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @UseBefore(validateBody(adminSetUserPasswordBodySchema))
   @OpenAPI({ summary: "Set a user's password" })
   async setUserPassword(
     @Param('username') username: string,
     @Body() body: AdminSetUserPasswordBody,
-  ): Promise<AdminSetUserPasswordResult> {
+  ): Promise<{ success: boolean }> {
     this.logger.info('POST /admin/users/:username/set-password', { username });
     try {
       return await this.adminService.setUserPassword(username, {
@@ -244,8 +322,9 @@ export class AdminController {
    */
   @Post('/users/:username/confirm')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
   @OpenAPI({ summary: "Confirm a user's sign-up" })
-  async confirmUserSignUp(@Param('username') username: string): Promise<AdminConfirmSignUpResult> {
+  async confirmUserSignUp(@Param('username') username: string): Promise<{ success: boolean }> {
     this.logger.info('POST /admin/users/:username/confirm', { username });
     try {
       return await this.adminService.confirmUserSignUp({ username });
@@ -256,18 +335,82 @@ export class AdminController {
   }
 
   /**
+   * List all groups that a user belongs to.
+   */
+  @Get('/users/:username/groups')
+  @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(usernameParamsSchema))
+  @UseBefore(validateQuery(listGroupsForUserQuerySchema))
+  @OpenAPI({ summary: 'List all groups that a user belongs to' })
+  async listGroupsForUser(
+    @Param('username') username: string,
+    @QueryParams() query: ListGroupsForUserQueryDto,
+  ): Promise<{ groups: NormalizedGroup[]; nextToken?: string }> {
+    this.logger.info('GET /admin/users/:username/groups', { username, query });
+    try {
+      const result = await this.adminService.listGroupsForUser({
+        username,
+        limit: query.limit,
+        nextToken: query.nextToken,
+      });
+
+      return {
+        groups: result.groups.map((group) => this.normalizeGroup(group)),
+        nextToken: result.nextToken,
+      };
+    } catch (err) {
+      this.logger.error('Error in listGroupsForUser', { err });
+      throw err;
+    }
+  }
+
+  /**
+   * List all users in a group.
+   */
+  @Get('/groups/:groupName/users')
+  @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(groupNameParamsSchema))
+  @UseBefore(validateQuery(listUsersInGroupQuerySchema))
+  @OpenAPI({ summary: 'List all users in a group' })
+  async listUsersInGroup(
+    @Param('groupName') groupName: string,
+    @QueryParams() query: ListUsersInGroupQueryDto,
+  ): Promise<{ users: NormalizedUser[]; nextToken?: string }> {
+    this.logger.info('GET /admin/groups/:groupName/users', { groupName, query });
+    try {
+      const result = await this.adminService.listUsersInGroup({
+        groupName,
+        limit: query.limit,
+        nextToken: query.nextToken,
+      });
+
+      return {
+        users: result.users.map((user) => this.normalizeUser(user)),
+        nextToken: result.nextToken,
+      };
+    } catch (err) {
+      this.logger.error('Error in listUsersInGroup', { err });
+      throw err;
+    }
+  }
+
+  /**
    * Add a user to a group.
    */
-  @Post('/groups/:groupName/users/:username')
+  @Post('/groups/add-user')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateBody(adminAddUserToGroupBodySchema))
   @OpenAPI({ summary: 'Add a user to a group' })
-  async addUserToGroup(
-    @Param('groupName') groupName: string,
-    @Param('username') username: string,
-  ): Promise<AdminAddUserToGroupResult> {
-    this.logger.info('POST /admin/groups/:groupName/users/:username', { groupName, username });
+  async addUserToGroup(@Body() body: AdminAddUserToGroupBody): Promise<{ success: boolean }> {
+    this.logger.info('POST /admin/groups/add-user', {
+      groupName: body.groupName,
+      username: body.username,
+    });
     try {
-      return await this.adminService.addUserToGroup(groupName, username);
+      return await this.adminService.addUserToGroup({
+        groupName: body.groupName,
+        username: body.username,
+      });
     } catch (err) {
       this.logger.error('Error in addUserToGroup', { err });
       throw err;
@@ -277,16 +420,22 @@ export class AdminController {
   /**
    * Remove a user from a group.
    */
-  @Delete('/groups/:groupName/users/:username')
+  @Post('/groups/remove-user')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateBody(adminRemoveUserFromGroupBodySchema))
   @OpenAPI({ summary: 'Remove a user from a group' })
   async removeUserFromGroup(
-    @Param('groupName') groupName: string,
-    @Param('username') username: string,
-  ): Promise<AdminRemoveUserFromGroupResult> {
-    this.logger.info('DELETE /admin/groups/:groupName/users/:username', { groupName, username });
+    @Body() body: AdminRemoveUserFromGroupBody,
+  ): Promise<{ success: boolean }> {
+    this.logger.info('POST /admin/groups/remove-user', {
+      groupName: body.groupName,
+      username: body.username,
+    });
     try {
-      return await this.adminService.removeUserFromGroup(groupName, username);
+      return await this.adminService.removeUserFromGroup({
+        groupName: body.groupName,
+        username: body.username,
+      });
     } catch (err) {
       this.logger.error('Error in removeUserFromGroup', { err });
       throw err;
@@ -300,10 +449,16 @@ export class AdminController {
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
   @UseBefore(validateParams(listGroupsQuerySchema))
   @OpenAPI({ summary: 'List all groups' })
-  async listGroups(@QueryParams() query: ListGroupsQueryDto): Promise<ListGroupsResult> {
+  async listGroups(
+    @QueryParams() query: ListGroupsQueryDto,
+  ): Promise<{ groups: NormalizedGroup[]; nextToken?: string }> {
     this.logger.info('GET /admin/groups', { query });
     try {
-      return await this.adminService.listGroups(query);
+      const result = await this.adminService.listGroups(query);
+      return {
+        groups: result.groups.map((group) => this.normalizeGroup(group)),
+        nextToken: result.nextToken,
+      };
     } catch (err) {
       this.logger.error('Error in listGroups', { err });
       throw err;
@@ -318,10 +473,13 @@ export class AdminController {
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
   @UseBefore(validateBody(createGroupBodySchema))
   @OpenAPI({ summary: 'Create a new group' })
-  async createGroup(@Body() body: CreateGroupBody): Promise<CreateGroupResult> {
+  async createGroup(@Body() body: CreateGroupBody): Promise<{ group: NormalizedGroup }> {
     this.logger.info('POST /admin/groups', { groupName: body.groupName });
     try {
-      return await this.adminService.createGroup(body);
+      const result = await this.adminService.createGroup(body);
+      return {
+        group: this.normalizeGroup(result.group),
+      };
     } catch (err) {
       this.logger.error('Error in createGroup', { err });
       throw err;
@@ -333,18 +491,22 @@ export class AdminController {
    */
   @Patch('/groups/:groupName')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(groupNameParamsSchema))
   @UseBefore(validateBody(updateGroupBodySchema))
   @OpenAPI({ summary: 'Update a group' })
   async updateGroup(
     @Param('groupName') groupName: string,
     @Body() body: UpdateGroupBody,
-  ): Promise<UpdateGroupResult> {
+  ): Promise<{ group: NormalizedGroup }> {
     this.logger.info('PATCH /admin/groups/:groupName', { groupName });
     try {
-      return await this.adminService.updateGroup(groupName, {
+      const result = await this.adminService.updateGroup(groupName, {
         ...body,
         groupName,
       });
+      return {
+        group: this.normalizeGroup(result.group),
+      };
     } catch (err) {
       this.logger.error('Error in updateGroup', { err });
       throw err;
@@ -356,8 +518,9 @@ export class AdminController {
    */
   @Delete('/groups/:groupName')
   @UseBefore(validateHeaders(adminAuthHeadersSchema))
+  @UseBefore(validateParams(groupNameParamsSchema))
   @OpenAPI({ summary: 'Delete a group' })
-  async deleteGroup(@Param('groupName') groupName: string): Promise<DeleteGroupResult> {
+  async deleteGroup(@Param('groupName') groupName: string): Promise<{ success: boolean }> {
     this.logger.info('DELETE /admin/groups/:groupName', { groupName });
     try {
       return await this.adminService.deleteGroup({ groupName });

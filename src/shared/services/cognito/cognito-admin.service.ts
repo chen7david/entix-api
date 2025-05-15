@@ -21,6 +21,8 @@ import {
   DeleteGroupCommand,
   ListGroupsCommand,
   AdminInitiateAuthCommand,
+  AdminListGroupsForUserCommand,
+  ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
   ListUsersParams,
@@ -59,6 +61,10 @@ import {
   AdminInitiateAuthResult,
   UserType,
   GroupType,
+  AdminListGroupsForUserParams,
+  AdminListGroupsForUserResult,
+  ListUsersInGroupParams,
+  ListUsersInGroupResult,
 } from '@shared/types/cognito-admin.type';
 
 /**
@@ -557,6 +563,81 @@ export class CognitoAdminService {
         idToken: result.AuthenticationResult?.IdToken,
         expiresIn: result.AuthenticationResult?.ExpiresIn,
         tokenType: result.AuthenticationResult?.TokenType,
+      };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Lists groups for a user.
+   * @param params - Parameters for listing groups for a user
+   */
+  async adminListGroupsForUser(
+    params: AdminListGroupsForUserParams,
+  ): Promise<AdminListGroupsForUserResult> {
+    try {
+      const command = new AdminListGroupsForUserCommand({
+        UserPoolId: this.config.userPoolId,
+        Username: params.username,
+        Limit: params.limit,
+        NextToken: params.nextToken,
+      });
+
+      const result = await this.cognito.send(command);
+      const groups: GroupType[] =
+        result.Groups?.map((group) => ({
+          groupName: group.GroupName || '',
+          description: group.Description,
+          precedence: group.Precedence,
+          roleArn: group.RoleArn,
+          creationDate: group.CreationDate,
+          lastModifiedDate: group.LastModifiedDate,
+        })) || [];
+
+      return {
+        groups,
+        nextToken: result.NextToken,
+      };
+    } catch (error) {
+      throw mapCognitoErrorToAppError(error);
+    }
+  }
+
+  /**
+   * Lists users in a group.
+   * @param params - Parameters for listing users in a group
+   */
+  async listUsersInGroup(params: ListUsersInGroupParams): Promise<ListUsersInGroupResult> {
+    try {
+      const command = new ListUsersInGroupCommand({
+        UserPoolId: this.config.userPoolId,
+        GroupName: params.groupName,
+        Limit: params.limit,
+        NextToken: params.nextToken,
+      });
+
+      const result = await this.cognito.send(command);
+      const users: UserType[] =
+        result.Users?.map((user) => {
+          const attributes: Record<string, string> = {};
+          user.Attributes?.forEach((attr) => {
+            if (attr.Name && attr.Value) attributes[attr.Name] = attr.Value;
+          });
+
+          return {
+            username: user.Username || '',
+            userStatus: user.UserStatus,
+            enabled: user.Enabled,
+            userCreateDate: user.UserCreateDate,
+            userLastModifiedDate: user.UserLastModifiedDate,
+            attributes,
+          };
+        }) || [];
+
+      return {
+        users,
+        nextToken: result.NextToken,
       };
     } catch (error) {
       throw mapCognitoErrorToAppError(error);

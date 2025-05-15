@@ -21,7 +21,9 @@ import {
   AdminSetUserPasswordResult,
   AdminConfirmSignUpParams,
   AdminConfirmSignUpResult,
+  AdminAddUserToGroupParams,
   AdminAddUserToGroupResult,
+  AdminRemoveUserFromGroupParams,
   AdminRemoveUserFromGroupResult,
   CreateGroupParams,
   CreateGroupResult,
@@ -35,6 +37,10 @@ import {
   ListGroupsResult,
   AdminInitiateAuthParams,
   AdminInitiateAuthResult,
+  AdminListGroupsForUserParams,
+  AdminListGroupsForUserResult,
+  ListUsersInGroupParams,
+  ListUsersInGroupResult,
 } from '@shared/types/cognito-admin.type';
 
 /**
@@ -159,31 +165,48 @@ export class AdminService {
 
   /**
    * Add a user to a group.
-   * @param groupName - The name of the group
-   * @param username - The username of the user
+   * @param params - Parameters for adding a user to a group
    */
-  async addUserToGroup(groupName: string, username: string): Promise<AdminAddUserToGroupResult> {
-    this.logger.info('Adding user to group', { username, groupName });
-    return this.cognitoAdminService.adminAddUserToGroup({
-      username,
-      groupName,
+  async addUserToGroup(params: AdminAddUserToGroupParams): Promise<AdminAddUserToGroupResult> {
+    this.logger.info('Adding user to group', {
+      username: params.username,
+      groupName: params.groupName,
     });
+    return this.cognitoAdminService.adminAddUserToGroup(params);
   }
 
   /**
    * Remove a user from a group.
-   * @param groupName - The name of the group
-   * @param username - The username of the user
+   * @param params - Parameters for removing a user from a group
    */
   async removeUserFromGroup(
-    groupName: string,
-    username: string,
+    params: AdminRemoveUserFromGroupParams,
   ): Promise<AdminRemoveUserFromGroupResult> {
-    this.logger.info('Removing user from group', { username, groupName });
-    return this.cognitoAdminService.adminRemoveUserFromGroup({
-      username,
-      groupName,
+    this.logger.info('Removing user from group', {
+      username: params.username,
+      groupName: params.groupName,
     });
+    return this.cognitoAdminService.adminRemoveUserFromGroup(params);
+  }
+
+  /**
+   * List groups for a user.
+   * @param params - Parameters for listing groups for a user
+   */
+  async listGroupsForUser(
+    params: AdminListGroupsForUserParams,
+  ): Promise<AdminListGroupsForUserResult> {
+    this.logger.info('Listing groups for user', { username: params.username });
+    return this.cognitoAdminService.adminListGroupsForUser(params);
+  }
+
+  /**
+   * List users in a group.
+   * @param params - Parameters for listing users in a group
+   */
+  async listUsersInGroup(params: ListUsersInGroupParams): Promise<ListUsersInGroupResult> {
+    this.logger.info('Listing users in group', { groupName: params.groupName });
+    return this.cognitoAdminService.listUsersInGroup(params);
   }
 
   /**

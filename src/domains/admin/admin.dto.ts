@@ -67,6 +67,50 @@ export const updateGroupBodySchema = z.object({
   roleArn: z.string().optional(),
 });
 
+// New schemas for updated endpoints
+
+export const adminAddUserToGroupBodySchema = z.object({
+  groupName: z.string().min(1),
+  username: z.string().min(1),
+});
+
+export const adminRemoveUserFromGroupBodySchema = z.object({
+  groupName: z.string().min(1),
+  username: z.string().min(1),
+});
+
+// New schemas for new endpoints
+export const listUsersInGroupQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().optional().describe('Number of users to return'),
+  nextToken: z.string().optional().describe('Token for pagination'),
+});
+
+export class ListUsersInGroupQueryDto {
+  limit?: number;
+  nextToken?: string;
+  public static _zodSchema = listUsersInGroupQuerySchema;
+}
+
+export const listGroupsForUserQuerySchema = z.object({
+  limit: z.coerce.number().int().positive().optional().describe('Number of groups to return'),
+  nextToken: z.string().optional().describe('Token for pagination'),
+});
+
+export class ListGroupsForUserQueryDto {
+  limit?: number;
+  nextToken?: string;
+  public static _zodSchema = listGroupsForUserQuerySchema;
+}
+
+// Add URL parameter schemas
+export const groupNameParamsSchema = z.object({
+  groupName: z.string().min(1),
+});
+
+export const usernameParamsSchema = z.object({
+  username: z.string().min(1),
+});
+
 // Authentication
 
 export const adminAuthBodySchema = z.object({
@@ -89,6 +133,16 @@ export type ListGroupsQuery = z.infer<typeof listGroupsQuerySchema>;
 export type CreateGroupBody = z.infer<typeof createGroupBodySchema>;
 export type UpdateGroupBody = z.infer<typeof updateGroupBodySchema>;
 
+// New types for updated endpoints
+export type AdminAddUserToGroupBody = z.infer<typeof adminAddUserToGroupBodySchema>;
+export type AdminRemoveUserFromGroupBody = z.infer<typeof adminRemoveUserFromGroupBodySchema>;
+
+// New types for new endpoints
+export type ListUsersInGroupQuery = z.infer<typeof listUsersInGroupQuerySchema>;
+export type ListGroupsForUserQuery = z.infer<typeof listGroupsForUserQuerySchema>;
+export type GroupNameParams = z.infer<typeof groupNameParamsSchema>;
+export type UsernameParams = z.infer<typeof usernameParamsSchema>;
+
 export type AdminAuthBody = z.infer<typeof adminAuthBodySchema>;
 
 /**
@@ -98,9 +152,7 @@ export type AdminAuthBody = z.infer<typeof adminAuthBodySchema>;
  */
 export function registerAdminSchemas(registry: OpenAPIRegistry): void {
   registry.register('AdminAuthHeaders', adminAuthHeadersSchema);
-  registry.register('ListUsersQuery', listUsersQuerySchema); // This is the primary registration for the schema object
-  // We also register it under 'ListUsersQueryDto' so if routing-controllers-openapi looks for a schema component
-  // named after the class, it finds the correct Zod-derived schema.
+  registry.register('ListUsersQuery', listUsersQuerySchema);
   registry.register('ListUsersQueryDto', listUsersQuerySchema);
 
   registry.register('ListGroupsQuery', listGroupsQuerySchema);
@@ -112,4 +164,16 @@ export function registerAdminSchemas(registry: OpenAPIRegistry): void {
   registry.register('CreateGroupBody', createGroupBodySchema);
   registry.register('UpdateGroupBody', updateGroupBodySchema);
   registry.register('AdminAuthBody', adminAuthBodySchema);
+
+  // Register new schemas
+  registry.register('AdminAddUserToGroupBody', adminAddUserToGroupBodySchema);
+  registry.register('AdminRemoveUserFromGroupBody', adminRemoveUserFromGroupBodySchema);
+  registry.register('ListUsersInGroupQuery', listUsersInGroupQuerySchema);
+  registry.register('ListUsersInGroupQueryDto', listUsersInGroupQuerySchema);
+  registry.register('ListGroupsForUserQuery', listGroupsForUserQuerySchema);
+  registry.register('ListGroupsForUserQueryDto', listGroupsForUserQuerySchema);
+
+  // Add URL parameter schemas
+  registry.register('GroupNameParams', groupNameParamsSchema);
+  registry.register('UsernameParams', usernameParamsSchema);
 }
