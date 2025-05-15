@@ -10,7 +10,10 @@ function createCognitoClient(configService: ConfigService): CognitoIdentityProvi
 
   return new CognitoIdentityProviderClient({
     region,
-    // Additional configuration could be added here if needed
+    credentials: {
+      accessKeyId: configService.get('COGNITO_ADMIN_ACCESS_KEY'),
+      secretAccessKey: configService.get('COGNITO_ADMIN_SECRET_KEY'),
+    },
   });
 }
 
