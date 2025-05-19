@@ -11,8 +11,6 @@ import type {
   ForgotPasswordResult,
   GetUserParams,
   GetUserResult,
-  LoginParams,
-  LoginResult,
   RefreshTokenParams,
   RefreshTokenResult,
   ResendConfirmationCodeParams,
@@ -23,6 +21,8 @@ import type {
   SignUpResult,
   UpdateUserAttributesParams,
   UpdateUserAttributesResult,
+  SignInParams,
+  SignInResult,
 } from '@shared/types/cognito.type';
 import type { CognitoService } from '@shared/services/cognito/cognito.service';
 import { faker } from '@faker-js/faker';
@@ -61,15 +61,14 @@ export const createMockCognitoService = (
       .mockResolvedValue({ success: true }),
     refreshToken: jest
       .fn<Promise<RefreshTokenResult>, [RefreshTokenParams]>()
-      .mockResolvedValue({ accessToken: 'mock-access-token', idToken: 'mock-id-token' }),
-    login: jest.fn<Promise<LoginResult>, [LoginParams]>().mockResolvedValue({
+      .mockResolvedValue({ accessToken: 'refreshed-access-token', idToken: 'mock-id-token' }),
+    signin: jest.fn<Promise<SignInResult>, [SignInParams]>().mockResolvedValue({
       accessToken: 'mock-access-token',
-      idToken: 'mock-id-token',
       refreshToken: 'mock-refresh-token',
     }),
     getUser: jest
       .fn<Promise<GetUserResult>, [GetUserParams]>()
-      .mockResolvedValue({ username: 'mock-user', attributes: { email: 'mock@example.com' } }),
+      .mockResolvedValue({ username: 'testuser', attributes: { email: 'mock@example.com' } }),
     updateUserAttributes: jest
       .fn<Promise<UpdateUserAttributesResult>, [UpdateUserAttributesParams]>()
       .mockResolvedValue({ success: true }),

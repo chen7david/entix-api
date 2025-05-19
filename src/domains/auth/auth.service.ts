@@ -10,10 +10,10 @@ import {
   ConfirmSignUpBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
+  SignInBody,
 } from '@domains/auth/auth.dto';
 import {
   SignUpResult,
@@ -24,10 +24,10 @@ import {
   ConfirmSignUpResult,
   SignOutResult,
   RefreshTokenResult,
-  LoginResult,
   GetUserResult,
   UpdateUserAttributesResult,
   DeleteUserResult,
+  SignInResult,
 } from '@shared/types/cognito.type';
 import { Logger } from '@shared/types/logger.type';
 
@@ -114,11 +114,11 @@ export class AuthService {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user sign-in (USER_PASSWORD_AUTH).
    */
-  async login(body: LoginBody): Promise<LoginResult> {
-    this.logger.info('login called', { username: body.username });
-    return this.cognitoService.login(body);
+  async signin(body: SignInBody): Promise<SignInResult> {
+    this.logger.info('signin called', { username: body.username });
+    return this.cognitoService.signin(body);
   }
 
   /**

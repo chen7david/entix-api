@@ -5,20 +5,6 @@ import type { DatabaseService } from '@shared/services/database/database.service
 import type { LoggerService } from '@shared/services/logger/logger.service';
 import { pgTable, serial, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 
-// Mock the error utility module
-// jest.mock('@shared/utils/error/error.util', () => {
-//   const originalModule = jest.requireActual('@shared/utils/error/error.util');
-//   return {
-//     ...originalModule,
-//     createAppError: jest.fn((err) => {
-//       if (err instanceof Error && err.message.includes('not found')) {
-//         return new originalModule.NotFoundError(err.message);
-//       }
-//       return new Error('Mocked error');
-//     }),
-//   };
-// });
-
 // --- Mock Schema ---
 const mockUsersTable = pgTable('mock_users', {
   id: serial('id').primaryKey(),
@@ -282,14 +268,6 @@ describe('BaseRepository', () => {
         mockDbService.db.update(mockUsersTable).set(updateData).where(expect.anything()).returning,
       ).toHaveBeenCalled();
     });
-
-    // This test is no longer valid as update doesn't call findById first.
-    // A failure scenario is covered by the 'update returns empty' test.
-    // it('should throw NotFoundError if findById fails before update', async () => {
-    //   mockFindById.mockRejectedValue(new NotFoundError('Not found before update'));
-    //   await expect(repository.update(userId, updateData)).rejects.toThrow(NotFoundError);
-    //   expect(mockUpdateReturning).not.toHaveBeenCalled();
-    // });
   });
 
   describe('delete (soft delete)', () => {
@@ -352,13 +330,6 @@ describe('BaseRepository', () => {
           .where(expect.anything()).returning,
       ).toHaveBeenCalled();
     });
-
-    // This scenario is covered by 'should throw NotFoundError if the internal update returns empty'
-    // it('should throw NotFoundError if findById fails before delete', async () => {
-    //   mockFindById.mockRejectedValue(new NotFoundError('Not found before delete'));
-    //   await expect(repository.delete(userId)).rejects.toThrow(NotFoundError);
-    //   expect(mockUpdateReturning).not.toHaveBeenCalled();
-    // });
   });
 
   describe('delete (hard delete)', () => {

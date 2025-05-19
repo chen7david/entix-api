@@ -1,4 +1,14 @@
-import { JsonController, Post, Body, Get, UseBefore, HttpCode } from 'routing-controllers';
+import {
+  JsonController,
+  Post,
+  Body,
+  Get,
+  UseBefore,
+  HttpCode,
+  Delete,
+  Patch,
+  HeaderParams,
+} from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { AuthService } from '@domains/auth/auth.service';
 import { LoggerService } from '@shared/services/logger/logger.service';
@@ -11,7 +21,6 @@ import {
   changePasswordBodySchema,
   signOutBodySchema,
   refreshTokenBodySchema,
-  loginBodySchema,
   getMeHeadersSchema,
   updateMeBodySchema,
   deleteMeHeadersSchema,
@@ -21,15 +30,17 @@ import {
   ResendConfirmationCodeBody,
   SignOutBody,
   RefreshTokenBody,
-  LoginBody,
   GetMeHeaders,
   UpdateMeBody,
   DeleteMeHeaders,
   ChangePasswordBody,
   confirmSignUpBodySchema,
   ConfirmSignUpBody,
+  signInBodySchema,
+  SignInBody,
 } from '@domains/auth/auth.dto';
 import { validateBody } from '@shared/middleware/validation.middleware';
+import { validateHeaders } from '@shared/middleware/validation.middleware';
 import {
   SignUpResult,
   ForgotPasswordResult,
@@ -38,11 +49,11 @@ import {
   ChangePasswordResult,
   SignOutResult,
   RefreshTokenResult,
-  LoginResult,
   GetUserResult,
   UpdateUserAttributesResult,
   DeleteUserResult,
   ConfirmSignUpResult,
+  SignInResult,
 } from '@shared/types/cognito.type';
 import { Injectable } from '@shared/utils/ioc.util';
 /**
@@ -195,17 +206,17 @@ export class AuthController {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
+   * Regular user sign-in (USER_PASSWORD_AUTH).
    */
-  @Post('/login')
-  @UseBefore(validateBody(loginBodySchema))
-  @OpenAPI({ summary: 'User login (USER_PASSWORD_AUTH)' })
-  async login(@Body() body: LoginBody): Promise<LoginResult> {
-    this.logger.info('POST /auth/login', { username: body.username });
+  @Post('/signin')
+  @UseBefore(validateBody(signInBodySchema))
+  @OpenAPI({ summary: 'User sign-in (USER_PASSWORD_AUTH)' })
+  async signin(@Body() body: SignInBody): Promise<SignInResult> {
+    this.logger.info('POST /auth/signin', { username: body.username });
     try {
-      return await this.authService.login(body);
+      return await this.authService.signin(body);
     } catch (err) {
-      this.logger.error('Error in login', { err });
+      this.logger.error('Error in signin', { err });
       throw err;
     }
   }
@@ -213,10 +224,10 @@ export class AuthController {
   /**
    * Get current user info (self-service, by access token).
    */
-  @Get('/me')
-  @UseBefore(validateBody(getMeHeadersSchema))
+  @UseBefore(validateHeaders(getMeHeadersSchema))
   @OpenAPI({ summary: 'Get current user info (requires Authorization header)' })
-  async getMe(@Body() headers: GetMeHeaders): Promise<GetUserResult> {
+  @Get('/me')
+  async getMe(@HeaderParams() headers: GetMeHeaders): Promise<GetUserResult> {
     this.logger.info('GET /auth/me');
     try {
       return await this.authService.getMe(headers);
@@ -229,8 +240,8 @@ export class AuthController {
   /**
    * Update current user attributes (self-service).
    */
-  @Post('/me')
-  @UseBefore(validateBody(getMeHeadersSchema))
+  @Patch('/me')
+  @UseBefore(validateHeaders(getMeHeadersSchema))
   @UseBefore(validateBody(updateMeBodySchema))
   @OpenAPI({ summary: 'Update current user attributes (requires Authorization header)' })
   async updateMe(
@@ -249,7 +260,7 @@ export class AuthController {
   /**
    * Delete current user (self-service).
    */
-  @Post('/me/delete')
+  @Delete('/me')
   @UseBefore(validateBody(deleteMeHeadersSchema))
   @OpenAPI({ summary: 'Delete current user (requires Authorization header)' })
   async deleteMe(@Body() headers: DeleteMeHeaders): Promise<DeleteUserResult> {

@@ -6,7 +6,7 @@ import { OpenApiService } from '@domains/openapi/openapi.service';
 /**
  * Controller to serve the OpenAPI JSON specification.
  */
-@JsonController()
+@JsonController('/api')
 @Injectable()
 export class OpenapiController {
   constructor(private readonly openApiService: OpenApiService) {}

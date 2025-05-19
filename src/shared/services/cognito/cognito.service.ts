@@ -32,14 +32,14 @@ import {
   SignOutResult,
   RefreshTokenParams,
   RefreshTokenResult,
-  LoginParams,
-  LoginResult,
   GetUserParams,
   GetUserResult,
   UpdateUserAttributesParams,
   UpdateUserAttributesResult,
   DeleteUserParams,
   DeleteUserResult,
+  SignInParams,
+  SignInResult,
 } from '@shared/types/cognito.type';
 
 /**
@@ -52,32 +52,35 @@ type CognitoConfig = {
 };
 @Injectable()
 export class CognitoService {
-  private readonly cognito: CognitoIdentityProviderClient;
   private readonly config: CognitoConfig;
 
   /**
    * Constructs a CognitoService.
    * @param configService - The config service
    * @param logger - The logger service
-   * @param cognitoClient - (Optional) Cognito client for dependency injection/testing
+   * @param cognito - Cognito client, now injected by TypeDI
    */
   // eslint-disable-next-line max-params
   constructor(
     private readonly configService: ConfigService,
     private readonly logger: LoggerService,
-    cognitoClient?: CognitoIdentityProviderClient,
+    private readonly cognito: CognitoIdentityProviderClient,
   ) {
     this.logger.component('CognitoService');
+    // Temporary debug log
+    this.logger.info('Inspecting injected Cognito Client in CognitoService constructor:', {
+      cognitoInstance: this.cognito,
+      constructorName: this.cognito?.constructor?.name,
+    });
+    // You can also use console.log for more direct output during dev if logger is complex:
+    // console.log('[CognitoService Constructor] Injected cognito client:', this.cognito);
+    // console.log('[CognitoService Constructor] Is cognito.send a function?', typeof this.cognito?.send === 'function');
+
     this.config = {
       region: this.configService.get('COGNITO_REGION'),
       userPoolId: this.configService.get('COGNITO_USER_POOL_ID'),
       clientId: this.configService.get('COGNITO_CLIENT_ID'),
     };
-    this.cognito =
-      cognitoClient ??
-      new CognitoIdentityProviderClient({
-        region: this.config.region,
-      });
   }
 
   /**
@@ -251,7 +254,7 @@ export class CognitoService {
       });
       const result = await this.cognito.send(command);
       return {
-        accessToken: result.AuthenticationResult?.AccessToken || '',
+        accessToken: result.AuthenticationResult?.AccessToken ?? '',
         idToken: result.AuthenticationResult?.IdToken,
         expiresIn: result.AuthenticationResult?.ExpiresIn,
         tokenType: result.AuthenticationResult?.TokenType,
@@ -262,10 +265,11 @@ export class CognitoService {
   }
 
   /**
-   * Regular user login (USER_PASSWORD_AUTH).
-   * @param params - Login parameters
+   * Regular user sign-in (USER_PASSWORD_AUTH).
+   * @param params - SignIn parameters
+   * @returns Authentication tokens.
    */
-  async login(params: LoginParams): Promise<LoginResult> {
+  async signin(params: SignInParams): Promise<SignInResult> {
     try {
       const command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
@@ -276,12 +280,20 @@ export class CognitoService {
         },
       });
       const result = await this.cognito.send(command);
+
+      // Add null/undefined checks for AuthenticationResult and its properties
+      if (!result.AuthenticationResult) {
+        // This case should ideally be handled by mapCognitoErrorToAppError or a specific error
+        // For now, let's throw a generic error or return a shape that indicates failure clearly
+        throw new Error('Authentication failed: No authentication result received.');
+      }
+
       return {
-        accessToken: result.AuthenticationResult?.AccessToken || '',
-        refreshToken: result.AuthenticationResult?.RefreshToken,
-        idToken: result.AuthenticationResult?.IdToken,
-        expiresIn: result.AuthenticationResult?.ExpiresIn,
-        tokenType: result.AuthenticationResult?.TokenType,
+        accessToken: result.AuthenticationResult.AccessToken ?? '', // Ensure accessToken is always a string
+        refreshToken: result.AuthenticationResult.RefreshToken,
+        idToken: result.AuthenticationResult.IdToken,
+        expiresIn: result.AuthenticationResult.ExpiresIn,
+        tokenType: result.AuthenticationResult.TokenType,
       };
     } catch (error) {
       throw mapCognitoErrorToAppError(error);

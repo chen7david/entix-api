@@ -21,6 +21,10 @@ export const envSchema = z.object({
   COGNITO_REGION: z.string(),
   COGNITO_USER_POOL_ID: z.string(),
   COGNITO_CLIENT_ID: z.string(),
+
+  // Admin-specific Cognito configuration
+  COGNITO_ADMIN_ACCESS_KEY: z.string(),
+  COGNITO_ADMIN_SECRET_KEY: z.string(),
   // Add more environment variables as needed
 });
 

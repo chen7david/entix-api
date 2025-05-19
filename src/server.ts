@@ -1,11 +1,13 @@
 import 'reflect-metadata';
 import { Container } from 'typedi';
 import { ServerService } from '@shared/services/server/server.service';
+import { AwsModule } from '@shared/modules/aws/aws.module';
 
 /**
  * Entry point: bootstraps and starts the server.
  */
 async function main() {
+  AwsModule.register();
   const serverService = Container.get(ServerService);
   await serverService.start();
 }
