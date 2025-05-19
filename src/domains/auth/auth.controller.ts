@@ -7,6 +7,7 @@ import {
   HttpCode,
   Delete,
   Patch,
+  HeaderParams,
 } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { AuthService } from '@domains/auth/auth.service';
@@ -223,10 +224,10 @@ export class AuthController {
   /**
    * Get current user info (self-service, by access token).
    */
-  @Get('/me')
-  @UseBefore(validateBody(getMeHeadersSchema))
+  @UseBefore(validateHeaders(getMeHeadersSchema))
   @OpenAPI({ summary: 'Get current user info (requires Authorization header)' })
-  async getMe(@Body() headers: GetMeHeaders): Promise<GetUserResult> {
+  @Get('/me')
+  async getMe(@HeaderParams() headers: GetMeHeaders): Promise<GetUserResult> {
     this.logger.info('GET /auth/me');
     try {
       return await this.authService.getMe(headers);
