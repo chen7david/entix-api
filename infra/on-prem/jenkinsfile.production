@@ -5,7 +5,7 @@ pipeline {
         // App Configuration
         APP_NAME = 'EntixAPI'
         NODE_ENV = 'production'
-        PORT = '3000'
+        APP_PORT = '3000'
 
         // Docker Configuration
         DOCKER_REGISTRY = 'ghcr.io'
