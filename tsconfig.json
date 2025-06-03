@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "target": "es2016",
+    "module": "commonjs",
+    "baseUrl": "./",
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@config/*": ["src/config/*"],
+      "@mocks/*": ["tests/mocks/*"],
+      "@modules/*": ["src/modules/*"]
+    },
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src", "tests"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}
