@@ -9,7 +9,7 @@ export const envConfigSchema = z.object({
   NEW_RELIC_LICENSE_KEY: z.string().optional(),
   NEW_RELIC_APP_NAME: z.string().optional(),
   NEW_RELIC_LOG_LEVEL: z.enum(LOG_LEVEL).optional(),
-  NEW_RELIC_ENABLED: z.boolean().optional(),
+  NEW_RELIC_ENABLED: z.coerce.boolean().optional(),
   COGNITO_REGION: z.string(),
   COGNITO_USER_POOL_ID: z.string(),
   COGNITO_CLIENT_ID: z.string(),

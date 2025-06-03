@@ -7,7 +7,7 @@
     "prepare": "node .husky/install.mjs",
     "dev": "NODE_ENV=development nodemon src/server.ts",
     "preview": "npm run build && NODE_ENV=development node dist/server.js",
-    "start": "NODE_ENV=production node dist/server.js",
+    "start": "NODE_ENV=production node -r newrelic dist/server.js",
     "test": "NODE_ENV=test jest",
     "test:watch": "NODE_ENV=test jest --watch",
     "build": "npm run clean:dist && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
