@@ -34,12 +34,12 @@ module.exports = {
           {
             name: '..',
             message:
-              'Use path aliases (e.g., @src/, @shared/, @domains/) instead of relative imports.',
+              'Use path aliases (e.g., @src/, @core/, @modules/) instead of relative imports.',
           },
           {
             name: '.',
             message:
-              'Use path aliases (e.g., @src/, @shared/, @domains/) instead of relative imports.',
+              'Use path aliases (e.g., @src/, @core/, @modules/) instead of relative imports.',
           },
         ],
       },

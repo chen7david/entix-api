@@ -29,6 +29,8 @@ pipeline {
         COGNITO_USER_POOL_ID = credentials('COGNITO_USER_POOL_ID')
         COGNITO_CLIENT_ID = credentials('COGNITO_CLIENT_ID')
         COGNITO_REGION = credentials('COGNITO_REGION')
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
     stages {
