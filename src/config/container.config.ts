@@ -13,8 +13,8 @@ const configService = Container.get(ConfigService);
 ErrorConfig.setDevelopmentMode(configService.isDevelopment());
 
 const clientConfig = {
-  region: configService.get('AWS_REGION'),
-  userPoolId: configService.get('AWS_USER_POOL_ID'),
+  region: configService.get('COGNITO_REGION'),
+  userPoolId: configService.get('COGNITO_USER_POOL_ID'),
   clientId: configService.get('COGNITO_CLIENT_ID'),
 };
 

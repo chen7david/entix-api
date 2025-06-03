@@ -67,13 +67,13 @@ describe('ConfigService', () => {
       const appName = configService.get('APP_NAME');
       const appPort = configService.get('APP_PORT');
       const logLevel = configService.get('LOG_LEVEL');
-      const awsRegion = configService.get('AWS_REGION');
+      const awsRegion = configService.get('COGNITO_REGION');
 
       // Verify they match what we put in the mock
       expect(appName).toBe(mockEnvService.get('APP_NAME'));
       expect(appPort).toBe(parseInt(mockEnvService.get('APP_PORT') as string, 10));
       expect(logLevel).toBe(mockEnvService.get('LOG_LEVEL'));
-      expect(awsRegion).toBe(mockEnvService.get('AWS_REGION'));
+      expect(awsRegion).toBe(mockEnvService.get('COGNITO_REGION'));
     });
 
     it('should properly coerce types according to schema', () => {
@@ -110,7 +110,7 @@ describe('ConfigService', () => {
           APP_PORT: 3000, // Should be coerced to number
           APP_NAME: 'Test App',
           LOG_LEVEL: 'info',
-          AWS_REGION: 'us-east-1',
+          COGNITO_REGION: 'us-east-1',
         }),
       );
     });
