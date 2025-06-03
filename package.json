@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "prepare": "node scripts/husky.mjs",
+    "prepare": "node .husky/install.mjs",
     "dev": "NODE_ENV=development nodemon src/server.ts",
     "preview": "npm run build && NODE_ENV=development node dist/server.js",
     "start": "NODE_ENV=production node dist/server.js",
