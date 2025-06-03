@@ -27,9 +27,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies only, skip lifecycle scripts
-# Add the faker package explicitly since cognito-client needs it at runtime
-RUN npm ci --omit=dev --ignore-scripts && \
-    npm install --no-save @faker-js/faker
+RUN npm ci --omit=dev --ignore-scripts
 
 # Copy the build output from the builder stage
 COPY --from=builder /app/dist ./dist

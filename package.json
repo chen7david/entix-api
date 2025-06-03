@@ -68,7 +68,7 @@
     "@asteasolutions/zod-to-openapi": "^7.3.2",
     "@newrelic/pino-enricher": "^1.1.1",
     "@sentientarts/errors": "^0.0.4",
-    "cognito-client": "^2.0.0",
+    "cognito-client": "^2.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
