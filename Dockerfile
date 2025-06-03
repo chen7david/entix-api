@@ -6,8 +6,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies without running lifecycle scripts (e.g., husky prepare)
+RUN npm ci --ignore-scripts
 
 # Copy the rest of the code
 COPY . .
@@ -26,7 +26,7 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install production dependencies only
+# Install production dependencies only, skip lifecycle scripts
 RUN npm ci --omit=dev --ignore-scripts
 
 # Copy the build output from the builder stage
@@ -43,4 +43,4 @@ USER node
 EXPOSE 3000
 
 # Command to run the application
-CMD ["npm", "start"] 
+CMD ["npm", "start"]
