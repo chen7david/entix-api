@@ -1,18 +1,6 @@
 import { Injectable } from '@core/utils/di.util';
-import {
-  Body,
-  Delete,
-  Get,
-  JsonController,
-  Params,
-  QueryParams,
-  UseBefore,
-} from 'routing-controllers';
-import {
-  validateBody,
-  validateParams,
-  validateQuery,
-} from '@core/middleware/validation.middleware';
+import { Delete, Get, JsonController, Params, QueryParams, UseBefore } from 'routing-controllers';
+import { validateBody, validateParams } from '@core/middleware/validation.middleware';
 import { ListUsersParamsDto } from '@modules/admin/auth.dto';
 import { AdminService } from '@modules/admin/admin.service';
 import { AdminListUsersResponse } from 'cognito-client';
